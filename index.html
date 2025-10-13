@@ -5,9 +5,49 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>call-ma</title>
+    <style>
+      /* Minimal layout styling for clarity */
+      body { font-family: system-ui, sans-serif; margin: 0; padding: 16px; }
+      header { margin-bottom: 12px; }
+      main { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      .field { display: flex; flex-direction: column; gap: 4px; }
+      .videos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      video { width: 100%; background: #000; aspect-ratio: 16/9; }
+      #logs { white-space: pre-wrap; background: #f6f6f6; padding: 8px; border-radius: 6px; min-height: 64px; }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
+    <a href="#main" class="visually-hidden">Skip to content</a>
+    <header>
+      <h1>call-ma</h1>
+      <div class="controls" role="group" aria-label="Call controls">
+        <button id="createBtn">Create Conference</button>
+        <button id="copyBtn" disabled>Copy Link</button>
+      </div>
+      <div class="field">
+        <label for="inviteInput">Paste invite link</label>
+        <textarea id="inviteInput" rows="2" placeholder="Paste link here"></textarea>
+      </div>
+    </header>
+    <main id="main">
+      <section class="videos" aria-label="Video">
+        <div>
+          <h2>Local</h2>
+          <video id="localVideo" autoplay muted playsinline></video>
+        </div>
+        <div>
+          <h2>Remote</h2>
+          <video id="remoteVideo" autoplay playsinline></video>
+        </div>
+      </section>
+      <section aria-label="Logs and stats">
+        <h2>Logs</h2>
+        <div id="logs" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <div id="app" hidden></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

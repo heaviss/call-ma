@@ -39,14 +39,14 @@
   - [x] Implement registration and basic offline fallback
 
 ## Phase 5 — UI Skeleton (HTML/CSS/JS)
-- [ ] Minimal layout:
-  - [ ] Buttons: "Create Conference", "Copy Link"
-  - [ ] Textarea/input: "Paste invite link"
-  - [ ] Video elements: #localVideo, #remoteVideo
-  - [ ] Logs/stats area
-- [ ] Accessibility: labels, focus order, keyboard use
-- [ ] TDD:
-  - [ ] Tests: DOM renders required controls; disabled/enabled states as expected
+- [x] Minimal layout:
+  - [x] Buttons: "Create Conference", "Copy Link"
+  - [x] Textarea/input: "Paste invite link"
+  - [x] Video elements: #localVideo, #remoteVideo
+  - [x] Logs/stats area
+- [x] Accessibility: labels, focus order, keyboard use
+- [x] TDD:
+  - [x] Tests: DOM renders required controls; disabled/enabled states as expected
 
 ## Phase 6 — URL-based Signaling (simple-peer)
 - [ ] Shared utils (packages/shared):
