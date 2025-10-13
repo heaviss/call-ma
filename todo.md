@@ -15,25 +15,22 @@
   - [x] Document chosen public STUN servers; allow override via env
 
 ## Phase 1 — Tooling & Bundler (Vite)
-- [ ] Initialize packages/app with Vite (vanilla JS)
-- [ ] Root scripts: build, dev, test, lint, format
-- [ ] Vite config with sensible defaults and base path settable via env for GH Pages
+- [x] Initialize packages/app with Vite (vanilla JS)
+- [x] Root scripts: build, dev, test, lint, format
+- [x] Vite config with sensible defaults and base path settable via env for GH Pages
 
 ## Phase 2 — Code Quality (ESLint + Prettier)
-- [ ] Configure ESLint for ES202x, browser, Vitest
-- [ ] Configure Prettier and ESLint integration
-- [ ] Add npm scripts: lint, lint:fix, format, format:check
-- [ ] Add minimal lint rules consistent with guidelines
+- [x] Configure ESLint for ES202x, browser, Vitest
+- [x] Configure Prettier and ESLint integration
+- [x] Add npm scripts: lint, lint:fix, format, format:check
+- [x] Add minimal lint rules consistent with guidelines
 
 ## Phase 3 — Testing (Vitest)
 - [ ] Add Vitest config in root or packages/app
 - [ ] Example unit test proving runner works (failing first)
-- [ ] Add jsdom environment for DOM-level tests
-- [ ] Add coverage setup (optional but recommended)
 
 ## Phase 4 — PWA (Manifest + Service Worker + Offline)
-- [ ] Decide approach: vite-plugin-pwa to auto-generate SW/manifest
-- [ ] Add plugin and config
+- [ ] Add vite-plugin-pwa plugin and config
 - [ ] Provide manifest entries (name, short_name, start_url, display, theme_color, background_color)
 - [ ] Provide icons (at least 192x192 and 512x512)
 - [ ] Add offline.html fallback page
