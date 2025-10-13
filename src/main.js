@@ -1,4 +1,7 @@
-import { getStunServers } from '@call-ma/shared';
+import { getStunServers } from './shared/config/stun.js';
+import { initPwa } from './pwa.js';
+
+initPwa();
 
 const app = document.getElementById('app');
 if (app) {

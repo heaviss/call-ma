@@ -26,17 +26,17 @@
 - [x] Add minimal lint rules consistent with guidelines
 
 ## Phase 3 — Testing (Vitest)
-- [ ] Add Vitest config in root or packages/app
-- [ ] Example unit test proving runner works (failing first)
+- [x] Add Vitest config in root or packages/app
+- [x] Example unit test proving runner works (failing first)
 
 ## Phase 4 — PWA (Manifest + Service Worker + Offline)
-- [ ] Add vite-plugin-pwa plugin and config
-- [ ] Provide manifest entries (name, short_name, start_url, display, theme_color, background_color)
-- [ ] Provide icons (at least 192x192 and 512x512)
-- [ ] Add offline.html fallback page
-- [ ] TDD:
-  - [ ] Tests: manifest fields validation (static checks), SW registration logic path
-  - [ ] Implement registration and basic offline fallback
+- [x] Add vite-plugin-pwa plugin and config
+- [x] Provide manifest entries (name, short_name, start_url, display, theme_color, background_color)
+- [x] Provide icons (at least 192x192 and 512x512)
+- [x] Add offline.html fallback page
+- [x] TDD:
+  - [x] Tests: manifest fields validation (static checks), SW registration logic path
+  - [x] Implement registration and basic offline fallback
 
 ## Phase 5 — UI Skeleton (HTML/CSS/JS)
 - [ ] Minimal layout:

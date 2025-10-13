@@ -3,26 +3,27 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "workspaces": ["packages/*"],
   "engines": {
     "node": ">=18.0.0"
   },
   "packageManager": "npm@10.8.1",
   "scripts": {
-    "bootstrap": "npm install --workspaces",
-    "clean": "node -e \"console.log('No build artifacts yet')\"",
-    "dev": "npm run -w @call-ma/app dev",
-    "build": "npm run -w @call-ma/app build",
-    "preview": "npm run -w @call-ma/app preview",
-    "test": "node -e \"console.log('No tests configured yet (Phase 3)')\"",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier . --write",
     "format:check": "prettier . --check"
   },
   "devDependencies": {
-    "eslint": "^8.57.0",
+    "eslint": "^9.37.0",
     "eslint-plugin-vitest": "^0.5.4",
-    "prettier": "^3.3.3"
+    "jsdom": "^27.0.0",
+    "prettier": "^3.6.2",
+    "vite": "^7.1.9",
+    "vite-plugin-pwa": "^1.0.3",
+    "vitest": "^3.2.4"
   }
 }
