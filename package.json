@@ -1,0 +1,17 @@
+{
+  "name": "call-ma",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "npm@10.8.1",
+  "scripts": {
+    "bootstrap": "npm install --workspaces",
+    "clean": "node -e \"console.log('No build artifacts yet')\""
+  }
+}
