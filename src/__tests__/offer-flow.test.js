@@ -1,12 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { initApp } from '../app/controller.js';
-import { CODEC_VERSION } from '../shared/codec.js';
+import { CODEC_VERSION, encodeSignal } from '../shared/codec.js';
+import { buildSignalUrl } from '../shared/link.js';
 
 class FakePeer {
   constructor(opts) {
     this.opts = opts;
     this._handlers = {};
+    this.signalCalls = [];
   }
   on(evt, cb) {
     this._handlers[evt] = this._handlers[evt] || [];
@@ -16,12 +18,16 @@ class FakePeer {
   emit(evt, ...args) {
     (this._handlers[evt] || []).forEach((cb) => cb(...args));
   }
+  signal(data) {
+    this.signalCalls.push(data);
+  }
 }
 
 function setupDom() {
   const html = `<!doctype html><html><body>
   <button id="createBtn">Create Conference</button>
   <button id="copyBtn" disabled>Copy Link</button>
+  <textarea id="inviteInput"></textarea>
   <video id="localVideo"></video>
   <video id="remoteVideo"></video>
   </body></html>`;
@@ -69,5 +75,30 @@ describe('offerer flow (integration, jsdom)', () => {
     expect(window.location.hash.startsWith('#' + CODEC_VERSION + '.')).toBe(true);
     expect(copyBtn.disabled).toBe(false);
     expect(controller.state.role).toBe('offer');
+  });
+
+  it('pasting an answer URL into inviteInput feeds the answer SDP to the peer', async () => {
+    // Arrange
+    initApp({ document, window, navigator: navigatorLike, PeerCtor });
+    const createBtn = document.getElementById('createBtn');
+    const inviteInput = document.getElementById('inviteInput');
+
+    createBtn.click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const peer = PeerCtor.mock.results[0].value;
+    peer.emit('signal', { type: 'offer', sdp: 'v=0' });
+
+    // Act — simulate offerer pasting the answer URL back
+    const answerSp = { type: 'answer', sdp: 'v=answer' };
+    const encoded = encodeSignal({ v: CODEC_VERSION, role: 'answer', sp: answerSp });
+    const answerUrl = buildSignalUrl(window.location, encoded);
+
+    inviteInput.value = answerUrl;
+    inviteInput.dispatchEvent(new window.Event('input'));
+
+    // Assert
+    expect(peer.signalCalls).toHaveLength(1);
+    expect(peer.signalCalls[0]).toEqual(answerSp);
   });
 });

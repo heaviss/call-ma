@@ -10,6 +10,7 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
 
   const createBtn = document.getElementById('createBtn');
   const copyBtn = document.getElementById('copyBtn');
+  const inviteInput = document.getElementById('inviteInput');
   const localVideo = document.getElementById('localVideo');
   const remoteVideo = document.getElementById('remoteVideo');
   const logsEl = document.getElementById('logs');
@@ -134,6 +135,25 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
       if (state.link) await copyToClipboard(navigator, state.link);
     } catch {}
   });
+
+  if (inviteInput) {
+    inviteInput.addEventListener('input', () => {
+      const val = inviteInput.value.trim();
+      if (!val) return;
+      const encoded = parseSignalFromUrl(val);
+      if (!encoded) return;
+      let signal;
+      try {
+        signal = decodeSignal(encoded);
+      } catch {
+        return;
+      }
+      if (!signal || signal.role !== 'answer') return;
+      try {
+        adapter.signal(signal.sp);
+      } catch {}
+    });
+  }
 
   onLoadMaybeAnswer();
 
