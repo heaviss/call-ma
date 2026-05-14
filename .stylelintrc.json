@@ -1,0 +1,18 @@
+{
+  "extends": ["stylelint-config-standard", "stylelint-config-html"],
+  "rules": {
+    "color-no-invalid-hex": true,
+    "unit-no-unknown": true,
+    "property-no-unknown": true,
+    "no-duplicate-selectors": true,
+    "declaration-block-no-duplicate-properties": true,
+    "declaration-block-no-shorthand-property-overrides": true,
+    "shorthand-property-no-redundant-values": true,
+    "no-descending-specificity": true,
+    "comment-no-empty": true,
+    "alpha-value-notation": "number",
+    "color-function-notation": "modern",
+    "selector-max-id": 1,
+    "selector-max-compound-selectors": 4
+  }
+}
