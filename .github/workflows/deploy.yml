@@ -26,6 +26,16 @@ jobs:
       - run: npm run build
         env:
           VITE_BASE: /call-ma/
+      - run: npm run test:coverage
+      - name: Generate coverage badge
+        run: |
+          PCT=$(node -e "const s=JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json','utf8')); console.log(Math.round(s.total.lines.pct));")
+          if   [ "$PCT" -ge 90 ]; then COLOR="brightgreen"
+          elif [ "$PCT" -ge 80 ]; then COLOR="green"
+          elif [ "$PCT" -ge 70 ]; then COLOR="yellow"
+          elif [ "$PCT" -ge 60 ]; then COLOR="orange"
+          else COLOR="red"; fi
+          curl -fsSo dist/coverage-badge.svg "https://img.shields.io/badge/coverage-${PCT}%25-${COLOR}"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
