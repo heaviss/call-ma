@@ -33,6 +33,17 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
     }
   }
 
+  function watchIceState() {
+    const pc = adapter.getPeerConnection();
+    if (!pc) return;
+    pc.addEventListener('iceconnectionstatechange', () => {
+      logger.log(`ICE: ${pc.iceConnectionState}`);
+    });
+    pc.addEventListener('icegatheringstatechange', () => {
+      logger.log(`ICE gathering: ${pc.iceGatheringState}`);
+    });
+  }
+
   function startStatsPolling() {
     let prevReport = null;
     let prevTimestamp = null;
@@ -74,6 +85,7 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
   }
 
   async function onCreate() {
+    logger.log('Getting camera/microphone...');
     const stream = await getMedia();
     if (localVideo) localVideo.srcObject = stream;
 
@@ -87,11 +99,15 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
         window.location.hash = '#' + encoded;
         state.link = url;
         if (copyBtn) copyBtn.disabled = false;
+        logger.log('Offer ready. Copy the link and send it to the other person.');
       })
       .onStream((remote) => {
         if (remoteVideo) remoteVideo.srcObject = remote;
       })
       .createInitiator(stream);
+
+    watchIceState();
+    logger.log('Gathering ICE candidates...');
   }
 
   async function onLoadMaybeAnswer() {
@@ -105,6 +121,7 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
     }
     if (!offer || offer.role !== 'offer') return;
 
+    logger.log('Offer detected. Getting camera/microphone...');
     const stream = await getMedia();
     if (localVideo) localVideo.srcObject = stream;
 
@@ -117,22 +134,31 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
         const url = buildSignalUrl(window.location, encodedAns);
         state.link = url;
         if (copyBtn) copyBtn.disabled = false;
+        logger.log('Answer ready. Copy the link and send it back to the other person.');
       })
       .onStream((remote) => {
         if (remoteVideo) remoteVideo.srcObject = remote;
       })
       .createResponder(stream);
 
+    watchIceState();
+
     try {
       adapter.signal(offer.sp);
-    } catch {}
+      logger.log('Processing offer, gathering ICE candidates...');
+    } catch (err) {
+      logger.log(`Failed to process offer: ${err.message}`);
+    }
   }
 
   if (createBtn) createBtn.addEventListener('click', () => { onCreate(); });
 
   if (copyBtn) copyBtn.addEventListener('click', async () => {
     try {
-      if (state.link) await copyToClipboard(navigator, state.link);
+      if (state.link) {
+        const ok = await copyToClipboard(navigator, state.link);
+        logger.log(ok ? 'Link copied to clipboard.' : 'Could not copy — select and copy the link manually from the address bar.');
+      }
     } catch {}
   });
 
@@ -146,12 +172,16 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
       try {
         signal = decodeSignal(encoded);
       } catch {
+        logger.log('Could not parse pasted link — make sure you copied the full URL.');
         return;
       }
       if (!signal || signal.role !== 'answer') return;
       try {
         adapter.signal(signal.sp);
-      } catch {}
+        logger.log('Answer received. Completing handshake...');
+      } catch (err) {
+        logger.log(`Failed to process answer: ${err.message}`);
+      }
     });
   }
 
