@@ -27,14 +27,13 @@ describe('UI Skeleton', () => {
     // Assert
     const createBtn = document.getElementById('createBtn');
     const copyBtn = document.getElementById('copyBtn');
-    const inviteInput = document.getElementById('inviteInput');
     const localVideo = document.getElementById('localVideo');
     const remoteVideo = document.getElementById('remoteVideo');
     const logs = document.getElementById('logs');
 
     expect(createBtn).toBeTruthy();
     expect(copyBtn).toBeTruthy();
-    expect(inviteInput).toBeTruthy();
+    expect(document.getElementById('inviteInput')).toBeNull();
     expect(localVideo).toBeTruthy();
     expect(remoteVideo).toBeTruthy();
     expect(logs).toBeTruthy();
@@ -46,10 +45,6 @@ describe('UI Skeleton', () => {
     // Act
 
     // Assert
-    const inviteLabel = document.querySelector('label[for="inviteInput"]');
-    expect(inviteLabel).toBeTruthy();
-    expect(inviteLabel.textContent.toLowerCase()).toContain('invite');
-
     const localVideo = document.getElementById('localVideo');
     const remoteVideo = document.getElementById('remoteVideo');
     expect(localVideo.getAttribute('autoplay')).not.toBeNull();

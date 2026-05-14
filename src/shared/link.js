@@ -1,14 +1,15 @@
-export function buildSignalUrl(locationLike, encoded) {
+const ROOM_ID_RE = /^[a-z0-9]{8}$/;
+
+export function buildRoomUrl(locationLike, roomId) {
   const base = `${locationLike.origin}${locationLike.pathname}${locationLike.search || ''}`;
-  return `${base}#${encoded}`;
+  return `${base}#${roomId}`;
 }
 
-export function parseSignalFromUrl(url) {
+export function getRoomIdFromUrl(url) {
   try {
-    const u = new URL(url);
-    const hash = u.hash || '';
+    const hash = new URL(url).hash;
     const val = hash.startsWith('#') ? hash.slice(1) : hash;
-    return val ? val : null;
+    return ROOM_ID_RE.test(val) ? val : null;
   } catch {
     return null;
   }

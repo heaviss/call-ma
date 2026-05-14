@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { buildSignalUrl, parseSignalFromUrl, copyToClipboard } from '../shared/link.js';
-import { CODEC_VERSION } from '../shared/codec.js';
+import { buildRoomUrl, getRoomIdFromUrl, copyToClipboard } from '../shared/link.js';
 
 function makeLocation(href) {
   const u = new URL(href);
@@ -13,60 +12,76 @@ function makeLocation(href) {
 }
 
 describe('link utilities', () => {
-  it('builds a URL with hash-encoded signal', () => {
-    // Arrange
-    const location = makeLocation('https://example.com/app/index.html');
-    const encoded = `${CODEC_VERSION}.AAA`;
+  describe('buildRoomUrl', () => {
+    it('builds a URL with the room ID in the hash', () => {
+      // Arrange
+      const location = makeLocation('https://example.com/app/index.html');
 
-    // Act
-    const url = buildSignalUrl(location, encoded);
+      // Act
+      const url = buildRoomUrl(location, 'abc12345');
 
-    // Assert
-    expect(url).toBe('https://example.com/app/index.html#' + encoded);
+      // Assert
+      expect(url).toBe('https://example.com/app/index.html#abc12345');
+    });
+
+    it('preserves query params', () => {
+      // Arrange
+      const location = makeLocation('https://example.com/app/?foo=bar');
+
+      // Act
+      const url = buildRoomUrl(location, 'xyz98765');
+
+      // Assert
+      expect(url).toBe('https://example.com/app/?foo=bar#xyz98765');
+    });
   });
 
-  it('parses signal from URL hash when present', () => {
-    // Arrange
-    const encoded = `${CODEC_VERSION}.BBBB`;
-    const url = 'https://x.y/#' + encoded;
+  describe('getRoomIdFromUrl', () => {
+    it('extracts a valid 8-char alphanumeric room ID from the hash', () => {
+      // Arrange / Act
+      const roomId = getRoomIdFromUrl('https://example.com/#abc12345');
 
-    // Act
-    const parsed = parseSignalFromUrl(url);
+      // Assert
+      expect(roomId).toBe('abc12345');
+    });
 
-    // Assert
-    expect(parsed).toBe(encoded);
+    it('returns null when there is no hash', () => {
+      expect(getRoomIdFromUrl('https://example.com/')).toBeNull();
+    });
+
+    it('returns null for an old v1.xxx SDP hash', () => {
+      expect(getRoomIdFromUrl('https://example.com/#v1.someLongBase64EncodedSdpBlob')).toBeNull();
+    });
+
+    it('returns null for a hash shorter than 8 chars', () => {
+      expect(getRoomIdFromUrl('https://example.com/#abc123')).toBeNull();
+    });
+
+    it('returns null for a hash longer than 8 chars', () => {
+      expect(getRoomIdFromUrl('https://example.com/#abc123456')).toBeNull();
+    });
+
+    it('returns null for a hash with uppercase letters', () => {
+      expect(getRoomIdFromUrl('https://example.com/#ABC12345')).toBeNull();
+    });
   });
 
-  it('returns null when URL has no hash signal', () => {
-    // Arrange
-    const url = 'https://x.y/'
+  describe('copyToClipboard', () => {
+    it('copies text to clipboard and returns true', async () => {
+      // Arrange
+      const writeText = vi.fn().mockResolvedValue(undefined);
+      const navigatorLike = { clipboard: { writeText } };
 
-    // Act
-    const parsed = parseSignalFromUrl(url);
+      // Act
+      const ok = await copyToClipboard(navigatorLike, 'hello');
 
-    // Assert
-    expect(parsed).toBeNull();
-  });
+      // Assert
+      expect(ok).toBe(true);
+      expect(writeText).toHaveBeenCalledWith('hello');
+    });
 
-  it('copies full link to clipboard via abstraction', async () => {
-    // Arrange
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    const navigatorLike = { clipboard: { writeText } };
-    const text = 'hello';
-
-    // Act
-    const ok = await copyToClipboard(navigatorLike, text);
-
-    // Assert
-    expect(ok).toBe(true);
-    expect(writeText).toHaveBeenCalledWith(text);
-  });
-
-  it('returns false if clipboard not available', async () => {
-    // Arrange
-    const ok = await copyToClipboard({}, 'x');
-
-    // Act / Assert
-    expect(ok).toBe(false);
+    it('returns false if clipboard is not available', async () => {
+      expect(await copyToClipboard({}, 'x')).toBe(false);
+    });
   });
 });

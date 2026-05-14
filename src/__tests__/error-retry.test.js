@@ -2,21 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { initApp } from '../app/controller.js';
 
-class FakePeer {
-  constructor(opts) {
-    this.opts = opts;
-    this._handlers = {};
+class FakeRoom {
+  constructor() {
+    this._onPeerJoinCb = null;
+    this._onPeerLeaveCb = null;
+    this._onPeerStreamCb = null;
   }
-  on(evt, cb) {
-    this._handlers[evt] = this._handlers[evt] || [];
-    this._handlers[evt].push(cb);
-    return this;
-  }
-  emit(evt, ...args) {
-    (this._handlers[evt] || []).forEach((cb) => cb(...args));
-  }
-  signal() {}
-  destroy() {}
+  addStream()      {}
+  onPeerJoin(cb)   { this._onPeerJoinCb = cb; }
+  onPeerLeave(cb)  { this._onPeerLeaveCb = cb; }
+  onPeerStream(cb) { this._onPeerStreamCb = cb; }
+  leave()          {}
+
+  simulatePeerLeave(peerId) { this._onPeerLeaveCb?.(peerId); }
 }
 
 function setupDom() {
@@ -30,53 +28,50 @@ function setupDom() {
   return new JSDOM(html, { url: 'https://example.com/' });
 }
 
-describe('error/close events (integration, jsdom)', () => {
-  let dom, window, document, navigatorLike, PeerCtor;
+describe('error/connection events (integration, jsdom)', () => {
+  let dom, window, document, navigatorLike, fakeRoom, fakeJoinRoom;
 
   beforeEach(() => {
     dom = setupDom();
     window = dom.window;
     document = dom.window.document;
+    fakeRoom = new FakeRoom();
+    fakeJoinRoom = vi.fn().mockReturnValue(fakeRoom);
     navigatorLike = {
       mediaDevices: { getUserMedia: vi.fn().mockResolvedValue({ id: 'stream' }) },
       clipboard: { writeText: vi.fn() },
     };
-    PeerCtor = vi.fn().mockImplementation((opts) => new FakePeer(opts));
   });
 
-  it('logs an error message to #logs when peer emits error', async () => {
+  it('logs an error message to #logs when joinRoom throws', async () => {
     // Arrange
-    initApp({ document, window, navigator: navigatorLike, PeerCtor });
+    fakeJoinRoom.mockImplementation(() => { throw new Error('relay unreachable'); });
+    initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     document.getElementById('createBtn').click();
     await new Promise((resolve) => setTimeout(resolve, 0));
-    const peer = PeerCtor.mock.results[0].value;
-
-    // Act
-    peer.emit('error', new Error('ICE failed'));
 
     // Assert
     expect(document.getElementById('logs').textContent).toMatch(/connection error/i);
   });
 
-  it('logs a close message to #logs when peer emits close', async () => {
+  it('logs "Peer left" when a peer leaves', async () => {
     // Arrange
-    initApp({ document, window, navigator: navigatorLike, PeerCtor });
+    initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     document.getElementById('createBtn').click();
     await new Promise((resolve) => setTimeout(resolve, 0));
-    const peer = PeerCtor.mock.results[0].value;
 
     // Act
-    peer.emit('close');
+    fakeRoom.simulatePeerLeave('peer-1');
 
     // Assert
-    expect(document.getElementById('logs').textContent).toMatch(/connection closed/i);
+    expect(document.getElementById('logs').textContent).toMatch(/peer left/i);
   });
 
   it('logs support warning to #logs on init when not secure context', () => {
     // Arrange
     window.isSecureContext = false;
 
-    initApp({ document, window, navigator: navigatorLike, PeerCtor });
+    initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
 
     expect(document.getElementById('logs').textContent).toMatch(/https/i);
   });
