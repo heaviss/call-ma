@@ -11,7 +11,7 @@ export const manifest = {
   theme_color: '#121212',
   background_color: '#ffffff',
   icons: [
-    { src: '/icons/call_ma_icon.webp', sizes: 'any', type: 'image/png' },
+    { src: '/icons/call_ma_icon.webp', sizes: 'any', type: 'image/webp' },
   ],
 };
 

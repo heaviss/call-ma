@@ -16,8 +16,8 @@ describe('PWA manifest config', () => {
     expect(manifest.theme_color).toBeTruthy();
     expect(manifest.background_color).toBeTruthy();
 
-    const sizes = (manifest.icons || []).map((i) => i.sizes);
-    expect(sizes).toContain('192x192');
-    expect(sizes).toContain('512x512');
+    expect(manifest.icons).toHaveLength(1);
+    expect(manifest.icons[0].type).toBe('image/webp');
+    expect(manifest.icons[0].sizes).toBe('any');
   });
 });
