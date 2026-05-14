@@ -1,8 +1,6 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
-import { createRequire } from 'module';
-
-const require = createRequire(import.meta.url);
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 const base = process.env.BASE || process.env.VITE_BASE || '/';
 
@@ -21,12 +19,8 @@ export const manifest = {
 
 export default defineConfig({
   base,
-  resolve: {
-    alias: {
-      events: require.resolve('events'),
-    },
-  },
   plugins: [
+    nodePolyfills(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest,
