@@ -96,7 +96,6 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
         const payload = { v: CODEC_VERSION, role: 'offer', sp };
         const encoded = encodeSignal(payload);
         const url = buildSignalUrl(window.location, encoded);
-        window.location.hash = '#' + encoded;
         state.link = url;
         if (copyBtn) copyBtn.disabled = false;
         logger.log('Offer ready. Copy the link and send it to the other person.');
@@ -176,6 +175,10 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
         return;
       }
       if (!signal || signal.role !== 'answer') return;
+      if (!adapter.peer) {
+        logger.log('No active call — click "Create Conference" first, then paste the answer link.');
+        return;
+      }
       try {
         adapter.signal(signal.sp);
         logger.log('Answer received. Completing handshake...');

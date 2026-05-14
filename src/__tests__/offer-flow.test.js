@@ -72,8 +72,9 @@ describe('offerer flow (integration, jsdom)', () => {
 
     // Assert
     expect(media.getUserMedia).toHaveBeenCalled();
-    expect(window.location.hash.startsWith('#' + CODEC_VERSION + '.')).toBe(true);
+    expect(window.location.hash).toBe('');  // offerer does NOT pollute its own hash
     expect(copyBtn.disabled).toBe(false);
+    expect(controller.state.link).toContain('#' + CODEC_VERSION + '.');
     expect(controller.state.role).toBe('offer');
   });
 
