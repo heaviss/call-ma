@@ -7,7 +7,7 @@ const base = process.env.BASE || process.env.VITE_BASE || '/';
 export const manifest = {
   name: 'call-ma',
   short_name: 'call-ma',
-  start_url: '/',
+  start_url: base,
   display: 'standalone',
   theme_color: '#121212',
   background_color: '#ffffff',
