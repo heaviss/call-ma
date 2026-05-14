@@ -10,6 +10,19 @@ export default defineConfig({
     globals: true,
     include: ['src/**/*.{test,spec}.js'],
     setupFiles: [],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html', 'lcov'],
+      reportsDirectory: './coverage',
+      include: ['src/**/*.js'],
+      exclude: ['src/**/*.{test,spec}.js', 'src/__mocks__/**', 'src/main.js'],
+      thresholds: {
+        lines:      70,
+        branches:   60,
+        functions:  60,
+        statements: 73,
+      },
+    },
   },
   resolve: {
     alias: {
