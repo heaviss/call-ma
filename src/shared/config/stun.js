@@ -1,22 +1,29 @@
-const DEFAULT_STUN_SERVERS = [
-  'stun:stun.l.google.com:19302',
-  'stun:global.stun.twilio.com:3478?transport=udp',
+const DEFAULT_ICE_SERVERS = [
+  { urls: 'stun:stun.l.google.com:19302' },
+  { urls: 'stun:openrelay.metered.ca:80' },
+  { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+  { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
 ];
 
 function parseServers(str) {
   return str
     .split(',')
     .map((s) => s.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((url) => ({ urls: url }));
 }
 
-export function getStunServers(env) {
+export function getIceServers(env) {
   const e = env ?? (typeof process !== 'undefined' ? process.env : undefined) ?? {};
   const override = e.STUN_SERVERS;
   if (override && typeof override === 'string') {
     return parseServers(override);
   }
-  return DEFAULT_STUN_SERVERS.slice();
+  return DEFAULT_ICE_SERVERS.slice();
 }
 
-export { DEFAULT_STUN_SERVERS };
+// backward compat alias
+export const getStunServers = getIceServers;
+
+export { DEFAULT_ICE_SERVERS };
