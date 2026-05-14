@@ -11,11 +11,11 @@ function generateRoomId() {
 export function initApp({ document, window, navigator, joinRoom }) {
   const state = { link: null };
 
-  const createBtn   = document.getElementById('createBtn');
-  const copyBtn     = document.getElementById('copyBtn');
-  const localVideo  = document.getElementById('localVideo');
-  const remoteVideo = document.getElementById('remoteVideo');
-  const logsEl      = document.getElementById('logs');
+  const createBtn   = document.querySelector('#createBtn');
+  const copyBtn     = document.querySelector('#copyBtn');
+  const localVideo  = document.querySelector('#localVideo');
+  const remoteVideo = document.querySelector('#remoteVideo');
+  const logsEl      = document.querySelector('#logs');
 
   const logger = logsEl ? createLogger(logsEl) : { log() {}, clear() {} };
 
@@ -27,9 +27,9 @@ export function initApp({ document, window, navigator, joinRoom }) {
       return navigator.mediaDevices && navigator.mediaDevices.getUserMedia
         ? await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
         : Promise.reject(new Error('mediaDevices not available'));
-    } catch (err) {
-      logger.log(mapMediaError(err));
-      throw err;
+    } catch (error) {
+      logger.log(mapMediaError(error));
+      throw error;
     }
   }
 
@@ -50,7 +50,7 @@ export function initApp({ document, window, navigator, joinRoom }) {
       .join(roomId, stream);
 
     if (copyBtn) copyBtn.disabled = false;
-    logger.log('Connecting via Nostr… Share this link: ' + url);
+    logger.log(`Connecting via Nostr… Share this link: ${  url}`);
   }
 
   if (createBtn) createBtn.addEventListener('click', () => { onCreate(); });

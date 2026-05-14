@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { resolve, dirname } from 'node:path';
+import path from 'node:path';
 
 function loadIndexIntoDom() {
   const __filename = fileURLToPath(import.meta.url);
-  const __dirname = dirname(__filename);
-  const indexPath = resolve(__dirname, '../../index.html');
-  const html = readFileSync(indexPath, 'utf-8');
+  const __dirname = path.dirname(__filename);
+  const indexPath = path.resolve(__dirname, '../../index.html');
+  const html = readFileSync(indexPath, 'utf8');
   // jsdom defaults to an empty document; replace with our index
   document.open();
   document.write(html);
@@ -25,15 +25,15 @@ describe('UI Skeleton', () => {
     // Act
 
     // Assert
-    const createBtn = document.getElementById('createBtn');
-    const copyBtn = document.getElementById('copyBtn');
-    const localVideo = document.getElementById('localVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
-    const logs = document.getElementById('logs');
+    const createBtn = document.querySelector('#createBtn');
+    const copyBtn = document.querySelector('#copyBtn');
+    const localVideo = document.querySelector('#localVideo');
+    const remoteVideo = document.querySelector('#remoteVideo');
+    const logs = document.querySelector('#logs');
 
     expect(createBtn).toBeTruthy();
     expect(copyBtn).toBeTruthy();
-    expect(document.getElementById('inviteInput')).toBeNull();
+    expect(document.querySelector('#inviteInput')).toBeNull();
     expect(localVideo).toBeTruthy();
     expect(remoteVideo).toBeTruthy();
     expect(logs).toBeTruthy();
@@ -45,13 +45,13 @@ describe('UI Skeleton', () => {
     // Act
 
     // Assert
-    const localVideo = document.getElementById('localVideo');
-    const remoteVideo = document.getElementById('remoteVideo');
+    const localVideo = document.querySelector('#localVideo');
+    const remoteVideo = document.querySelector('#remoteVideo');
     expect(localVideo.getAttribute('autoplay')).not.toBeNull();
     expect(remoteVideo.getAttribute('autoplay')).not.toBeNull();
     expect(remoteVideo.getAttribute('playsinline')).not.toBeNull();
 
-    const copyBtn = document.getElementById('copyBtn');
+    const copyBtn = document.querySelector('#copyBtn');
     expect(copyBtn.disabled).toBe(true);
   });
 });

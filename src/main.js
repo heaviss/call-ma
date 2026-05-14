@@ -4,8 +4,8 @@ import { initApp } from './app/controller.js';
 
 initPwa();
 
-if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+if (globalThis.window !== undefined && globalThis.document !== undefined) {
   try {
-    initApp({ document, window, navigator, joinRoom });
+    initApp({ document: globalThis.document, window: globalThis.window, navigator: globalThis.navigator, joinRoom });
   } catch {}
 }

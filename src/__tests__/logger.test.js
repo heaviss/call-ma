@@ -7,7 +7,7 @@ describe('createLogger', () => {
 
   beforeEach(() => {
     const dom = new JSDOM('<div id="logs"></div>');
-    logsEl = dom.window.document.getElementById('logs');
+    logsEl = dom.window.document.querySelector('#logs');
   });
 
   it('appends a timestamped line on log()', () => {

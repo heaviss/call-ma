@@ -57,7 +57,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
     // Assert
     expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345');
     expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalled();
-    expect(dom.window.document.getElementById('copyBtn').disabled).toBe(false);
+    expect(dom.window.document.querySelector('#copyBtn').disabled).toBe(false);
     expect(controller.state.link).toContain('#abc12345');
   });
 
@@ -72,7 +72,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Assert
-    expect(dom.window.document.getElementById('localVideo').srcObject).toBe(localStream);
+    expect(dom.window.document.querySelector('#localVideo').srcObject).toBe(localStream);
   });
 
   it('attaches remote stream to remoteVideo on auto-join', async () => {
@@ -86,7 +86,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
     fakeRoom.simulatePeerStream(remoteStream, 'peer-1');
 
     // Assert
-    expect(dom.window.document.getElementById('remoteVideo').srcObject).toBe(remoteStream);
+    expect(dom.window.document.querySelector('#remoteVideo').srcObject).toBe(remoteStream);
   });
 
   it('does not auto-join when URL hash is not an 8-char room ID', async () => {

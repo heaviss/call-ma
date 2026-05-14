@@ -48,8 +48,8 @@ describe('create conference flow (integration, jsdom)', () => {
   it('clicking Create gets media, joins a room, and enables the copy button', async () => {
     // Arrange
     const controller = initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    const createBtn = document.getElementById('createBtn');
-    const copyBtn = document.getElementById('copyBtn');
+    const createBtn = document.querySelector('#createBtn');
+    const copyBtn = document.querySelector('#copyBtn');
 
     // Act
     createBtn.click();
@@ -69,17 +69,17 @@ describe('create conference flow (integration, jsdom)', () => {
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
 
     // Act
-    document.getElementById('createBtn').click();
+    document.querySelector('#createBtn').click();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Assert
-    expect(document.getElementById('localVideo').srcObject).toBe(localStream);
+    expect(document.querySelector('#localVideo').srcObject).toBe(localStream);
   });
 
   it('attaches remote stream to remoteVideo when a peer sends their stream', async () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    document.getElementById('createBtn').click();
+    document.querySelector('#createBtn').click();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Act
@@ -87,26 +87,26 @@ describe('create conference flow (integration, jsdom)', () => {
     fakeRoom.simulatePeerStream(remoteStream, 'peer-1');
 
     // Assert
-    expect(document.getElementById('remoteVideo').srcObject).toBe(remoteStream);
+    expect(document.querySelector('#remoteVideo').srcObject).toBe(remoteStream);
   });
 
   it('logs "Peer joined" when a peer connects', async () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    document.getElementById('createBtn').click();
+    document.querySelector('#createBtn').click();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Act
     fakeRoom.simulatePeerJoin('peer-1');
 
     // Assert
-    expect(document.getElementById('logs').textContent).toMatch(/peer joined/i);
+    expect(document.querySelector('#logs').textContent).toMatch(/peer joined/i);
   });
 
   it('room URL is shared with the same appId across calls', async () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    document.getElementById('createBtn').click();
+    document.querySelector('#createBtn').click();
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Assert — appId is consistent

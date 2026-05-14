@@ -5,7 +5,7 @@ function fakeEnv(overrides = {}) {
   return {
     window: { isSecureContext: true, ...overrides.window },
     navigator: { mediaDevices: {}, ...overrides.navigator },
-    RTCPeerConnection: function () {},
+    RTCPeerConnection () {},
     ...overrides,
   };
 }

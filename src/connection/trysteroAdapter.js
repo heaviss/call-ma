@@ -26,8 +26,8 @@ export class TrysteroAdapter {
       });
       this._room.onPeerStream((stream, peerId) => this._onStream?.(stream, peerId));
       this._room.onPeerLeave((peerId) => this._onPeerLeave?.(peerId));
-    } catch (err) {
-      this._onError?.(err);
+    } catch (error) {
+      this._onError?.(error);
     }
     return this;
   }

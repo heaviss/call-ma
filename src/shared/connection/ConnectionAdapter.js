@@ -32,7 +32,7 @@ export function assertAdapterShape(adapter) {
   ];
   for (const k of required) {
     if (typeof adapter[k] !== "function") {
-      throw new Error(`Adapter missing required method: ${k}`);
+      throw new TypeError(`Adapter missing required method: ${k}`);
     }
   }
   return true;

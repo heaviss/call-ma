@@ -12,12 +12,12 @@ function parseServers(str) {
 }
 
 export function getIceServers(env) {
-  const e = env ?? (typeof process !== 'undefined' ? process.env : undefined) ?? {};
+  const e = env ?? (globalThis.process?.env) ?? {};
   const override = e.STUN_SERVERS;
   if (override && typeof override === 'string') {
     return parseServers(override);
   }
-  return DEFAULT_ICE_SERVERS.slice();
+  return [...DEFAULT_ICE_SERVERS];
 }
 
 // backward compat alias

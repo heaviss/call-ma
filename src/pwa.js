@@ -1,9 +1,9 @@
 import { registerSW } from 'virtual:pwa-register';
 
 export function initPwa() {
+  let sw;
   try {
-    return registerSW({ immediate: true });
-  } catch {
-    return undefined;
-  }
+    sw = registerSW({ immediate: true });
+  } catch {}
+  return sw;
 }
