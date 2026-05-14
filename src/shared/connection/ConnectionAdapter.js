@@ -14,6 +14,11 @@ export class ConnectionAdapter {
   signal(_data) { throw new Error("Not implemented"); }
   // Media
   onStream(_cb) { throw new Error("Not implemented"); }
+  // Events
+  onError(_cb) { throw new Error("Not implemented"); }
+  onClose(_cb) { throw new Error("Not implemented"); }
+  onConnect(_cb) { throw new Error("Not implemented"); }
+  getPeerConnection() { return null; }
 }
 
 export function assertAdapterShape(adapter) {

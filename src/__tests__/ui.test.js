@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
 import { resolve, dirname } from 'node:path';
 
 function loadIndexIntoDom() {
@@ -46,7 +46,6 @@ describe('UI Skeleton', () => {
     // Act
 
     // Assert
-    const inviteInput = document.getElementById('inviteInput');
     const inviteLabel = document.querySelector('label[for="inviteInput"]');
     expect(inviteLabel).toBeTruthy();
     expect(inviteLabel.textContent.toLowerCase()).toContain('invite');

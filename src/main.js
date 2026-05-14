@@ -1,11 +1,13 @@
+import Peer from 'simple-peer';
 import { getStunServers } from './shared/config/stun.js';
 import { initPwa } from './pwa.js';
+import { initApp } from './app/controller.js';
 
 initPwa();
 
-const app = document.getElementById('app');
-if (app) {
-  const pre = document.createElement('pre');
-  pre.textContent = `STUN servers: ${getStunServers().join(', ')}`;
-  app.appendChild(pre);
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  const peerConfig = { iceServers: getStunServers().map((u) => ({ urls: u })) };
+  try {
+    initApp({ document, window, navigator, PeerCtor: Peer, peerConfig });
+  } catch {}
 }

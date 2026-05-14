@@ -25,5 +25,8 @@
     "vite": "^7.1.9",
     "vite-plugin-pwa": "^1.0.3",
     "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "simple-peer": "^9.11.1"
   }
 }

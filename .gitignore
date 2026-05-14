@@ -18,6 +18,7 @@ coverage/
 Thumbs.db
 .idea/
 .vscode/
+.zed
 
 # Env
 .env
@@ -27,3 +28,11 @@ Thumbs.db
 # Cache
 .cache/
 .tmp/
+
+# Agent guides
+.junie/
+CLAUDE.md
+
+# Todo
+todo.md
+spec.md
