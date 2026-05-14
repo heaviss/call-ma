@@ -16,6 +16,11 @@ export function initApp({ document, window, navigator, joinRoom }) {
   const localVideo  = document.querySelector('#localVideo');
   const remoteVideo = document.querySelector('#remoteVideo');
   const logsEl      = document.querySelector('#logs');
+  const logsSection = document.querySelector('#logsSection');
+
+  if (logsSection && new URLSearchParams(window.location.search).get('debug') === 'true') {
+    logsSection.hidden = false;
+  }
 
   const logger = logsEl ? createLogger(logsEl) : { log() {}, clear() {} };
 
