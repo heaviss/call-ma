@@ -1,6 +1,6 @@
 import { SimplePeerAdapter } from '../connection/simplePeerAdapter.js';
 import { CODEC_VERSION, encodeSignal, decodeSignal } from '../shared/codec.js';
-import { buildSignalUrl, parseSignalFromUrl } from '../shared/link.js';
+import { buildSignalUrl, parseSignalFromUrl, copyToClipboard } from '../shared/link.js';
 import { createLogger } from './logger.js';
 import { checkSupport, mapMediaError } from '../shared/browserSupport.js';
 import { deriveMetrics } from '../shared/stats.js';
@@ -131,7 +131,6 @@ export function initApp({ document, window, navigator, PeerCtor, peerConfig }) {
 
   if (copyBtn) copyBtn.addEventListener('click', async () => {
     try {
-      const { copyToClipboard } = await import('../shared/link.js');
       if (state.link) await copyToClipboard(navigator, state.link);
     } catch {}
   });

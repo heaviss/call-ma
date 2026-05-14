@@ -1,5 +1,8 @@
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
 
 const base = process.env.BASE || process.env.VITE_BASE || '/';
 
@@ -18,6 +21,11 @@ export const manifest = {
 
 export default defineConfig({
   base,
+  resolve: {
+    alias: {
+      events: require.resolve('events'),
+    },
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
