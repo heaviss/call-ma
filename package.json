@@ -39,6 +39,8 @@
     "vitest": "^4.1.6"
   },
   "dependencies": {
+    "@trystero-p2p/mqtt": "^0.25.0",
+    "@trystero-p2p/torrent": "^0.25.0",
     "trystero": "^0.24.0"
   }
 }

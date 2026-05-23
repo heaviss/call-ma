@@ -100,4 +100,96 @@ describe('TrysteroAdapter', () => {
 
     expect(result).toBe(adapter);
   });
+
+  describe('multi-transport', () => {
+    it('calls all joinRoom functions on join()', () => {
+      const fakeRoom2 = new FakeRoom();
+      const fakeJoinRoom2 = vi.fn().mockReturnValue(fakeRoom2);
+      const multiAdapter = new TrysteroAdapter({
+        transports: [
+          { joinRoom: fakeJoinRoom },
+          { joinRoom: fakeJoinRoom2 },
+        ],
+      });
+
+      multiAdapter.join('abc12345', localStream);
+
+      expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345');
+      expect(fakeJoinRoom2).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345');
+    });
+
+    it('passes relayConfig and turnConfig per transport', () => {
+      const fakeRoom2 = new FakeRoom();
+      const fakeJoinRoom2 = vi.fn().mockReturnValue(fakeRoom2);
+      const multiAdapter = new TrysteroAdapter({
+        transports: [
+          { joinRoom: fakeJoinRoom,  relayUrls: ['wss://mqtt.example.com'] },
+          { joinRoom: fakeJoinRoom2, relayUrls: ['wss://tracker.example.com'] },
+        ],
+        turnConfig: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
+      });
+
+      multiAdapter.join('abc12345', localStream);
+
+      expect(fakeJoinRoom).toHaveBeenCalledWith({
+        appId: 'call-ma',
+        relayConfig: { urls: ['wss://mqtt.example.com'] },
+        turnConfig: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
+      }, 'abc12345');
+      expect(fakeJoinRoom2).toHaveBeenCalledWith({
+        appId: 'call-ma',
+        relayConfig: { urls: ['wss://tracker.example.com'] },
+        turnConfig: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
+      }, 'abc12345');
+    });
+
+    it('fires onStream only once when same peer connects via both transports', () => {
+      const fakeRoom2 = new FakeRoom();
+      const fakeJoinRoom2 = vi.fn().mockReturnValue(fakeRoom2);
+      const multiAdapter = new TrysteroAdapter({
+        transports: [{ joinRoom: fakeJoinRoom }, { joinRoom: fakeJoinRoom2 }],
+      });
+      const onStream = vi.fn();
+      const remoteStream1 = { id: 'remote-mqtt' };
+      const remoteStream2 = { id: 'remote-torrent' };
+
+      multiAdapter.onStream(onStream).join('abc12345', localStream);
+      fakeRoom.simulatePeerStream(remoteStream1, 'peer-1');
+      fakeRoom2.simulatePeerStream(remoteStream2, 'peer-1');
+
+      expect(onStream).toHaveBeenCalledTimes(1);
+      expect(onStream).toHaveBeenCalledWith(remoteStream1, 'peer-1');
+    });
+
+    it('allows a new stream after peer leaves and rejoins', () => {
+      const fakeRoom2 = new FakeRoom();
+      const fakeJoinRoom2 = vi.fn().mockReturnValue(fakeRoom2);
+      const multiAdapter = new TrysteroAdapter({
+        transports: [{ joinRoom: fakeJoinRoom }, { joinRoom: fakeJoinRoom2 }],
+      });
+      const onStream = vi.fn();
+      const remoteStream = { id: 'remote' };
+
+      multiAdapter.onStream(onStream).join('abc12345', localStream);
+      fakeRoom.simulatePeerStream(remoteStream, 'peer-1');
+      fakeRoom.simulatePeerLeave('peer-1');
+      fakeRoom2.simulatePeerStream(remoteStream, 'peer-1');
+
+      expect(onStream).toHaveBeenCalledTimes(2);
+    });
+
+    it('leaves all rooms on destroy()', () => {
+      const fakeRoom2 = new FakeRoom();
+      const fakeJoinRoom2 = vi.fn().mockReturnValue(fakeRoom2);
+      const multiAdapter = new TrysteroAdapter({
+        transports: [{ joinRoom: fakeJoinRoom }, { joinRoom: fakeJoinRoom2 }],
+      });
+
+      multiAdapter.join('abc12345', localStream);
+      multiAdapter.destroy();
+
+      expect(fakeRoom.left).toBe(true);
+      expect(fakeRoom2.left).toBe(true);
+    });
+  });
 });

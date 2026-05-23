@@ -1,11 +1,13 @@
 export class TrysteroAdapter {
-  constructor({ joinRoom }) {
-    this._joinRoom = joinRoom;
-    this._room = null;
-    this._localStream = null;
-    this._onStream = null;
-    this._onConnect = null;
-    this._onError = null;
+  constructor({ joinRoom, transports, turnConfig }) {
+    // transports = [{ joinRoom, relayUrls? }]  (preferred)
+    // joinRoom = single fn                      (backward compat)
+    this._transports = transports ?? [{ joinRoom }];
+    this._turnConfig = turnConfig;
+    this._rooms = [];
+    this._onStream    = null;
+    this._onConnect   = null;
+    this._onError     = null;
     this._onPeerLeave = null;
   }
 
@@ -15,25 +17,41 @@ export class TrysteroAdapter {
   onPeerLeave(cb) { this._onPeerLeave = cb; return this; }
 
   join(roomId, localStream) {
-    this._localStream = localStream;
-    try {
-      this._room = this._joinRoom({ appId: 'call-ma' }, roomId);
-      // Send local stream to any already-present peers, and to each peer as they join
-      this._room.addStream(localStream);
-      this._room.onPeerJoin((peerId) => {
-        this._room.addStream(localStream, peerId);
-        this._onConnect?.(peerId);
-      });
-      this._room.onPeerStream((stream, peerId) => this._onStream?.(stream, peerId));
-      this._room.onPeerLeave((peerId) => this._onPeerLeave?.(peerId));
-    } catch (error) {
-      this._onError?.(error);
+    const connectedPeers = new Set();
+
+    for (const { joinRoom, relayUrls } of this._transports) {
+      const config = { appId: 'call-ma' };
+      if (relayUrls?.length)        config.relayConfig = { urls: relayUrls };
+      if (this._turnConfig?.length) config.turnConfig  = this._turnConfig;
+
+      try {
+        const room = joinRoom(config, roomId);
+        this._rooms.push(room);
+
+        room.addStream(localStream);
+        room.onPeerJoin((peerId) => {
+          room.addStream(localStream, peerId);
+          if (!connectedPeers.has(peerId)) this._onConnect?.(peerId);
+        });
+        room.onPeerStream((stream, peerId) => {
+          if (!connectedPeers.has(peerId)) {
+            connectedPeers.add(peerId);
+            this._onStream?.(stream, peerId);
+          }
+        });
+        room.onPeerLeave((peerId) => {
+          connectedPeers.delete(peerId);
+          this._onPeerLeave?.(peerId);
+        });
+      } catch (error) {
+        this._onError?.(error);
+      }
     }
     return this;
   }
 
   destroy() {
-    this._room?.leave?.();
-    this._room = null;
+    this._rooms.forEach((r) => r?.leave?.());
+    this._rooms = [];
   }
 }

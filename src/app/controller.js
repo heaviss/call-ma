@@ -2,13 +2,14 @@ import { TrysteroAdapter } from '../connection/trysteroAdapter.js';
 import { buildRoomUrl, getRoomIdFromUrl, copyToClipboard } from '../shared/link.js';
 import { createLogger } from './logger.js';
 import { checkSupport, mapMediaError } from '../shared/browserSupport.js';
+import { getTurnConfig } from '../shared/config/stun.js';
 
 function generateRoomId() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
   return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * 36)]).join('');
 }
 
-export function initApp({ document, window, navigator, joinRoom }) {
+export function initApp({ document, window, navigator, joinRoom, transports }) {
   const state = { link: null };
 
   const createBtn   = document.querySelector('#createBtn');
@@ -46,7 +47,8 @@ export function initApp({ document, window, navigator, joinRoom }) {
     const url = buildRoomUrl(window.location, roomId);
     state.link = url;
 
-    const adapter = new TrysteroAdapter({ joinRoom });
+    const turnConfig = getTurnConfig(undefined);
+    const adapter = new TrysteroAdapter({ joinRoom, transports, turnConfig });
     adapter
       .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })
       .onConnect(()      => { logger.log('Peer joined — connected!'); })
