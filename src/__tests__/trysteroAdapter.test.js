@@ -61,6 +61,19 @@ describe('TrysteroAdapter', () => {
     expect(onConnect).toHaveBeenCalledWith('peer-1');
   });
 
+  it('does not fire onConnect when the peer stream arrived before the join event', () => {
+    // Arrange — stream arrives first, adding peer to connectedPeers
+    const onConnect = vi.fn();
+    adapter.onConnect(onConnect).join('abc12345', localStream);
+    fakeRoom.simulatePeerStream({ id: 'remote' }, 'peer-1');
+
+    // Act — join event fires after stream
+    fakeRoom.simulatePeerJoin('peer-1');
+
+    // Assert — onConnect is suppressed since peer already counted
+    expect(onConnect).not.toHaveBeenCalled();
+  });
+
   it('fires onStream when a peer sends their stream', () => {
     const onStream = vi.fn();
     const remoteStream = { id: 'remote' };

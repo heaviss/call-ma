@@ -74,4 +74,44 @@ describe('error/connection events (integration, jsdom)', () => {
 
     expect(document.querySelector('#logs').textContent).toMatch(/https/i);
   });
+
+  it('logs a media error when getUserMedia rejects', async () => {
+    // Arrange
+    const permissionError = Object.assign(new Error('denied'), { name: 'NotAllowedError' });
+    navigatorLike.mediaDevices.getUserMedia.mockRejectedValue(permissionError);
+    const { onCreate } = initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+
+    // Act — call onCreate directly so we can catch the rethrown error
+    await expect(onCreate()).rejects.toThrow('denied');
+
+    // Assert
+    expect(document.querySelector('#logs').textContent).toMatch(/permission denied/i);
+  });
+
+  it('rejects onCreate when mediaDevices is not available', async () => {
+    // Arrange — navigator without mediaDevices
+    const { onCreate } = initApp({
+      document,
+      window,
+      navigator: {},
+      joinRoom: fakeJoinRoom,
+    });
+
+    // Act + Assert — getMedia returns a rejected promise (not caught internally)
+    await expect(onCreate()).rejects.toThrow('mediaDevices not available');
+  });
+
+  it('does nothing when copy button is clicked before a room is created', async () => {
+    // Arrange
+    initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    // Enable the button so the click event fires (state.link is still null)
+    document.querySelector('#copyBtn').disabled = false;
+
+    // Act — click copy before onCreate has set state.link
+    document.querySelector('#copyBtn').click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Assert — clipboard was not touched (state.link guard skipped the copy)
+    expect(navigatorLike.clipboard.writeText).not.toHaveBeenCalled();
+  });
 });

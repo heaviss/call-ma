@@ -64,6 +64,10 @@ describe('link utilities', () => {
     it('returns null for a hash with uppercase letters', () => {
       expect(getRoomIdFromUrl('https://example.com/#ABC12345')).toBeNull();
     });
+
+    it('returns null for an invalid URL that throws during parsing', () => {
+      expect(getRoomIdFromUrl('not a valid url at all')).toBeNull();
+    });
   });
 
   describe('copyToClipboard', () => {

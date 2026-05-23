@@ -112,4 +112,57 @@ describe('create conference flow (integration, jsdom)', () => {
     // Assert — appId is consistent
     expect(fakeJoinRoom.mock.calls[0][0]).toEqual({ appId: 'call-ma' });
   });
+
+  it('copies the link and logs confirmation when copy button is clicked after creating a room', async () => {
+    // Arrange
+    initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    document.querySelector('#createBtn').click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Act
+    navigatorLike.clipboard.writeText.mockResolvedValue(undefined);
+    document.querySelector('#copyBtn').click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Assert
+    expect(navigatorLike.clipboard.writeText).toHaveBeenCalled();
+    expect(document.querySelector('#logs').textContent).toMatch(/copied/i);
+  });
+
+  it('logs "Could not copy" when clipboard is unavailable after creating a room', async () => {
+    // Arrange — navigator without clipboard
+    navigatorLike = {
+      mediaDevices: { getUserMedia: vi.fn().mockResolvedValue({ id: 'stream' }) },
+    };
+    initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    document.querySelector('#createBtn').click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Act
+    document.querySelector('#copyBtn').click();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // Assert
+    expect(document.querySelector('#logs').textContent).toMatch(/could not copy/i);
+  });
+
+  it('shows the logs section when ?debug=true is in the URL', () => {
+    // Arrange — DOM with #logsSection and debug URL
+    const html = `<!doctype html><html><body>
+    <button id="createBtn"></button>
+    <div id="logsSection" hidden><div id="logs"></div></div>
+    </body></html>`;
+    const debugDom = new JSDOM(html, { url: 'https://example.com/?debug=true' });
+
+    // Act
+    initApp({
+      document: debugDom.window.document,
+      window: debugDom.window,
+      navigator: navigatorLike,
+      joinRoom: fakeJoinRoom,
+    });
+
+    // Assert
+    expect(debugDom.window.document.querySelector('#logsSection').hidden).toBe(false);
+  });
 });
