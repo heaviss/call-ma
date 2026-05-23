@@ -57,7 +57,7 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
       .join(roomId, stream);
 
     if (copyBtn) copyBtn.disabled = false;
-    logger.log(`Connecting via Nostr… Share this link: ${  url}`);
+    logger.log(`Connecting… Share this link: ${url}`);
   }
 
   if (createBtn) createBtn.addEventListener('click', () => { onCreate(); });
