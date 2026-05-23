@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { getMqttRelayUrls, getTorrentRelayUrls } from '../shared/config/relays.js';
 
 describe('getMqttRelayUrls', () => {

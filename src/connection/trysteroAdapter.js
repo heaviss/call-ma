@@ -51,7 +51,7 @@ export class TrysteroAdapter {
   }
 
   destroy() {
-    this._rooms.forEach((r) => r?.leave?.());
+    for (const r of this._rooms) r?.leave?.();
     this._rooms = [];
   }
 }

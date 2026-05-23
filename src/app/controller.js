@@ -47,7 +47,7 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
     const url = buildRoomUrl(window.location, roomId);
     state.link = url;
 
-    const turnConfig = getTurnConfig(undefined);
+    const turnConfig = getTurnConfig();
     const adapter = new TrysteroAdapter({ joinRoom, transports, turnConfig });
     adapter
       .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })

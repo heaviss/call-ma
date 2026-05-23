@@ -23,12 +23,13 @@ export function getIceServers(env) {
 export function getTurnConfig(env) {
   const e = env ?? (globalThis.process?.env) ?? {};
   const url = e.TURN_URL;
-  if (!url || typeof url !== 'string') return undefined;
-  return url.split(',').map((s) => s.trim()).filter(Boolean).map((u) => ({
-    urls: u,
-    ...(e.TURN_USER ? { username: e.TURN_USER } : {}),
-    ...(e.TURN_PASS ? { credential: e.TURN_PASS } : {}),
-  }));
+  return (url && typeof url === 'string')
+    ? url.split(',').map((s) => s.trim()).filter(Boolean).map((u) => ({
+        urls: u,
+        ...(e.TURN_USER ? { username: e.TURN_USER } : {}),
+        ...(e.TURN_PASS ? { credential: e.TURN_PASS } : {}),
+      }))
+    : undefined;
 }
 
 // backward compat alias
