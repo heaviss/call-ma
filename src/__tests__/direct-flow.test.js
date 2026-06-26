@@ -83,6 +83,14 @@ describe('direct mode — initiator flow', () => {
     expect(dom.window.document.querySelector('#directCopyBtn').disabled).toBe(false);
   });
 
+  it('directConnectBtn is enabled after offer is created', async () => {
+    initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
+    dom.window.document.querySelector('#directBtn').click();
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(dom.window.document.querySelector('#directConnectBtn').disabled).toBe(false);
+  });
+
   it('directConnectBtn applies the answer and enables connect', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     dom.window.document.querySelector('#directBtn').click();
@@ -96,7 +104,8 @@ describe('direct mode — initiator flow', () => {
     const { encodeSdp } = await import('../shared/sdp.js');
     const answerEncoded = await encodeSdp({ type: 'answer', sdp: 'v=0\r\nfake-answer' });
     answerInput.value = `https://example.com/#answer=${answerEncoded}`;
-    connectBtn.disabled = false;
+    // Assert button was enabled by the controller (not manually)
+    expect(connectBtn.disabled).toBe(false);
     connectBtn.click();
     await new Promise((r) => setTimeout(r, 50));
 

@@ -75,6 +75,7 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
       } else {
         encodedSdp = await directAdapter.createOffer(stream);
         if (directStatus) directStatus.textContent = 'Share this with the other person:';
+        if (directConnectBtn) directConnectBtn.disabled = false;
       }
     } catch {
       return;
