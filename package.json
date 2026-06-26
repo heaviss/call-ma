@@ -40,6 +40,7 @@
   },
   "dependencies": {
     "@trystero-p2p/mqtt": "^0.25.0",
-    "@trystero-p2p/torrent": "^0.25.0"
+    "@trystero-p2p/torrent": "^0.25.0",
+    "qrcode": "^1.5.4"
   }
 }

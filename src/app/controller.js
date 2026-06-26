@@ -1,8 +1,10 @@
 import { TrysteroAdapter } from '../connection/trysteroAdapter.js';
-import { buildRoomUrl, getRoomIdFromUrl, copyToClipboard } from '../shared/link.js';
+import { buildRoomUrl, getRoomIdFromUrl, copyToClipboard, buildDirectUrl, parseDirectUrl } from '../shared/link.js';
 import { createLogger } from './logger.js';
 import { checkSupport, mapMediaError } from '../shared/browserSupport.js';
-import { getTurnConfig } from '../shared/config/stun.js';
+import { getTurnConfig, getIceServers } from '../shared/config/stun.js';
+import QRCode from 'qrcode';
+import { DirectAdapter } from '../connection/directAdapter.js';
 
 function generateRoomId() {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -18,6 +20,13 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
   const remoteVideo = document.querySelector('#remoteVideo');
   const logsEl      = document.querySelector('#logs');
   const logsSection = document.querySelector('#logsSection');
+  const directBtn         = document.querySelector('#directBtn');
+  const directPanel       = document.querySelector('#directPanel');
+  const directQr          = document.querySelector('#directQr');
+  const directCopyBtn     = document.querySelector('#directCopyBtn');
+  const directStatus      = document.querySelector('#directStatus');
+  const directAnswerInput = document.querySelector('#directAnswerInput');
+  const directConnectBtn  = document.querySelector('#directConnectBtn');
 
   if (logsSection && new URLSearchParams(window.location.search).get('debug') === 'true') {
     logsSection.hidden = false;
@@ -36,6 +45,70 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
     } catch (error) {
       logger.log(mapMediaError(error));
       throw error;
+    }
+  }
+
+  async function startDirectMode(offerEncoded = null) {
+    if (directPanel) directPanel.hidden = false;
+
+    const iceServers = getIceServers();
+    const turnConfig = getTurnConfig();
+    const directAdapter = new DirectAdapter({
+      iceServers,
+      turnConfig,
+      PeerConnection: (cfg) => new window.RTCPeerConnection(cfg),
+    });
+
+    directAdapter
+      .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })
+      .onConnect(()       => { logger.log('Direct connection established!'); })
+      .onError((err)      => { logger.log(`Direct connection error: ${err.message}`); });
+
+    let encodedSdp;
+    try {
+      const stream = await getMedia();
+      if (localVideo) localVideo.srcObject = stream;
+
+      if (offerEncoded) {
+        encodedSdp = await directAdapter.createAnswer(offerEncoded, stream);
+        if (directStatus) directStatus.textContent = 'Share your answer with the caller:';
+      } else {
+        encodedSdp = await directAdapter.createOffer(stream);
+        if (directStatus) directStatus.textContent = 'Share this with the other person:';
+      }
+    } catch {
+      return;
+    }
+
+    const directUrl = buildDirectUrl(
+      window.location,
+      offerEncoded ? 'answer' : 'offer',
+      encodedSdp,
+    );
+
+    if (directQr) await QRCode.toCanvas(directQr, directUrl, { width: 256, margin: 2 });
+    if (directCopyBtn) {
+      directCopyBtn.disabled = false;
+      directCopyBtn.addEventListener('click', async () => {
+        await copyToClipboard(navigator, directUrl);
+        logger.log('Direct link copied.');
+      });
+    }
+
+    if (directConnectBtn && !offerEncoded) {
+      directConnectBtn.addEventListener('click', async () => {
+        const inputUrl = directAnswerInput?.value ?? '';
+        const parsed = parseDirectUrl(inputUrl);
+        if (!parsed || parsed.type !== 'answer') {
+          logger.log('Invalid answer link — paste the link from the other person.');
+          return;
+        }
+        try {
+          await directAdapter.applyAnswer(parsed.encoded);
+        } catch (error) {
+          logger.log(`Direct connect error: ${error.message}`);
+        }
+      });
     }
   }
 
@@ -71,8 +144,18 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
     } catch {}
   });
 
+  if (directBtn) directBtn.addEventListener('click', () => { startDirectMode(); });
+
   const hashRoomId = getRoomIdFromUrl(window.location.href);
   if (hashRoomId) onCreate(hashRoomId);
+
+  const directParsed = parseDirectUrl(window.location.href);
+  if (directParsed?.type === 'offer') {
+    startDirectMode(directParsed.encoded);
+  } else if (directParsed?.type === 'answer') {
+    if (directPanel) directPanel.hidden = false;
+    if (directStatus) directStatus.textContent = 'Paste this link where the call was created.';
+  }
 
   return { state, onCreate };
 }
