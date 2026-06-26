@@ -6,9 +6,7 @@ async function compress(str) {
   writer.close();
   const buf = await new Response(cs.readable).arrayBuffer();
   const bytes = new Uint8Array(buf);
-  let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCodePoint(bytes[i]);
-  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+  return btoa(Array.from(bytes, (b) => String.fromCodePoint(b)).join('')).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 }
 
 async function decompress(b64url) {

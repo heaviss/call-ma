@@ -1,14 +1,16 @@
 const ROOM_ID_RE = /^[a-z0-9]{8}$/;
 
+function base(locationLike) {
+  return `${locationLike.origin}${locationLike.pathname}${locationLike.search || ''}`;
+}
+
 export function buildRoomUrl(locationLike, roomId) {
-  const base = `${locationLike.origin}${locationLike.pathname}${locationLike.search || ''}`;
-  return `${base}#${roomId}`;
+  return `${base(locationLike)}#${roomId}`;
 }
 
 export function getRoomIdFromUrl(url) {
   try {
-    const hash = new URL(url).hash;
-    const val = hash.startsWith('#') ? hash.slice(1) : hash;
+    const val = new URL(url).hash.slice(1);
     return ROOM_ID_RE.test(val) ? val : null;
   } catch {
     return null;
@@ -28,18 +30,15 @@ export async function copyToClipboard(navigatorLike, text) {
 }
 
 export function buildDirectUrl(locationLike, type, encoded) {
-  const base = `${locationLike.origin}${locationLike.pathname}${locationLike.search || ''}`;
-  return `${base}#${type}=${encoded}`;
+  return `${base(locationLike)}#${type}=${encoded}`;
 }
 
 export function parseDirectUrl(url) {
   try {
-    const hash = new URL(url).hash.slice(1);
-    const eq = hash.indexOf('=');
-    if (eq === -1) return null;
-    const type = hash.slice(0, eq);
-    if (type !== 'offer' && type !== 'answer') return null;
-    const encoded = hash.slice(eq + 1);
+    const params = new URLSearchParams(new URL(url).hash.slice(1));
+    const type = ['offer', 'answer'].find((t) => params.has(t)) ?? null;
+    if (!type) return null;
+    const encoded = params.get(type);
     return encoded ? { type, encoded } : null;
   } catch {
     return null;
