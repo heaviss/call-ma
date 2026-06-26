@@ -26,3 +26,22 @@ export async function copyToClipboard(navigatorLike, text) {
   }
   return false;
 }
+
+export function buildDirectUrl(locationLike, type, encoded) {
+  const base = `${locationLike.origin}${locationLike.pathname}${locationLike.search || ''}`;
+  return `${base}#${type}=${encoded}`;
+}
+
+export function parseDirectUrl(url) {
+  try {
+    const hash = new URL(url).hash.slice(1);
+    const eq = hash.indexOf('=');
+    if (eq === -1) return null;
+    const type = hash.slice(0, eq);
+    if (type !== 'offer' && type !== 'answer') return null;
+    const encoded = hash.slice(eq + 1);
+    return encoded ? { type, encoded } : null;
+  } catch {
+    return null;
+  }
+}
