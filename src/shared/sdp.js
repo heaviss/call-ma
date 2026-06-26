@@ -7,14 +7,14 @@ async function compress(str) {
   const buf = await new Response(cs.readable).arrayBuffer();
   const bytes = new Uint8Array(buf);
   let binary = '';
-  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCodePoint(bytes[i]);
+  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
 }
 
 async function decompress(b64url) {
-  const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+  const b64 = b64url.replaceAll('-', '+').replaceAll('_', '/');
   const binary = atob(b64);
-  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  const bytes = Uint8Array.from(binary, (c) => c.codePointAt(0));
   const ds = new DecompressionStream('deflate-raw');
   const writer = ds.writable.getWriter();
   await writer.write(bytes);

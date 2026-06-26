@@ -1,4 +1,4 @@
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { encodeSdp, decodeSdp } from '../shared/sdp.js';
 
 describe('sdp', () => {
@@ -23,7 +23,7 @@ describe('sdp', () => {
   });
 
   it('decodeSdp throws on valid base64url that is not JSON', async () => {
-    const garbage = btoa('not json').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const garbage = btoa('not json').replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
     await expect(decodeSdp(garbage)).rejects.toThrow();
   });
 
