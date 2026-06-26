@@ -28,6 +28,10 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
   const directAnswerInput = document.querySelector('#directAnswerInput');
   const directConnectBtn  = document.querySelector('#directConnectBtn');
 
+  if (typeof CompressionStream === 'undefined' && directBtn) {
+    directBtn.hidden = true;
+  }
+
   if (logsSection && new URLSearchParams(window.location.search).get('debug') === 'true') {
     logsSection.hidden = false;
   }
@@ -87,7 +91,13 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
       encodedSdp,
     );
 
-    if (directQr) await QRCode.toCanvas(directQr, directUrl, { width: 256, margin: 2 });
+    if (directQr) {
+      try {
+        await QRCode.toCanvas(directQr, directUrl, { width: 256, margin: 2 });
+      } catch {
+        logger.log('QR rendering failed. Use the copy button instead.');
+      }
+    }
     if (directCopyBtn) {
       directCopyBtn.disabled = false;
       directCopyBtn.addEventListener('click', async () => {
@@ -145,14 +155,27 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
     } catch {}
   });
 
-  if (directBtn) directBtn.addEventListener('click', () => { startDirectMode(); });
+  if (directBtn) {
+    let directStarted = false;
+    directBtn.addEventListener('click', () => {
+      if (directStarted) return;
+      directStarted = true;
+      startDirectMode().catch(
+        /* v8 ignore next */
+        (error) => logger.log(`Direct mode error: ${error.message}`)
+      );
+    });
+  }
 
   const hashRoomId = getRoomIdFromUrl(window.location.href);
   if (hashRoomId) onCreate(hashRoomId);
 
   const directParsed = parseDirectUrl(window.location.href);
   if (directParsed?.type === 'offer') {
-    startDirectMode(directParsed.encoded);
+    startDirectMode(directParsed.encoded).catch(
+      /* v8 ignore next */
+      (error) => logger.log(`Direct mode error: ${error.message}`)
+    );
   } else if (directParsed?.type === 'answer') {
     if (directPanel) directPanel.hidden = false;
     if (directStatus) directStatus.textContent = 'Paste this link where the call was created.';

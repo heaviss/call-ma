@@ -225,6 +225,47 @@ describe('direct mode — initiator flow', () => {
     // directCopyBtn should be enabled even without optional elements
     expect(minDom.window.document.querySelector('#directCopyBtn').disabled).toBe(false);
   });
+
+  it('shows QR error log but still enables copy button when QRCode.toCanvas throws', async () => {
+    const qrcodeModule = await import('qrcode');
+    const QRCode = qrcodeModule.default;
+    QRCode.toCanvas.mockRejectedValueOnce(new Error('canvas error'));
+
+    initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
+    dom.window.document.querySelector('#directBtn').click();
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(dom.window.document.querySelector('#directCopyBtn').disabled).toBe(false);
+    expect(dom.window.document.querySelector('#logs').textContent).toContain('QR rendering failed');
+  });
+
+  it('ignores repeated directBtn clicks after the first', async () => {
+    initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
+    const directBtn = dom.window.document.querySelector('#directBtn');
+
+    directBtn.click();
+    directBtn.click();
+    directBtn.click();
+    await new Promise((r) => setTimeout(r, 50));
+
+    expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('CompressionStream unavailable', () => {
+  it('hides directBtn when CompressionStream is not available', () => {
+    const saved = globalThis.CompressionStream;
+    delete globalThis.CompressionStream;
+
+    const dom2 = makeDOM();
+    const nav2 = makeNavigator();
+    initApp({ document: dom2.window.document, window: dom2.window, navigator: nav2, transports: [] });
+
+    globalThis.CompressionStream = saved;
+
+    // Note: jsdom does not apply CSS hidden, check the attribute
+    expect(dom2.window.document.querySelector('#directBtn').hidden).toBe(true);
+  });
 });
 
 describe('direct mode — receiver flow (offer in URL hash)', () => {
