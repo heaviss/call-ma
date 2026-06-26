@@ -34,6 +34,10 @@ class FakePeerConnection {
     this.connectionState = 'connected';
     this.onconnectionstatechange?.();
   }
+  simulateFailed() {
+    this.connectionState = 'failed';
+    this.onconnectionstatechange?.();
+  }
 }
 
 function fakeStream(id = 'stream-1') {
@@ -152,6 +156,45 @@ describe('DirectAdapter', () => {
 
       expect(pc.localDescription).not.toBeNull();
       vi.useRealTimers();
+    });
+
+    it('resolves immediately if ICE gathering is already complete', async () => {
+      pc.iceGatheringState = 'complete'; // already complete before #waitForIce() is called
+
+      const encoded = await adapter.createOffer(fakeStream());
+
+      expect(pc.localDescription).not.toBeNull();
+      expect(typeof encoded).toBe('string');
+    });
+  });
+
+  describe('error handling', () => {
+    it('fires onError when connection state becomes failed', async () => {
+      const onError = vi.fn();
+      adapter.onError(onError);
+
+      await adapter.createOffer(fakeStream());
+      pc.simulateFailed();
+
+      expect(onError).toHaveBeenCalledOnce();
+      expect(onError.mock.calls[0][0]).toBeInstanceOf(Error);
+    });
+  });
+
+  describe('default PeerConnection factory', () => {
+    it('falls back to globalThis.RTCPeerConnection when none is provided', async () => {
+      const fakePc = new FakePeerConnection();
+      // Must be a regular function (not arrow) so it works with `new`
+      const FakeRTC = vi.fn(function () { return fakePc; });
+      globalThis.RTCPeerConnection = FakeRTC;
+
+      const defaultAdapter = new DirectAdapter({ iceServers: [{ urls: 'stun:stun.example.com' }] });
+      const encoded = await defaultAdapter.createOffer(fakeStream());
+
+      expect(FakeRTC).toHaveBeenCalledOnce();
+      expect(typeof encoded).toBe('string');
+
+      delete globalThis.RTCPeerConnection;
     });
   });
 });
