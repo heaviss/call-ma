@@ -42,6 +42,7 @@ export default [
       'unicorn/no-negated-condition':       'off',
       'unicorn/no-array-callback-reference': 'off',
       'unicorn/filename-case':              'off', // camelCase files are established
+      'unicorn/no-unused-array-method-return': 'off', // false positives on our own .join() (TrysteroAdapter/FakeRoom), unrelated to Array#join
     },
   },
 

@@ -48,7 +48,7 @@ describe('getMqttRelayUrls', () => {
 
   it('filters out non-wss entries from env var', () => {
     const result = getMqttRelayUrls(
-      { MQTT_RELAYS: 'wss://good.example.com,ws://bad.example.com,http://also-bad.example.com' },
+      { MQTT_RELAYS: 'wss://good.example.com,ws://bad.example.com,http://also-bad.example.com' }, // eslint-disable-line unicorn/prefer-https -- deliberately-insecure fixture, not a real request
       new URLSearchParams(),
     );
     expect(result).toEqual(['wss://good.example.com']);
