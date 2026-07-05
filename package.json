@@ -13,6 +13,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "lint": "eslint . && npm run lint:css",
     "lint:fix": "eslint . --fix && npm run lint:css:fix",
     "lint:css": "stylelint \"index.html\" \"src/public/**/*.html\"",
@@ -23,8 +24,10 @@
   "devDependencies": {
     "@html-eslint/eslint-plugin": "^0.63.0",
     "@html-eslint/parser": "^0.63.0",
+    "@playwright/test": "^1.61.1",
     "@vitest/coverage-v8": "^4.1.6",
     "eslint": "^9.39.4",
+    "eslint-plugin-playwright": "^2.10.4",
     "eslint-plugin-unicorn": "^65.0.1",
     "eslint-plugin-vitest": "^0.5.4",
     "jsdom": "^29.1.1",

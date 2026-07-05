@@ -13,6 +13,10 @@ yarn-error.log*
 .vite/
 coverage/
 
+# Playwright
+/playwright-report/
+/test-results/
+
 # Editor/OS
 .DS_Store
 Thumbs.db

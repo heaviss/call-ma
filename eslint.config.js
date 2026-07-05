@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import html from '@html-eslint/eslint-plugin';
 import htmlParser from '@html-eslint/parser';
+import playwright from 'eslint-plugin-playwright';
 import unicorn from 'eslint-plugin-unicorn';
 import vitest from 'eslint-plugin-vitest';
 import globals from 'globals';
@@ -59,6 +60,12 @@ export default [
     languageOptions: {
       globals: { ...vitest.environments.env.globals },
     },
+  },
+
+  // ── E2E files ────────────────────────────────────────────────────────────
+  {
+    files: ['e2e/**/*.js', 'playwright.config.js'],
+    ...playwright.configs['flat/recommended'],
   },
 
   // ── HTML files ─────────────────────────────────────────────────────────────
