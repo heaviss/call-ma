@@ -1,6 +1,6 @@
 # call-ma
 
-A minimalist peer-to-peer WebRTC video call app. Signaling uses [Trystero](https://github.com/dmotz/trystero) over the NOSTR relay network — no server or account required.
+A minimalist peer-to-peer WebRTC video call app. Signaling uses [Trystero](https://github.com/dmotz/trystero) over four transports racing in parallel — MQTT, BitTorrent, Nostr, and IPFS (via Waku) — whichever connects first wins; duplicate streams from the same peer are discarded. No server or account required.
 
 ![Coverage](https://heaviss.github.io/call-ma/coverage-badge.svg)
 
@@ -19,7 +19,7 @@ npm run build    # production build (output: dist/)
 
 1. **Creator** clicks "Create Conference" → camera/mic captured → a random 8-char room ID is generated → share the URL (room ID in the hash).
 2. **Joiner** opens the link → room ID is parsed from the hash → auto-joins.
-3. Both peers meet via Trystero over the NOSTR relay network; once matched, a direct WebRTC media stream is established between browsers.
+3. Both peers meet via whichever of the four transports connects first; once matched, a direct WebRTC media stream is established between browsers.
 
 No server stores anything. Stats (RTT, bitrate, FPS) are shown in the Logs panel and never leave the device.
 
@@ -35,6 +35,16 @@ STUN_SERVERS=stun:mystun.example.com:3478 npm run build
 ```
 
 **Note:** No TURN server is configured. Connections behind symmetric NAT may fail.
+
+## Direct connection (no transport reachable)
+
+If all four transports are blocked (e.g. on a restrictive network), click **"Can't connect? Try directly"**:
+
+1. The initiator gets a QR code and a copyable link encoding a WebRTC offer.
+2. Share it any way you like (chat app, AirDrop, reading it aloud). The other person opens the link, which auto-generates their answer as another QR code/link.
+3. They send that back to the initiator, who pastes it into the "Paste their response link" field and clicks **Connect**.
+
+No server is involved — the SDP offer/answer is compressed and encoded directly into the URL.
 
 ## Privacy
 
@@ -60,6 +70,7 @@ npm run lint:css      # CSS only
 npm run format        # Prettier write
 npm run format:check  # Prettier check
 npm run test:coverage # Tests with branch/line coverage report
+npm run test:e2e      # Playwright e2e tests (run `npx playwright install --with-deps chromium` once first)
 ```
 
 Run a single test file:
