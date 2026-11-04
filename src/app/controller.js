@@ -77,7 +77,8 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
         if (directStatus) directStatus.textContent = 'Share this with the other person:';
         if (directConnectBtn) directConnectBtn.disabled = false;
       }
-    } catch {
+    } catch (error) {
+      logger.log(`Direct mode error: ${error.message}`);
       return;
     }
 
