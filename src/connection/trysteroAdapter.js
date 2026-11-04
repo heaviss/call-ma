@@ -1,9 +1,9 @@
 export class TrysteroAdapter {
-  constructor({ joinRoom, transports, turnConfig }) {
+  constructor({ joinRoom, transports, iceServers }) {
     // transports = [{ joinRoom, relayUrls? }]  (preferred)
     // joinRoom = single fn                      (backward compat)
     this._transports = transports ?? [{ joinRoom }];
-    this._turnConfig = turnConfig;
+    this._iceServers = iceServers;
     this._rooms = [];
     this._onStream    = null;
     this._onConnect   = null;
@@ -16,36 +16,33 @@ export class TrysteroAdapter {
   onError(cb)     { this._onError = cb;     return this; }
   onPeerLeave(cb) { this._onPeerLeave = cb; return this; }
 
+  // Programmer errors (bad config, API drift) throw; network failures arrive via onError.
   join(roomId, localStream) {
     const connectedPeers = new Set();
+    const callbacks = { onJoinError: ({ error }) => this._onError?.(new Error(error)) };
 
     for (const { joinRoom, relayUrls } of this._transports) {
       const config = { appId: 'call-ma' };
       if (relayUrls?.length)        config.relayConfig = { urls: relayUrls };
-      if (this._turnConfig?.length) config.turnConfig  = this._turnConfig;
+      if (this._iceServers?.length) config.rtcConfig   = { iceServers: this._iceServers };
 
-      try {
-        const room = joinRoom(config, roomId);
-        this._rooms.push(room);
+      const room = joinRoom(config, roomId, callbacks);
+      this._rooms.push(room);
 
-        room.addStream(localStream);
-        room.onPeerJoin((peerId) => {
-          room.addStream(localStream, peerId);
-          if (!connectedPeers.has(peerId)) this._onConnect?.(peerId);
-        });
-        room.onPeerStream((stream, peerId) => {
-          if (!connectedPeers.has(peerId)) {
-            connectedPeers.add(peerId);
-            this._onStream?.(stream, peerId);
-          }
-        });
-        room.onPeerLeave((peerId) => {
-          connectedPeers.delete(peerId);
-          this._onPeerLeave?.(peerId);
-        });
-      } catch (error) {
-        this._onError?.(error);
-      }
+      room.onPeerJoin = (peerId) => {
+        room.addStream(localStream, { target: peerId });
+        if (!connectedPeers.has(peerId)) this._onConnect?.(peerId);
+      };
+      room.onPeerStream = (stream, peerId) => {
+        if (!connectedPeers.has(peerId)) {
+          connectedPeers.add(peerId);
+          this._onStream?.(stream, peerId);
+        }
+      };
+      room.onPeerLeave = (peerId) => {
+        connectedPeers.delete(peerId);
+        this._onPeerLeave?.(peerId);
+      };
     }
     return this;
   }

@@ -8,8 +8,8 @@ export class DirectAdapter {
   #onConnectCb = null;
   #onErrorCb = null;
 
-  constructor({ iceServers = [], turnConfig, PeerConnection } = {}) {
-    this.#iceConfig = { iceServers: [...iceServers, ...(turnConfig ?? [])] };
+  constructor({ iceServers = [], PeerConnection } = {}) {
+    this.#iceConfig = { iceServers };
     this.#PeerConnection = PeerConnection ?? ((cfg) => new globalThis.RTCPeerConnection(cfg));
   }
 

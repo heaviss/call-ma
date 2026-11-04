@@ -1,22 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { initApp } from '../app/controller.js';
+import { FakeRoom } from './fakes/fakeRoom.js';
 
-class FakeRoom {
-  constructor() {
-    this._addStreamCalls = [];
-    this._onPeerJoinCb = null;
-    this._onPeerLeaveCb = null;
-    this._onPeerStreamCb = null;
-  }
-  addStream(stream, peerId)  { this._addStreamCalls.push({ stream, peerId }); }
-  onPeerJoin(cb)             { this._onPeerJoinCb = cb; }
-  onPeerLeave(cb)            { this._onPeerLeaveCb = cb; }
-  onPeerStream(cb)           { this._onPeerStreamCb = cb; }
-  leave()                    {}
-
-  simulatePeerStream(stream, peerId) { this._onPeerStreamCb?.(stream, peerId); }
-}
 
 function setupDomWithRoomId(roomId) {
   const html = `<!doctype html><html><body>
@@ -55,7 +41,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // Assert
-    expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345');
+    expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
     expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalled();
     expect(dom.window.document.querySelector('#copyBtn').disabled).toBe(false);
     expect(controller.state.link).toContain('#abc12345');

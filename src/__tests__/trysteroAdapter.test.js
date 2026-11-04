@@ -1,26 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TrysteroAdapter } from '../connection/trysteroAdapter.js';
+import { FakeRoom } from './fakes/fakeRoom.js';
 
-class FakeRoom {
-  constructor() {
-    this._addStreamCalls = [];
-    this._onPeerStreamCb = null;
-    this._onPeerJoinCb = null;
-    this._onPeerLeaveCb = null;
-    this.left = false;
-  }
-
-  addStream(stream, peerId)  { this._addStreamCalls.push({ stream, peerId }); }
-  onPeerStream(cb)           { this._onPeerStreamCb = cb; }
-  onPeerJoin(cb)             { this._onPeerJoinCb = cb; }
-  onPeerLeave(cb)            { this._onPeerLeaveCb = cb; }
-  leave()                    { this.left = true; }
-
-  // Test helpers
-  simulatePeerJoin(peerId)              { this._onPeerJoinCb?.(peerId); }
-  simulatePeerLeave(peerId)             { this._onPeerLeaveCb?.(peerId); }
-  simulatePeerStream(stream, peerId)    { this._onPeerStreamCb?.(stream, peerId); }
-}
 
 describe('TrysteroAdapter', () => {
   let fakeRoom;
@@ -37,20 +18,14 @@ describe('TrysteroAdapter', () => {
   it('calls joinRoom with appId and roomId on join()', () => {
     adapter.join('abc12345', localStream);
 
-    expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345');
-  });
-
-  it('adds local stream to the room immediately on join()', () => {
-    adapter.join('abc12345', localStream);
-
-    expect(fakeRoom._addStreamCalls.some((c) => c.stream === localStream && c.peerId == null)).toBe(true);
+    expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
   });
 
   it('sends local stream to a specific peer when they join', () => {
     adapter.join('abc12345', localStream);
     fakeRoom.simulatePeerJoin('peer-1');
 
-    expect(fakeRoom._addStreamCalls.some((c) => c.stream === localStream && c.peerId === 'peer-1')).toBe(true);
+    expect(fakeRoom.addStreamCalls.some((c) => c.stream === localStream && c.target === 'peer-1')).toBe(true);
   });
 
   it('fires onConnect when a peer joins', () => {
@@ -98,14 +73,22 @@ describe('TrysteroAdapter', () => {
     expect(fakeRoom.left).toBe(true);
   });
 
-  it('fires onError if joinRoom throws', () => {
+  it('reports transport join errors through onError', () => {
     const onError = vi.fn();
-    const boom = new Error('relay down');
-    fakeJoinRoom.mockImplementation(() => { throw boom; });
-
     adapter.onError(onError).join('abc12345', localStream);
+    const callbacks = fakeJoinRoom.mock.calls[0][2];
 
-    expect(onError).toHaveBeenCalledWith(boom);
+    callbacks.onJoinError({ error: 'configure TURN servers' });
+
+    expect(onError).toHaveBeenCalledWith(new Error('configure TURN servers'));
+  });
+
+  it('lets programmer errors from joinRoom propagate instead of hiding them in onError', () => {
+    const onError = vi.fn();
+    fakeJoinRoom.mockImplementation(() => { throw new TypeError('bad config'); });
+
+    expect(() => adapter.onError(onError).join('abc12345', localStream)).toThrow('bad config');
+    expect(onError).not.toHaveBeenCalled();
   });
 
   it('returns the adapter for chaining from join()', () => {
@@ -127,11 +110,11 @@ describe('TrysteroAdapter', () => {
 
       multiAdapter.join('abc12345', localStream);
 
-      expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345');
-      expect(fakeJoinRoom2).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345');
+      expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
+      expect(fakeJoinRoom2).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
     });
 
-    it('passes relayConfig and turnConfig per transport', () => {
+    it('passes relayConfig per transport and the same ICE servers to every transport', () => {
       const fakeRoom2 = new FakeRoom();
       const fakeJoinRoom2 = vi.fn().mockReturnValue(fakeRoom2);
       const multiAdapter = new TrysteroAdapter({
@@ -139,7 +122,7 @@ describe('TrysteroAdapter', () => {
           { joinRoom: fakeJoinRoom,  relayUrls: ['wss://mqtt.example.com'] },
           { joinRoom: fakeJoinRoom2, relayUrls: ['wss://tracker.example.com'] },
         ],
-        turnConfig: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
+        iceServers: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
       });
 
       multiAdapter.join('abc12345', localStream);
@@ -147,13 +130,13 @@ describe('TrysteroAdapter', () => {
       expect(fakeJoinRoom).toHaveBeenCalledWith({
         appId: 'call-ma',
         relayConfig: { urls: ['wss://mqtt.example.com'] },
-        turnConfig: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
-      }, 'abc12345');
+        rtcConfig: { iceServers: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }] },
+      }, 'abc12345', expect.any(Object));
       expect(fakeJoinRoom2).toHaveBeenCalledWith({
         appId: 'call-ma',
         relayConfig: { urls: ['wss://tracker.example.com'] },
-        turnConfig: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
-      }, 'abc12345');
+        rtcConfig: { iceServers: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }] },
+      }, 'abc12345', expect.any(Object));
     });
 
     it('fires onStream only once when same peer connects via both transports', () => {

@@ -25,6 +25,7 @@
     "@html-eslint/eslint-plugin": "^0.63.0",
     "@html-eslint/parser": "^0.63.0",
     "@playwright/test": "^1.61.1",
+    "@trystero-p2p/core": "^0.26.0",
     "@vitest/coverage-v8": "^4.1.6",
     "eslint": "^9.39.4",
     "eslint-plugin-playwright": "^2.10.4",
@@ -42,10 +43,10 @@
     "vitest": "^4.1.6"
   },
   "dependencies": {
-    "@trystero-p2p/ipfs": "^0.25.2",
-    "@trystero-p2p/mqtt": "^0.25.0",
-    "@trystero-p2p/nostr": "^0.25.2",
-    "@trystero-p2p/torrent": "^0.25.0",
+    "@trystero-p2p/ipfs": "^0.26.0",
+    "@trystero-p2p/mqtt": "^0.26.0",
+    "@trystero-p2p/nostr": "^0.26.0",
+    "@trystero-p2p/torrent": "^0.26.0",
     "qrcode": "^1.5.4"
   }
 }
