@@ -1,0 +1,8 @@
+{
+  "extends": ["html-validate:recommended", "html-validate:a11y", "html-validate:document"],
+  "rules": {
+    "no-autoplay": ["error", { "include": ["audio"] }],
+    "require-sri": "off",
+    "doctype-style": ["error", { "style": "lowercase" }]
+  }
+}

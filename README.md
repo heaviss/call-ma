@@ -74,9 +74,10 @@ VITE_BASE=/call-ma/ npm run build
 ## Development
 
 ```bash
-npm run lint          # ESLint (JS + HTML) + Stylelint (CSS)
+npm run lint          # ESLint (JS + HTML) + Stylelint (CSS) + html-validate
 npm run lint:fix      # Auto-fix
-npm run lint:css      # CSS only
+npm run lint:css      # CSS only (stylelint, baseline in stylelint-suppressions.json)
+npm run lint:html     # HTML only (html-validate)
 npm run format        # Prettier write
 npm run format:check  # Prettier check
 npm run test:coverage # Tests with branch/line coverage report
