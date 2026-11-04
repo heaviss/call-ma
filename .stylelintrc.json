@@ -1,18 +1,29 @@
 {
-  "extends": ["stylelint-config-standard", "stylelint-config-html"],
+  "extends": [
+    "stylelint-config-standard",
+    "stylelint-config-html",
+    "stylelint-config-recess-order"
+  ],
+  "plugins": [
+    "stylelint-declaration-strict-value",
+    "stylelint-high-performance-animation",
+    "stylelint-plugin-logical-css"
+  ],
   "rules": {
-    "color-no-invalid-hex": true,
-    "unit-no-unknown": true,
-    "property-no-unknown": true,
-    "no-duplicate-selectors": true,
-    "declaration-block-no-duplicate-properties": true,
-    "declaration-block-no-shorthand-property-overrides": true,
-    "shorthand-property-no-redundant-values": true,
-    "no-descending-specificity": true,
-    "comment-no-empty": true,
-    "alpha-value-notation": "number",
-    "color-function-notation": "modern",
-    "selector-max-id": 1,
-    "selector-max-compound-selectors": 4
+    "scale-unlimited/declaration-strict-value": [
+      ["/color$/", "fill", "stroke", "z-index"],
+      { "ignoreValues": ["transparent", "currentcolor", "inherit", "initial", "unset", "none"] }
+    ],
+    "plugin/no-low-performance-animation-properties": true,
+    "logical-css/require-logical-properties": true,
+    "logical-css/require-logical-keywords": true,
+    "logical-css/require-logical-units": true,
+    "selector-max-id": 0,
+    "selector-max-specificity": "0,3,0",
+    "selector-max-compound-selectors": 3,
+    "max-nesting-depth": 2,
+    "declaration-no-important": true,
+    "color-named": "never",
+    "selector-no-qualifying-type": true
   }
 }

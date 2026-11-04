@@ -1,0 +1,18 @@
+{
+  "index.html": {
+    "scale-unlimited/declaration-strict-value": {
+      "count": 1
+    },
+    "selector-max-id": {
+      "count": 1
+    },
+    "selector-max-specificity": {
+      "count": 1
+    }
+  },
+  "src/public/offline.html": {
+    "scale-unlimited/declaration-strict-value": {
+      "count": 1
+    }
+  }
+}
