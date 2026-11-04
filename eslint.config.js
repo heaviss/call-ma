@@ -5,16 +5,17 @@ import playwright from 'eslint-plugin-playwright';
 import unicorn from 'eslint-plugin-unicorn';
 import vitest from '@vitest/eslint-plugin';
 import globals from 'globals';
+import tseslint from 'typescript-eslint';
 
 export default [
   { ignores: ['node_modules', 'coverage', 'dist'] },
 
-  // ── JS ────────────────────────────────────────────────────────────────────
-  // JS-only presets: unicorn 79 also reports on HTML attributes via the html-eslint AST
-  { files: ['**/*.js'], ...js.configs.recommended },
-  { files: ['**/*.js'], ...unicorn.configs.recommended },
+  // ── JS / TS ───────────────────────────────────────────────────────────────
+  // Script-only presets: unicorn 79 also reports on HTML attributes via the html-eslint AST
+  { files: ['**/*.{js,ts}'], ...js.configs.recommended },
+  { files: ['**/*.{js,ts}'], ...unicorn.configs.recommended },
   {
-    files: ['**/*.js'],
+    files: ['**/*.{js,ts}'],
     languageOptions: {
       globals: { ...globals.browser, ...globals.es2022, ...globals.node },
     },
@@ -48,9 +49,22 @@ export default [
     },
   },
 
+  // ── TS parser ──────────────────────────────────────────────────────────────
+  // Same rules as JS; only core rules that misfire on TS syntax are swapped.
+  {
+    files: ['**/*.ts'],
+    languageOptions: { parser: tseslint.parser },
+    plugins: { '@typescript-eslint': tseslint.plugin },
+    rules: {
+      'no-undef':                           'off', // tsc checks undefined names, incl. DOM/lib types ESLint does not know
+      'no-unused-vars':                     'off', // reports parameter names in function types
+      '@typescript-eslint/no-unused-vars':  ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    },
+  },
+
   // ── Test files ─────────────────────────────────────────────────────────────
   {
-    files: ['src/**/*.{test,spec}.js'],
+    files: ['src/**/*.{test,spec}.ts'],
     plugins: { vitest },
     rules: {
       ...vitest.configs.recommended.rules,
@@ -65,7 +79,7 @@ export default [
 
   // ── E2E files ────────────────────────────────────────────────────────────
   {
-    files: ['e2e/**/*.js', 'playwright.config.js'],
+    files: ['e2e/**/*.ts', 'playwright.config.ts'],
     ...playwright.configs['flat/recommended'],
   },
 

@@ -7,7 +7,7 @@ Peer-to-peer video calls between two browsers, with no server of our own. Signal
 
 ## Done
 
-A change is done when `npm run lint`, `npm run test:coverage` (coverage thresholds included) and `npm run test:e2e` pass. Work test-first: failing test → implementation → green → commit.
+A change is done when `npm run lint`, `npm run typecheck`, `npm run test:coverage` (coverage thresholds included) and `npm run test:e2e` pass. Work test-first: failing test → implementation → green → commit.
 
 ## Lint
 
@@ -15,6 +15,10 @@ Rules are the strictest available, at wemake-python-styleguide level. Fix the co
 
 - `stylelint-suppressions.json` freezes old CSS violations and may only shrink. Stylelint 17 ignores stale entries, so CI runs `npm run lint:css:baseline`, which fails when the file would change. After fixing a frozen violation, run it locally and commit the shrunk file. Never add entries for new code.
 - Prettier owns formatting; linters must agree with it (hence the lowercase `<!doctype html>` in html-validate).
+
+## TypeScript
+
+All code is TypeScript (`src/`, `e2e/`, `*.config.ts`); only `eslint.config.js` stays JS, because ESLint 10 needs `jiti` to load a `.ts` config. `tsconfig.json` is strict (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `erasableSyntaxOnly`: no `enum` or `namespace`). Relative imports carry the `.ts` extension. Fix type errors in code; `@ts-expect-error` and `any` only with a reason comment. Trystero types come from `@trystero-p2p/core`; Vite env vars are typed in `src/vite-env.d.ts`.
 
 ## Seams
 
@@ -26,7 +30,7 @@ Rules are the strictest available, at wemake-python-styleguide level. Fix the co
 ## Tests
 
 - Integration tests build a `JSDOM` and inject it into `initApp`. Tests of pure functions use no DOM.
-- Adapter tests go through `src/__tests__/fakes/fakeRoom`. `roomContract` runs the same checks against `FakeRoom` and a real offline Trystero room (`createStrategy` from `@trystero-p2p/core`), so the fake stays true to the library.
+- Adapter tests go through `src/__tests__/fakes/fakeRoom`; DOM and stream helpers (`getEl`, `fakeStream`, `makeNavigator`) live in `src/__tests__/fakes/dom`. `roomContract` runs the same checks against `FakeRoom` and a real offline Trystero room (`createStrategy` from `@trystero-p2p/core`), so the fake stays true to the library.
 - `vi.fn()` stands in for external dependencies only (`mediaDevices`, `clipboard`, `joinRoom`); everything else is a real object. `virtual:pwa-register` resolves to a stub in `src/__mocks__` via a Vitest alias.
 - Arrange / Act / Assert blocks are separated by blank lines.
 
