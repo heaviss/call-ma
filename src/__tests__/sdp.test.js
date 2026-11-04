@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { encodeSdp, decodeSdp } from '../shared/sdp.js';
 
 describe('sdp', () => {
@@ -28,12 +28,11 @@ describe('sdp', () => {
   });
 
   it('encodeSdp throws when CompressionStream is not available', async () => {
-    const saved = globalThis.CompressionStream;
-    delete globalThis.CompressionStream;
+    vi.stubGlobal('CompressionStream', undefined);
 
     await expect(encodeSdp(desc)).rejects.toThrow('CompressionStream not supported');
 
-    globalThis.CompressionStream = saved;
+    vi.unstubAllGlobals();
   });
 });
 

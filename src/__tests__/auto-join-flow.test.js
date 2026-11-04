@@ -4,7 +4,7 @@ import { initApp } from '../app/controller.js';
 import { FakeRoom } from './fakes/fakeRoom.js';
 
 
-function setupDomWithRoomId(roomId) {
+function setupDomWithRoomId() {
   const html = `<!doctype html><html><body>
   <button id="createBtn">Create Conference</button>
   <button id="copyBtn" disabled>Copy Link</button>
@@ -12,7 +12,7 @@ function setupDomWithRoomId(roomId) {
   <video id="remoteVideo"></video>
   <div id="logs"></div>
   </body></html>`;
-  return new JSDOM(html, { url: `https://example.com/#${roomId}` });
+  return new JSDOM(html, { url: 'https://example.com/#abc12345' });
 }
 
 describe('auto-join flow (Person B opens shared link)', () => {
@@ -29,7 +29,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
 
   it('auto-joins the room from URL hash without clicking Create', async () => {
     // Arrange
-    const dom = setupDomWithRoomId('abc12345');
+    const dom = setupDomWithRoomId();
 
     // Act
     const controller = initApp({
@@ -51,7 +51,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
     // Arrange
     const localStream = { id: 'local-stream' };
     navigatorLike.mediaDevices.getUserMedia.mockResolvedValue(localStream);
-    const dom = setupDomWithRoomId('abc12345');
+    const dom = setupDomWithRoomId();
 
     // Act
     initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
@@ -63,7 +63,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
 
   it('attaches remote stream to remoteVideo on auto-join', async () => {
     // Arrange
-    const dom = setupDomWithRoomId('abc12345');
+    const dom = setupDomWithRoomId();
     initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     await new Promise((resolve) => setTimeout(resolve, 0));
 

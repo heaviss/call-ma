@@ -8,17 +8,17 @@ export function deriveMetrics(report, prevReport = null, timeDeltaMs = 0) {
         rtt = entry.currentRoundTripTime * 1000;
       }
 
-    if (entry.type === 'inbound-rtp' && entry.mediaType === 'video') {
-      if (entry.framesPerSecond != null) {
-        frameRate = entry.framesPerSecond;
-      }
+    if (entry.type !== 'inbound-rtp' || entry.mediaType !== 'video') continue;
 
-      if (prevReport && timeDeltaMs > 0) {
-        const prev = prevReport.get(entry.id);
-        if (prev != null && entry.bytesReceived != null && prev.bytesReceived != null) {
-          bitrate = ((entry.bytesReceived - prev.bytesReceived) * 8) / timeDeltaMs;
-        }
-      }
+    if (entry.framesPerSecond != null) {
+      frameRate = entry.framesPerSecond;
+    }
+
+    if (!prevReport || !(timeDeltaMs > 0)) continue;
+
+    const prev = prevReport.get(entry.id);
+    if (prev != null && entry.bytesReceived != null && prev.bytesReceived != null) {
+      bitrate = ((entry.bytesReceived - prev.bytesReceived) * 8) / timeDeltaMs;
     }
   }
 

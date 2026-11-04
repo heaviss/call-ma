@@ -152,11 +152,11 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
   });
 
   if (directBtn) {
-    let directStarted = false;
+    let isDirectStarted = false;
     directBtn.addEventListener('click', () => {
-      if (directStarted) return;
-      directStarted = true;
-      startDirectMode().catch(
+      if (isDirectStarted) return;
+      isDirectStarted = true;
+      void startDirectMode().catch(
         /* v8 ignore next */
         (error) => logger.log(`Direct mode error: ${error.message}`)
       );
@@ -168,7 +168,7 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
 
   const directParsed = parseDirectUrl(window.location.href);
   if (directParsed?.type === 'offer') {
-    startDirectMode(directParsed.encoded).catch(
+    void startDirectMode(directParsed.encoded).catch(
       /* v8 ignore next */
       (error) => logger.log(`Direct mode error: ${error.message}`)
     );

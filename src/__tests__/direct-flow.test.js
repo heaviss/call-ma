@@ -5,10 +5,15 @@ import { initApp } from '../app/controller.js';
 vi.mock('qrcode', () => ({ default: { toCanvas: vi.fn().mockResolvedValue(undefined) } }));
 
 class FakePeerConnection {
-  constructor() {
-    this._tracks = [];
-  }
-  addTrack(track, stream) { this._tracks.push({ track, stream }); }
+  #tracks = [];
+  localDescription = null;
+  remoteDescription = null;
+  iceGatheringState = 'new';
+  connectionState = 'new';
+  onicegatheringstatechange = null;
+  onconnectionstatechange = null;
+  ontrack = null;
+  addTrack(track, stream) { this.#tracks.push({ track, stream }); }
   async createOffer() { return { type: 'offer', sdp: 'v=0\r\nfake-offer' }; }
   async createAnswer() { return { type: 'answer', sdp: 'v=0\r\nfake-answer' }; }
   async setLocalDescription(desc) {
@@ -18,13 +23,6 @@ class FakePeerConnection {
   }
   async setRemoteDescription(desc) { this.remoteDescription = { type: desc.type, sdp: desc.sdp }; }
   simulateTrack(stream) { this.ontrack?.({ streams: [stream] }); }
-  localDescription = null;
-  remoteDescription = null;
-  iceGatheringState = 'new';
-  connectionState = 'new';
-  onicegatheringstatechange = null;
-  onconnectionstatechange = null;
-  ontrack = null;
 }
 
 function makeDOM(url = 'https://example.com/') {
@@ -47,9 +45,9 @@ function makeDOM(url = 'https://example.com/') {
 }
 
 const DEFAULT_STREAM = { id: 'local', getTracks: () => [] };
-function makeNavigator(stream = DEFAULT_STREAM) {
+function makeNavigator() {
   return {
-    mediaDevices: { getUserMedia: vi.fn().mockResolvedValue(stream) },
+    mediaDevices: { getUserMedia: vi.fn().mockResolvedValue(DEFAULT_STREAM) },
     clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
   };
 }
@@ -254,14 +252,13 @@ describe('direct mode — initiator flow', () => {
 
 describe('CompressionStream unavailable', () => {
   it('hides directBtn when CompressionStream is not available', () => {
-    const saved = globalThis.CompressionStream;
-    delete globalThis.CompressionStream;
+    vi.stubGlobal('CompressionStream', undefined);
 
     const dom2 = makeDOM();
     const nav2 = makeNavigator();
     initApp({ document: dom2.window.document, window: dom2.window, navigator: nav2, transports: [] });
 
-    globalThis.CompressionStream = saved;
+    vi.unstubAllGlobals();
 
     // Note: jsdom does not apply CSS hidden, check the attribute
     expect(dom2.window.document.querySelector('#directBtn').hidden).toBe(true);

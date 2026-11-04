@@ -42,31 +42,31 @@ describe('checkSupport', () => {
 
 describe('mapMediaError', () => {
   it('maps NotAllowedError to permission denied message', () => {
-    const err = Object.assign(new Error('denied'), { name: 'NotAllowedError' });
+    const err = new DOMException('denied', 'NotAllowedError');
 
     expect(mapMediaError(err)).toMatch(/permission denied/i);
   });
 
   it('maps PermissionDeniedError to permission denied message', () => {
-    const err = Object.assign(new Error('denied'), { name: 'PermissionDeniedError' });
+    const err = new DOMException('denied', 'PermissionDeniedError');
 
     expect(mapMediaError(err)).toMatch(/permission denied/i);
   });
 
   it('maps NotFoundError to no device found message', () => {
-    const err = Object.assign(new Error('nope'), { name: 'NotFoundError' });
+    const err = new DOMException('nope', 'NotFoundError');
 
     expect(mapMediaError(err)).toMatch(/no camera/i);
   });
 
   it('maps NotReadableError to in-use message', () => {
-    const err = Object.assign(new Error('busy'), { name: 'NotReadableError' });
+    const err = new DOMException('busy', 'NotReadableError');
 
     expect(mapMediaError(err)).toMatch(/already in use/i);
   });
 
   it('returns a generic message for unknown error names', () => {
-    const err = Object.assign(new Error('weird'), { name: 'WeirdError' });
+    const err = new DOMException('weird', 'WeirdError');
 
     expect(mapMediaError(err)).toMatch(/media error/i);
   });

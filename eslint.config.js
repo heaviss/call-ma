@@ -3,15 +3,16 @@ import html from '@html-eslint/eslint-plugin';
 import htmlParser from '@html-eslint/parser';
 import playwright from 'eslint-plugin-playwright';
 import unicorn from 'eslint-plugin-unicorn';
-import vitest from 'eslint-plugin-vitest';
+import vitest from '@vitest/eslint-plugin';
 import globals from 'globals';
 
 export default [
   { ignores: ['node_modules', 'coverage', 'dist'] },
 
   // ── JS ────────────────────────────────────────────────────────────────────
-  js.configs.recommended,
-  unicorn.configs.recommended,
+  // JS-only presets: unicorn 79 also reports on HTML attributes via the html-eslint AST
+  { files: ['**/*.js'], ...js.configs.recommended },
+  { files: ['**/*.js'], ...unicorn.configs.recommended },
   {
     files: ['**/*.js'],
     languageOptions: {
@@ -38,12 +39,12 @@ export default [
       'guard-for-in':               'error',
 
       // Project conventions override unicorn defaults
-      'unicorn/prevent-abbreviations':      'off', // err, nav, el, btn are established
+      'unicorn/name-replacements':          'off', // err, nav, el, btn are established
       'unicorn/no-null':                    'off', // null used intentionally
       'unicorn/no-negated-condition':       'off',
       'unicorn/no-array-callback-reference': 'off',
       'unicorn/filename-case':              'off', // camelCase files are established
-      'unicorn/no-unused-array-method-return': 'off', // false positives on our own .join() (TrysteroAdapter/FakeRoom), unrelated to Array#join
+      'unicorn/no-unused-builtin-method-return': 'off', // false positives on our own .join() (TrysteroAdapter/FakeRoom), unrelated to Array#join
     },
   },
 

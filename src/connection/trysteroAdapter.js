@@ -34,10 +34,9 @@ export class TrysteroAdapter {
         if (!connectedPeers.has(peerId)) this._onConnect?.(peerId);
       };
       room.onPeerStream = (stream, peerId) => {
-        if (!connectedPeers.has(peerId)) {
-          connectedPeers.add(peerId);
-          this._onStream?.(stream, peerId);
-        }
+        if (connectedPeers.has(peerId)) return;
+        connectedPeers.add(peerId);
+        this._onStream?.(stream, peerId);
       };
       room.onPeerLeave = (peerId) => {
         connectedPeers.delete(peerId);

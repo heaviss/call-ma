@@ -64,7 +64,7 @@ describe('TrysteroAdapter against a real Trystero room', () => {
     const adapter = new TrysteroAdapter({
       transports: [{ joinRoom: (config, roomId, callbacks) =>
         joinRoom({ ...config, rtcPolyfill: StubPeerConnection }, roomId, callbacks) }],
-    }).onError((error) => errors.push(error));
+    }).onError((error) => { errors.push(error); });
 
     adapter.join('room', { id: 'local', getTracks: () => [] });
 

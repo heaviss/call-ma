@@ -68,7 +68,7 @@ describe('error/connection events (integration, jsdom)', () => {
 
   it('logs a media error when getUserMedia rejects', async () => {
     // Arrange
-    const permissionError = Object.assign(new Error('denied'), { name: 'NotAllowedError' });
+    const permissionError = new DOMException('denied', 'NotAllowedError');
     navigatorLike.mediaDevices.getUserMedia.mockRejectedValue(permissionError);
     const { onCreate } = initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
 
