@@ -10,7 +10,29 @@ export class DirectAdapter {
 
   constructor({ iceServers = [], PeerConnection } = {}) {
     this.#iceConfig = { iceServers };
-    this.#PeerConnection = PeerConnection ?? ((cfg) => new globalThis.RTCPeerConnection(cfg));
+    this.#PeerConnection = PeerConnection ?? ((cfg) => new RTCPeerConnection(cfg));
+  }
+
+  #setup() {
+    this.#pc.ontrack = ({ streams }) => {
+      if (this.#onStreamCb) this.#onStreamCb(streams[0]);
+    };
+    this.#pc.onconnectionstatechange = () => {
+      if (this.#pc.connectionState === 'connected' && this.#onConnectCb) this.#onConnectCb();
+      if (this.#pc.connectionState === 'failed' && this.#onErrorCb) this.#onErrorCb(new Error('connection failed'));
+    };
+  }
+
+  #waitForIce() {
+    return new Promise((resolve) => {
+      if (this.#pc.iceGatheringState === 'complete') { resolve(); return; }
+      const timer = setTimeout(resolve, 5000);
+      this.#pc.onicegatheringstatechange = () => {
+        if (this.#pc.iceGatheringState !== 'complete') return;
+        clearTimeout(timer);
+        resolve();
+      };
+    });
   }
 
   onStream(cb)  { this.#onStreamCb  = cb; return this; }
@@ -45,28 +67,5 @@ export class DirectAdapter {
     if (!this.#pc) throw new Error('no pending offer');
     const answer = await decodeSdp(answerEncoded);
     await this.#pc.setRemoteDescription(answer);
-  }
-
-  #setup() {
-    this.#pc.ontrack = ({ streams }) => {
-      if (this.#onStreamCb) this.#onStreamCb(streams[0]);
-    };
-    this.#pc.onconnectionstatechange = () => {
-      if (this.#pc.connectionState === 'connected' && this.#onConnectCb) this.#onConnectCb();
-      if (this.#pc.connectionState === 'failed' && this.#onErrorCb) this.#onErrorCb(new Error('connection failed'));
-    };
-  }
-
-  #waitForIce() {
-    return new Promise((resolve) => {
-      if (this.#pc.iceGatheringState === 'complete') { resolve(); return; }
-      const timer = setTimeout(resolve, 5000);
-      this.#pc.onicegatheringstatechange = () => {
-        if (this.#pc.iceGatheringState === 'complete') {
-          clearTimeout(timer);
-          resolve();
-        }
-      };
-    });
   }
 }

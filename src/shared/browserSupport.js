@@ -11,13 +11,14 @@ const ERROR_MAP = {
 
 export function checkSupport(env = {}) {
   const win = env.window || globalThis.window || null;
-  const nav = env.navigator || globalThis.navigator || null;
-  const RTC = 'RTCPeerConnection' in env ? env.RTCPeerConnection : globalThis.RTCPeerConnection;
-
   if (!win || !win.isSecureContext) return { ok: false, reason: 'HTTPS is required.' };
+
+  const nav = env.navigator || globalThis.navigator || null;
   if (!nav || !nav.mediaDevices) return { ok: false, reason: 'Media devices not available.' };
-  if (!RTC) return { ok: false, reason: 'WebRTC not supported in this browser.' };
-  return { ok: true, reason: null };
+
+  // eslint-disable-next-line unicorn/no-unnecessary-global-this -- feature detection: bare RTCPeerConnection throws ReferenceError where WebRTC is absent
+  const RTC = 'RTCPeerConnection' in env ? env.RTCPeerConnection : globalThis.RTCPeerConnection;
+  return RTC ? { ok: true, reason: null } : { ok: false, reason: 'WebRTC not supported in this browser.' };
 }
 
 export function mapMediaError(error) {

@@ -6,7 +6,7 @@ A minimalist peer-to-peer WebRTC video call app. Signaling uses [Trystero](https
 
 ## Quickstart
 
-Requires Node.js >= 18 and npm >= 10.
+Requires Node.js >= 22.22 (CI uses 24) and npm >= 10.
 
 ```bash
 npm install

@@ -9,9 +9,9 @@ class FakePeerConnection {
   onicegatheringstatechange = null;
   onconnectionstatechange = null;
   ontrack = null;
-  _tracks = [];
+  tracks = [];
 
-  addTrack(track, stream) { this._tracks.push({ track, stream }); }
+  addTrack(track, stream) { this.tracks.push({ track, stream }); }
 
   async createOffer() { return { type: 'offer', sdp: 'v=0\r\nfake-offer' }; }
   async createAnswer() { return { type: 'answer', sdp: 'v=0\r\nfake-answer' }; }
@@ -66,7 +66,7 @@ describe('DirectAdapter', () => {
 
       await adapter.createOffer(stream);
 
-      expect(pc._tracks.some((t) => t.stream === stream)).toBe(true);
+      expect(pc.tracks.some((t) => t.stream === stream)).toBe(true);
     });
 
     it('sets local description on the peer connection', async () => {
@@ -158,6 +158,24 @@ describe('DirectAdapter', () => {
       vi.useRealTimers();
     });
 
+    it('keeps waiting while ICE gathering is still in progress', async () => {
+      vi.useFakeTimers();
+      pc.setLocalDescription = async (desc) => {
+        pc.localDescription = desc;
+        pc.iceGatheringState = 'gathering';
+        pc.onicegatheringstatechange?.();
+      };
+
+      const offerPromise = adapter.createOffer(fakeStream());
+      await vi.advanceTimersByTimeAsync(4999);
+      const pendingTimers = vi.getTimerCount();
+      await vi.advanceTimersByTimeAsync(1);
+      await offerPromise;
+
+      expect(pendingTimers).toBe(1); // the 'gathering' event did not cancel the 5 s fallback
+      vi.useRealTimers();
+    });
+
     it('resolves immediately if ICE gathering is already complete', async () => {
       pc.iceGatheringState = 'complete'; // already complete before #waitForIce() is called
 
@@ -186,7 +204,7 @@ describe('DirectAdapter', () => {
       const fakePc = new FakePeerConnection();
       // Must be a regular function (not arrow) so it works with `new`
       const FakeRTC = vi.fn(function () { return fakePc; });
-      globalThis.RTCPeerConnection = FakeRTC;
+      vi.stubGlobal('RTCPeerConnection', FakeRTC);
 
       const defaultAdapter = new DirectAdapter({ iceServers: [{ urls: 'stun:stun.example.com' }] });
       const encoded = await defaultAdapter.createOffer(fakeStream());
@@ -194,7 +212,7 @@ describe('DirectAdapter', () => {
       expect(FakeRTC).toHaveBeenCalledOnce();
       expect(typeof encoded).toBe('string');
 
-      delete globalThis.RTCPeerConnection;
+      vi.unstubAllGlobals();
     });
   });
 });
