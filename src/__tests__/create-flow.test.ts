@@ -1,11 +1,14 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { JSDOM } from 'jsdom';
-import { initApp } from '../app/controller.ts';
-import type { Mock } from 'vitest';
 import type { DOMWindow } from 'jsdom';
+import type { Mock } from 'vitest';
+
+import { JSDOM } from 'jsdom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { JoinRoomLike } from '../connection/trysteroAdapter.ts';
+
+import { initApp } from '../app/controller.ts';
+import { type FakeNavigator, fakeStream, getEl, makeNavigator } from './fakes/dom.ts';
 import { FakeRoom } from './fakes/fakeRoom.ts';
-import { fakeStream, getEl, makeNavigator, type FakeNavigator } from './fakes/dom.ts';
 
 
 function setupDom() {

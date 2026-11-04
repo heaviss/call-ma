@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { encodeSdp, decodeSdp } from '../shared/sdp.ts';
+import { describe, expect, it, vi } from 'vitest';
+
+import { decodeSdp, encodeSdp } from '../shared/sdp.ts';
 
 describe('sdp', () => {
   const desc: RTCSessionDescriptionInit = { type: 'offer', sdp: 'v=0\r\no=- 1234 2 IN IP4 127.0.0.1\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n' };

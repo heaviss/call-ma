@@ -1,5 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { createLogger } from '../app/logger.ts';
 import { getEl } from './fakes/dom.ts';
 

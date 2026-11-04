@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
-import { buildRoomUrl, getRoomIdFromUrl, copyToClipboard, buildDirectUrl, parseDirectUrl } from '../shared/link.ts';
+import { describe, expect, it, vi } from 'vitest';
+
+import { buildDirectUrl, buildRoomUrl, copyToClipboard, getRoomIdFromUrl, parseDirectUrl } from '../shared/link.ts';
 
 function makeLocation(href: string) {
   const u = new URL(href);
@@ -77,10 +78,10 @@ describe('link utilities', () => {
       const navigatorLike = { clipboard: { writeText } };
 
       // Act
-      const ok = await copyToClipboard(navigatorLike, 'hello');
+      const isOk = await copyToClipboard(navigatorLike, 'hello');
 
       // Assert
-      expect(ok).toBe(true);
+      expect(isOk).toBe(true);
       expect(writeText).toHaveBeenCalledWith('hello');
     });
 

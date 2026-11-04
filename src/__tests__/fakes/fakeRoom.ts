@@ -1,4 +1,5 @@
 import type { AddMediaOptions, PeerTarget } from '@trystero-p2p/core';
+
 import type { RoomLike } from '../../connection/trysteroAdapter.ts';
 
 // Mirrors the Trystero 0.26 room interface. roomContract.test.ts keeps it honest.

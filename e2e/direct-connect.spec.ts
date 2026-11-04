@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 const BASE_URL = 'http://localhost:5173';
 // ponytail: browser.newContext() doesn't inherit playwright.config.ts's `use.permissions` —

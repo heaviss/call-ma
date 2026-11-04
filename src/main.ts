@@ -1,9 +1,10 @@
-import { joinRoom as mqttJoinRoom }    from '@trystero-p2p/mqtt';
-import { joinRoom as torrentJoinRoom } from '@trystero-p2p/torrent';
-import { joinRoom as nostrJoinRoom }   from '@trystero-p2p/nostr';
 import { joinRoom as ipfsJoinRoom }    from '@trystero-p2p/ipfs';
-import { initPwa } from './pwa.ts';
+import { joinRoom as mqttJoinRoom }    from '@trystero-p2p/mqtt';
+import { joinRoom as nostrJoinRoom }   from '@trystero-p2p/nostr';
+import { joinRoom as torrentJoinRoom } from '@trystero-p2p/torrent';
+
 import { initApp } from './app/controller.ts';
+import { initPwa } from './pwa.ts';
 import { getConnectionConfig } from './shared/config/connection.ts';
 
 initPwa();

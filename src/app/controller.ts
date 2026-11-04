@@ -1,9 +1,10 @@
-import { TrysteroAdapter, type TransportOptions } from '../connection/trysteroAdapter.ts';
-import { buildRoomUrl, getRoomIdFromUrl, copyToClipboard, buildDirectUrl, parseDirectUrl } from '../shared/link.ts';
-import { createLogger, type Logger } from './logger.ts';
-import { checkSupport, mapMediaError } from '../shared/browserSupport.ts';
 import QRCode from 'qrcode';
+
 import { DirectAdapter, type PeerConnectionLike } from '../connection/directAdapter.ts';
+import { type TransportOptions, TrysteroAdapter } from '../connection/trysteroAdapter.ts';
+import { checkSupport, mapMediaError } from '../shared/browserSupport.ts';
+import { buildDirectUrl, buildRoomUrl, copyToClipboard, getRoomIdFromUrl, parseDirectUrl } from '../shared/link.ts';
+import { createLogger, type Logger } from './logger.ts';
 
 export interface AppWindow {
   location: Location;
@@ -62,11 +63,11 @@ export function initApp(deps: AppDeps): AppController {
   const logger: Logger = logsEl ? createLogger(logsEl) : { log() {}, clear() {} };
 
   const support = checkSupport({ window, navigator, RTCPeerConnection: window.RTCPeerConnection });
-  if (!support.ok) logger.log(`Warning: ${support.reason}`);
+  if (!support.ok) { logger.log(`Warning: ${support.reason}`); }
 
   async function getMedia(): Promise<MediaStream> {
     try {
-      return navigator.mediaDevices && navigator.mediaDevices.getUserMedia
+      return navigator.mediaDevices?.getUserMedia
         ? await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
         : Promise.reject(new Error('mediaDevices not available'));
     } catch (error) {
@@ -76,7 +77,7 @@ export function initApp(deps: AppDeps): AppController {
   }
 
   async function startDirectMode(offerEncoded: string | null = null): Promise<void> {
-    if (directPanel) directPanel.hidden = false;
+    if (directPanel) { directPanel.hidden = false; }
 
     const directAdapter = new DirectAdapter({
       iceServers,
@@ -85,22 +86,22 @@ export function initApp(deps: AppDeps): AppController {
     });
 
     directAdapter
-      .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })
+      .onStream((remote) => { if (remoteVideo) { remoteVideo.srcObject = remote; } })
       .onConnect(()       => { logger.log('Direct connection established!'); })
       .onError((err)      => { logger.log(`Direct connection error: ${err.message}`); });
 
     let encodedSdp: string;
     try {
       const stream = await getMedia();
-      if (localVideo) localVideo.srcObject = stream;
+      if (localVideo) { localVideo.srcObject = stream; }
 
       if (offerEncoded) {
         encodedSdp = await directAdapter.createAnswer(offerEncoded, stream);
-        if (directStatus) directStatus.textContent = 'Share your answer with the caller:';
+        if (directStatus) { directStatus.textContent = 'Share your answer with the caller:'; }
       } else {
         encodedSdp = await directAdapter.createOffer(stream);
-        if (directStatus) directStatus.textContent = 'Share this with the other person:';
-        if (directConnectBtn) directConnectBtn.disabled = false;
+        if (directStatus) { directStatus.textContent = 'Share this with the other person:'; }
+        if (directConnectBtn) { directConnectBtn.disabled = false; }
       }
     } catch (error) {
       logger.log(`Direct mode error: ${(error as Error).message}`);
@@ -148,58 +149,62 @@ export function initApp(deps: AppDeps): AppController {
   async function onCreate(roomId = generateRoomId()): Promise<void> {
     logger.log('Getting camera/microphone...');
     const stream = await getMedia();
-    if (localVideo) localVideo.srcObject = stream;
+    if (localVideo) { localVideo.srcObject = stream; }
 
     const url = buildRoomUrl(window.location, roomId);
     state.link = url;
 
     const adapter = new TrysteroAdapter(deps);
     adapter
-      .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })
+      .onStream((remote) => { if (remoteVideo) { remoteVideo.srcObject = remote; } })
       .onConnect(()      => { logger.log('Peer joined — connected!'); })
       .onError((err)     => { logger.log(`Connection error: ${err.message}`); })
       .onPeerLeave(()    => { logger.log('Peer left.'); })
       .join(roomId, stream);
 
-    if (copyBtn) copyBtn.disabled = false;
+    if (copyBtn) { copyBtn.disabled = false; }
     logger.log(`Connecting… Share this link: ${url}`);
   }
 
-  if (createBtn) createBtn.addEventListener('click', () => { onCreate(); });
+  if (createBtn) {
+    createBtn.addEventListener('click', () => { onCreate(); });
+  }
 
-  if (copyBtn) copyBtn.addEventListener('click', async () => {
-    try {
-      if (state.link) {
-        const ok = await copyToClipboard(navigator, state.link);
-        logger.log(ok ? 'Link copied to clipboard.' : 'Could not copy — copy the link manually from the address bar.');
-      }
-    } catch {}
-  });
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async () => {
+      try {
+        if (state.link) {
+          const isOk = await copyToClipboard(navigator, state.link);
+          logger.log(isOk ? 'Link copied to clipboard.' : 'Could not copy — copy the link manually from the address bar.');
+        }
+      } catch {}
+    });
+  }
 
   if (directBtn) {
     let isDirectStarted = false;
     directBtn.addEventListener('click', () => {
-      if (isDirectStarted) return;
+      if (isDirectStarted) { return; }
       isDirectStarted = true;
       void startDirectMode().catch(
         /* v8 ignore next */
-        (error: unknown) => logger.log(`Direct mode error: ${(error as Error).message}`)
+        (error: unknown) => { logger.log(`Direct mode error: ${(error as Error).message}`); }
       );
     });
   }
 
   const hashRoomId = getRoomIdFromUrl(window.location.href);
-  if (hashRoomId) onCreate(hashRoomId);
+  if (hashRoomId) { onCreate(hashRoomId); }
 
   const directParsed = parseDirectUrl(window.location.href);
   if (directParsed?.type === 'offer') {
     void startDirectMode(directParsed.encoded).catch(
       /* v8 ignore next */
-      (error: unknown) => logger.log(`Direct mode error: ${(error as Error).message}`)
+      (error: unknown) => { logger.log(`Direct mode error: ${(error as Error).message}`); }
     );
   } else if (directParsed?.type === 'answer') {
-    if (directPanel) directPanel.hidden = false;
-    if (directStatus) directStatus.textContent = 'Paste this link where the call was created.';
+    if (directPanel) { directPanel.hidden = false; }
+    if (directStatus) { directStatus.textContent = 'Paste this link where the call was created.'; }
   }
 
   return { state, onCreate };

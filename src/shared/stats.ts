@@ -26,13 +26,13 @@ export function deriveMetrics(report: StatsReportLike, prevReport: StatsReportLi
         rtt = entry.currentRoundTripTime * 1000;
       }
 
-    if (entry.type !== 'inbound-rtp' || entry.mediaType !== 'video') continue;
+    if (entry.type !== 'inbound-rtp' || entry.mediaType !== 'video') { continue; }
 
     if (entry.framesPerSecond != null) {
       frameRate = entry.framesPerSecond;
     }
 
-    if (!prevReport || !(timeDeltaMs > 0)) continue;
+    if (!prevReport || !(timeDeltaMs > 0)) { continue; }
 
     const prev = prevReport.get(entry.id);
     if (prev != null && entry.bytesReceived != null && prev.bytesReceived != null) {

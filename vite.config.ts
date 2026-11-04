@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import { VitePWA, type ManifestOptions } from 'vite-plugin-pwa';
+import { type ManifestOptions, VitePWA } from 'vite-plugin-pwa';
 
 const base = process.env['BASE'] || process.env['VITE_BASE'] || '/';
 

@@ -1,9 +1,12 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { TrysteroAdapter } from '../connection/trysteroAdapter.ts';
 import type { Mock } from 'vitest';
+
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import type { JoinRoomLike } from '../connection/trysteroAdapter.ts';
-import { FakeRoom } from './fakes/fakeRoom.ts';
+
+import { TrysteroAdapter } from '../connection/trysteroAdapter.ts';
 import { fakeStream } from './fakes/dom.ts';
+import { FakeRoom } from './fakes/fakeRoom.ts';
 
 
 describe('TrysteroAdapter', () => {

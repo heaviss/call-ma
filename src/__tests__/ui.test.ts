@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-import { getEl } from './fakes/dom.ts';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import { getEl } from './fakes/dom.ts';
 
 function loadIndexIntoDom() {
   const __filename = fileURLToPath(import.meta.url);

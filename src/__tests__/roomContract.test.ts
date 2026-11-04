@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
 import { createStrategy } from '@trystero-p2p/core';
-import { FakeRoom } from './fakes/fakeRoom.ts';
-import { fakeStream } from './fakes/dom.ts';
+import { describe, expect, it } from 'vitest';
+
 import { TrysteroAdapter } from '../connection/trysteroAdapter.ts';
+import { fakeStream } from './fakes/dom.ts';
+import { FakeRoom } from './fakes/fakeRoom.ts';
 
 class StubPeerConnection {
   addEventListener() {}

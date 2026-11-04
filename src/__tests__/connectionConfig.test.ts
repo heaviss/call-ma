@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { getConnectionConfig, DEFAULT_STUN_URLS } from '../shared/config/connection.ts';
+import { describe, expect, it } from 'vitest';
+
+import { DEFAULT_STUN_URLS, getConnectionConfig } from '../shared/config/connection.ts';
 
 const noParams = new URLSearchParams();
 

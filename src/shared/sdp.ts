@@ -4,7 +4,7 @@ function bodyOf(source: string | Uint8Array<ArrayBuffer>): ReadableStream<Uint8A
 }
 
 async function compress(str: string): Promise<string> {
-  if (typeof CompressionStream === 'undefined') throw new Error('CompressionStream not supported');
+  if (typeof CompressionStream === 'undefined') { throw new Error('CompressionStream not supported'); }
   const buf = await new Response(bodyOf(str).pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer();
   const bytes = new Uint8Array(buf);
   return btoa(Array.from(bytes, (b) => String.fromCodePoint(b)).join('')).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
