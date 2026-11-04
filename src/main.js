@@ -4,19 +4,22 @@ import { joinRoom as nostrJoinRoom }   from '@trystero-p2p/nostr';
 import { joinRoom as ipfsJoinRoom }    from '@trystero-p2p/ipfs';
 import { initPwa } from './pwa.js';
 import { initApp } from './app/controller.js';
-import { getMqttRelayUrls, getTorrentRelayUrls } from './shared/config/relays.js';
+import { getConnectionConfig } from './shared/config/connection.js';
 
 initPwa();
 
-if (globalThis.window !== undefined && globalThis.document !== undefined) {
-  try {
-    const searchParams = new URLSearchParams(globalThis.window.location.search);
-    const transports = [
-      { joinRoom: mqttJoinRoom,    relayUrls: getMqttRelayUrls(undefined, searchParams) },
-      { joinRoom: torrentJoinRoom, relayUrls: getTorrentRelayUrls(undefined, searchParams) },
-      { joinRoom: nostrJoinRoom },
-      { joinRoom: ipfsJoinRoom },
-    ];
-    initApp({ document: globalThis.document, window: globalThis.window, navigator: globalThis.navigator, transports });
-  } catch {}
-}
+const searchParams = new URLSearchParams(globalThis.location.search);
+const { iceServers, mqttRelayUrls, torrentRelayUrls } = getConnectionConfig({ env: import.meta.env, searchParams });
+
+initApp({
+  document: globalThis.document,
+  window: globalThis.window,
+  navigator: globalThis.navigator,
+  iceServers,
+  transports: [
+    { joinRoom: mqttJoinRoom,    relayUrls: mqttRelayUrls },
+    { joinRoom: torrentJoinRoom, relayUrls: torrentRelayUrls },
+    { joinRoom: nostrJoinRoom },
+    { joinRoom: ipfsJoinRoom },
+  ],
+});

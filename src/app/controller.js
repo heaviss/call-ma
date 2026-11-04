@@ -2,7 +2,6 @@ import { TrysteroAdapter } from '../connection/trysteroAdapter.js';
 import { buildRoomUrl, getRoomIdFromUrl, copyToClipboard, buildDirectUrl, parseDirectUrl } from '../shared/link.js';
 import { createLogger } from './logger.js';
 import { checkSupport, mapMediaError } from '../shared/browserSupport.js';
-import { getTurnConfig, getIceServers } from '../shared/config/stun.js';
 import QRCode from 'qrcode';
 import { DirectAdapter } from '../connection/directAdapter.js';
 
@@ -11,7 +10,7 @@ function generateRoomId() {
   return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * 36)]).join('');
 }
 
-export function initApp({ document, window, navigator, joinRoom, transports }) {
+export function initApp({ document, window, navigator, joinRoom, transports, iceServers }) {
   const state = { link: null };
 
   const createBtn   = document.querySelector('#createBtn');
@@ -55,11 +54,8 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
   async function startDirectMode(offerEncoded = null) {
     if (directPanel) directPanel.hidden = false;
 
-    const iceServers = getIceServers();
-    const turnConfig = getTurnConfig();
     const directAdapter = new DirectAdapter({
       iceServers,
-      turnConfig,
       PeerConnection: (cfg) => new window.RTCPeerConnection(cfg),
     });
 
@@ -81,7 +77,8 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
         if (directStatus) directStatus.textContent = 'Share this with the other person:';
         if (directConnectBtn) directConnectBtn.disabled = false;
       }
-    } catch {
+    } catch (error) {
+      logger.log(`Direct mode error: ${error.message}`);
       return;
     }
 
@@ -131,8 +128,7 @@ export function initApp({ document, window, navigator, joinRoom, transports }) {
     const url = buildRoomUrl(window.location, roomId);
     state.link = url;
 
-    const turnConfig = getTurnConfig();
-    const adapter = new TrysteroAdapter({ joinRoom, transports, turnConfig });
+    const adapter = new TrysteroAdapter({ joinRoom, transports, iceServers });
     adapter
       .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })
       .onConnect(()      => { logger.log('Peer joined — connected!'); })

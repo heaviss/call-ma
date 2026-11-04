@@ -36,3 +36,14 @@ describe('sdp', () => {
     globalThis.CompressionStream = saved;
   });
 });
+
+describe('decodeSdp with output larger than the stream buffer', () => {
+  it('round-trips without deadlocking', async () => {
+    const sdp = Array.from({ length: 5000 }, (_, i) => `a=candidate:${i} 1 udp 2122260223 192.0.2.${i % 255} ${50_000 + i} typ host`).join('\r\n');
+    const desc = { type: 'offer', sdp };
+
+    const decoded = await decodeSdp(await encodeSdp(desc));
+
+    expect(decoded).toEqual(desc);
+  }, 3000);
+});

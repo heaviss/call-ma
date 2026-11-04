@@ -1,23 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { initApp } from '../app/controller.js';
+import { FakeRoom } from './fakes/fakeRoom.js';
 
-class FakeRoom {
-  constructor() {
-    this._addStreamCalls = [];
-    this._onPeerJoinCb = null;
-    this._onPeerLeaveCb = null;
-    this._onPeerStreamCb = null;
-  }
-  addStream(stream, peerId)  { this._addStreamCalls.push({ stream, peerId }); }
-  onPeerJoin(cb)             { this._onPeerJoinCb = cb; }
-  onPeerLeave(cb)            { this._onPeerLeaveCb = cb; }
-  onPeerStream(cb)           { this._onPeerStreamCb = cb; }
-  leave()                    {}
-
-  simulatePeerJoin(peerId)           { this._onPeerJoinCb?.(peerId); }
-  simulatePeerStream(stream, peerId) { this._onPeerStreamCb?.(stream, peerId); }
-}
 
 function setupDom() {
   const html = `<!doctype html><html><body>
@@ -57,7 +42,7 @@ describe('create conference flow (integration, jsdom)', () => {
 
     // Assert
     expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalled();
-    expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, expect.stringMatching(/^[a-z0-9]{8}$/));
+    expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, expect.stringMatching(/^[a-z0-9]{8}$/), expect.any(Object));
     expect(copyBtn.disabled).toBe(false);
     expect(controller.state.link).toMatch(/#[a-z0-9]{8}$/);
   });

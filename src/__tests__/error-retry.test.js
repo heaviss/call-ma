@@ -1,20 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { JSDOM } from 'jsdom';
 import { initApp } from '../app/controller.js';
+import { FakeRoom } from './fakes/fakeRoom.js';
 
-class FakeRoom {
-  constructor() {}
-  addStream()      {}
-  onPeerJoin(cb)   { this._onPeerJoinCb = cb; }
-  onPeerLeave(cb)  { this._onPeerLeaveCb = cb; }
-  onPeerStream(cb) { this._onPeerStreamCb = cb; }
-  leave()          {}
-
-  simulatePeerLeave(peerId) { this._onPeerLeaveCb?.(peerId); }
-  _onPeerJoinCb = null;
-  _onPeerLeaveCb = null;
-  _onPeerStreamCb = null;
-}
 
 function setupDom() {
   const html = `<!doctype html><html><body>
@@ -42,9 +30,12 @@ describe('error/connection events (integration, jsdom)', () => {
     };
   });
 
-  it('logs an error message to #logs when joinRoom throws', async () => {
+  it('logs an error message to #logs when a transport reports a join error', async () => {
     // Arrange
-    fakeJoinRoom.mockImplementation(() => { throw new Error('relay unreachable'); });
+    fakeJoinRoom.mockImplementation((_config, _roomId, callbacks) => {
+      callbacks.onJoinError({ error: 'relay unreachable' });
+      return fakeRoom;
+    });
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     document.querySelector('#createBtn').click();
     await new Promise((resolve) => setTimeout(resolve, 0));

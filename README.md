@@ -23,18 +23,28 @@ npm run build    # production build (output: dist/)
 
 No server stores anything. Stats (RTT, bitrate, FPS) are shown in the Logs panel and never leave the device.
 
-## STUN servers
+## ICE servers and relays
 
-Default servers used for ICE candidate gathering:
-- `stun:stun.l.google.com:19302`
-- `stun:stun1.l.google.com:19302`
+All connection settings live in `src/shared/config/connection.js`. One ICE server list is used by every transport and by direct mode; it replaces Trystero's built-in defaults.
 
-Override at build time via the `STUN_SERVERS` environment variable (comma-separated):
+Default STUN servers: `stun.l.google.com:19302`, plus `stun.nextcloud.com:3478`, `stun.sonetel.com`, `stun.telnyx.com` (reachable from Russia, where Google STUN is blocked).
+
+Build-time overrides (Vite env, comma-separated):
+
+| Variable | Meaning |
+|---|---|
+| `VITE_STUN_SERVERS` | Replace the default STUN list |
+| `VITE_TURN_URL`, `VITE_TURN_USER`, `VITE_TURN_PASS` | Add TURN server(s) with shared credentials |
+| `VITE_MQTT_RELAYS` | `wss://` MQTT brokers |
+| `VITE_TORRENT_TRACKERS` | `wss://` BitTorrent trackers |
+
 ```bash
-STUN_SERVERS=stun:mystun.example.com:3478 npm run build
+VITE_STUN_SERVERS=stun:mystun.example.com:3478 npm run build
 ```
 
-**Note:** No TURN server is configured. Connections behind symmetric NAT may fail.
+URL params override env and travel inside shared links: `?stun=`, `?mqttRelay=`, `?torrentTracker=`. TURN credentials are never read from the URL.
+
+**Note:** No TURN server is configured by default. Connections behind symmetric NAT may fail.
 
 ## Direct connection (no transport reachable)
 
