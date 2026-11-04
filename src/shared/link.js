@@ -37,7 +37,7 @@ export function parseDirectUrl(url) {
   try {
     const params = new URLSearchParams(new URL(url).hash.slice(1));
     const type = ['offer', 'answer'].find((t) => params.has(t)) ?? null;
-    if (!type) return null;
+    if (!type) {return null;}
     const encoded = params.get(type);
     return encoded ? { type, encoded } : null;
   } catch {

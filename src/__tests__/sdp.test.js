@@ -28,7 +28,7 @@ describe('sdp', () => {
   });
 
   it('encodeSdp throws when CompressionStream is not available', async () => {
-    const saved = globalThis.CompressionStream;
+    const saved = CompressionStream;
     delete globalThis.CompressionStream;
 
     await expect(encodeSdp(desc)).rejects.toThrow('CompressionStream not supported');

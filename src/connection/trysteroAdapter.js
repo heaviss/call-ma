@@ -23,21 +23,23 @@ export class TrysteroAdapter {
 
     for (const { joinRoom, relayUrls } of this._transports) {
       const config = { appId: 'call-ma' };
-      if (relayUrls?.length)        config.relayConfig = { urls: relayUrls };
-      if (this._iceServers?.length) config.rtcConfig   = { iceServers: this._iceServers };
+      if (relayUrls?.length)        {config.relayConfig = { urls: relayUrls };}
+      if (this._iceServers?.length) {config.rtcConfig   = { iceServers: this._iceServers };}
 
       const room = joinRoom(config, roomId, callbacks);
       this._rooms.push(room);
 
       room.onPeerJoin = (peerId) => {
         room.addStream(localStream, { target: peerId });
-        if (!connectedPeers.has(peerId)) this._onConnect?.(peerId);
+        if (!connectedPeers.has(peerId)) {this._onConnect?.(peerId);}
       };
       room.onPeerStream = (stream, peerId) => {
-        if (!connectedPeers.has(peerId)) {
-          connectedPeers.add(peerId);
-          this._onStream?.(stream, peerId);
+        if (connectedPeers.has(peerId)) {
+          return;
         }
+
+        connectedPeers.add(peerId);
+        this._onStream?.(stream, peerId);
       };
       room.onPeerLeave = (peerId) => {
         connectedPeers.delete(peerId);
@@ -48,7 +50,7 @@ export class TrysteroAdapter {
   }
 
   destroy() {
-    for (const r of this._rooms) r?.leave?.();
+    for (const r of this._rooms) {r?.leave?.();}
     this._rooms = [];
   }
 }

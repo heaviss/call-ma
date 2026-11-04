@@ -8,13 +8,13 @@ import { getConnectionConfig } from './shared/config/connection.js';
 
 initPwa();
 
-const searchParams = new URLSearchParams(globalThis.location.search);
+const searchParams = new URLSearchParams(location.search);
 const { iceServers, mqttRelayUrls, torrentRelayUrls } = getConnectionConfig({ env: import.meta.env, searchParams });
 
 initApp({
-  document: globalThis.document,
-  window: globalThis.window,
-  navigator: globalThis.navigator,
+  document,
+  window: globalThis,
+  navigator,
   iceServers,
   transports: [
     { joinRoom: mqttJoinRoom,    relayUrls: mqttRelayUrls },

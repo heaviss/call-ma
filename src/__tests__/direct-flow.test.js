@@ -254,7 +254,7 @@ describe('direct mode — initiator flow', () => {
 
 describe('CompressionStream unavailable', () => {
   it('hides directBtn when CompressionStream is not available', () => {
-    const saved = globalThis.CompressionStream;
+    const saved = CompressionStream;
     delete globalThis.CompressionStream;
 
     const dom2 = makeDOM();

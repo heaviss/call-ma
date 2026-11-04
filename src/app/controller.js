@@ -38,7 +38,7 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
   const logger = logsEl ? createLogger(logsEl) : { log() {}, clear() {} };
 
   const support = checkSupport({ window, navigator, RTCPeerConnection: window.RTCPeerConnection });
-  if (!support.ok) logger.log(`Warning: ${support.reason}`);
+  if (!support.ok) {logger.log(`Warning: ${support.reason}`);}
 
   async function getMedia() {
     try {
@@ -52,7 +52,7 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
   }
 
   async function startDirectMode(offerEncoded = null) {
-    if (directPanel) directPanel.hidden = false;
+    if (directPanel) {directPanel.hidden = false;}
 
     const directAdapter = new DirectAdapter({
       iceServers,
@@ -60,22 +60,22 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
     });
 
     directAdapter
-      .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })
+      .onStream((remote) => { if (remoteVideo) {remoteVideo.srcObject = remote;} })
       .onConnect(()       => { logger.log('Direct connection established!'); })
       .onError((err)      => { logger.log(`Direct connection error: ${err.message}`); });
 
     let encodedSdp;
     try {
       const stream = await getMedia();
-      if (localVideo) localVideo.srcObject = stream;
+      if (localVideo) {localVideo.srcObject = stream;}
 
       if (offerEncoded) {
         encodedSdp = await directAdapter.createAnswer(offerEncoded, stream);
-        if (directStatus) directStatus.textContent = 'Share your answer with the caller:';
+        if (directStatus) {directStatus.textContent = 'Share your answer with the caller:';}
       } else {
         encodedSdp = await directAdapter.createOffer(stream);
-        if (directStatus) directStatus.textContent = 'Share this with the other person:';
-        if (directConnectBtn) directConnectBtn.disabled = false;
+        if (directStatus) {directStatus.textContent = 'Share this with the other person:';}
+        if (directConnectBtn) {directConnectBtn.disabled = false;}
       }
     } catch (error) {
       logger.log(`Direct mode error: ${error.message}`);
@@ -123,39 +123,39 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
   async function onCreate(roomId = generateRoomId()) {
     logger.log('Getting camera/microphone...');
     const stream = await getMedia();
-    if (localVideo) localVideo.srcObject = stream;
+    if (localVideo) {localVideo.srcObject = stream;}
 
     const url = buildRoomUrl(window.location, roomId);
     state.link = url;
 
     const adapter = new TrysteroAdapter({ joinRoom, transports, iceServers });
     adapter
-      .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })
+      .onStream((remote) => { if (remoteVideo) {remoteVideo.srcObject = remote;} })
       .onConnect(()      => { logger.log('Peer joined — connected!'); })
       .onError((err)     => { logger.log(`Connection error: ${err.message}`); })
       .onPeerLeave(()    => { logger.log('Peer left.'); })
       .join(roomId, stream);
 
-    if (copyBtn) copyBtn.disabled = false;
+    if (copyBtn) {copyBtn.disabled = false;}
     logger.log(`Connecting… Share this link: ${url}`);
   }
 
-  if (createBtn) createBtn.addEventListener('click', () => { onCreate(); });
+  if (createBtn) {createBtn.addEventListener('click', () => { onCreate(); });}
 
-  if (copyBtn) copyBtn.addEventListener('click', async () => {
+  if (copyBtn) {copyBtn.addEventListener('click', async () => {
     try {
       if (state.link) {
         const ok = await copyToClipboard(navigator, state.link);
         logger.log(ok ? 'Link copied to clipboard.' : 'Could not copy — copy the link manually from the address bar.');
       }
     } catch {}
-  });
+  });}
 
   if (directBtn) {
-    let directStarted = false;
+    let isDirectStarted = false;
     directBtn.addEventListener('click', () => {
-      if (directStarted) return;
-      directStarted = true;
+      if (isDirectStarted) {return;}
+      isDirectStarted = true;
       startDirectMode().catch(
         /* v8 ignore next */
         (error) => logger.log(`Direct mode error: ${error.message}`)
@@ -164,7 +164,7 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
   }
 
   const hashRoomId = getRoomIdFromUrl(window.location.href);
-  if (hashRoomId) onCreate(hashRoomId);
+  if (hashRoomId) {onCreate(hashRoomId);}
 
   const directParsed = parseDirectUrl(window.location.href);
   if (directParsed?.type === 'offer') {
@@ -173,8 +173,8 @@ export function initApp({ document, window, navigator, joinRoom, transports, ice
       (error) => logger.log(`Direct mode error: ${error.message}`)
     );
   } else if (directParsed?.type === 'answer') {
-    if (directPanel) directPanel.hidden = false;
-    if (directStatus) directStatus.textContent = 'Paste this link where the call was created.';
+    if (directPanel) {directPanel.hidden = false;}
+    if (directStatus) {directStatus.textContent = 'Paste this link where the call was created.';}
   }
 
   return { state, onCreate };

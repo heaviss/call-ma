@@ -10,7 +10,7 @@ export class DirectAdapter {
 
   constructor({ iceServers = [], PeerConnection } = {}) {
     this.#iceConfig = { iceServers };
-    this.#PeerConnection = PeerConnection ?? ((cfg) => new globalThis.RTCPeerConnection(cfg));
+    this.#PeerConnection = PeerConnection ?? ((cfg) => new RTCPeerConnection(cfg));
   }
 
   onStream(cb)  { this.#onStreamCb  = cb; return this; }
@@ -20,7 +20,7 @@ export class DirectAdapter {
   async createOffer(stream) {
     this.#pc = this.#PeerConnection(this.#iceConfig);
     this.#setup();
-    for (const track of stream.getTracks()) this.#pc.addTrack(track, stream);
+    for (const track of stream.getTracks()) {this.#pc.addTrack(track, stream);}
     const iceWaiter = this.#waitForIce(); // ponytail: register timer before any await so fake-timers tests work
     const offer = await this.#pc.createOffer();
     await this.#pc.setLocalDescription(offer);
@@ -34,7 +34,7 @@ export class DirectAdapter {
     const iceWaiter = this.#waitForIce(); // ponytail: register timer before any await so fake-timers tests work
     const offer = await decodeSdp(offerEncoded);
     await this.#pc.setRemoteDescription(offer);
-    for (const track of stream.getTracks()) this.#pc.addTrack(track, stream);
+    for (const track of stream.getTracks()) {this.#pc.addTrack(track, stream);}
     const answer = await this.#pc.createAnswer();
     await this.#pc.setLocalDescription(answer);
     await iceWaiter;
@@ -42,18 +42,18 @@ export class DirectAdapter {
   }
 
   async applyAnswer(answerEncoded) {
-    if (!this.#pc) throw new Error('no pending offer');
+    if (!this.#pc) {throw new Error('no pending offer');}
     const answer = await decodeSdp(answerEncoded);
     await this.#pc.setRemoteDescription(answer);
   }
 
   #setup() {
     this.#pc.ontrack = ({ streams }) => {
-      if (this.#onStreamCb) this.#onStreamCb(streams[0]);
+      if (this.#onStreamCb) {this.#onStreamCb(streams[0]);}
     };
     this.#pc.onconnectionstatechange = () => {
-      if (this.#pc.connectionState === 'connected' && this.#onConnectCb) this.#onConnectCb();
-      if (this.#pc.connectionState === 'failed' && this.#onErrorCb) this.#onErrorCb(new Error('connection failed'));
+      if (this.#pc.connectionState === 'connected' && this.#onConnectCb) {this.#onConnectCb();}
+      if (this.#pc.connectionState === 'failed' && this.#onErrorCb) {this.#onErrorCb(new Error('connection failed'));}
     };
   }
 
@@ -62,10 +62,12 @@ export class DirectAdapter {
       if (this.#pc.iceGatheringState === 'complete') { resolve(); return; }
       const timer = setTimeout(resolve, 5000);
       this.#pc.onicegatheringstatechange = () => {
-        if (this.#pc.iceGatheringState === 'complete') {
-          clearTimeout(timer);
-          resolve();
+        if (this.#pc.iceGatheringState !== 'complete') {
+          return;
         }
+
+        clearTimeout(timer);
+        resolve();
       };
     });
   }

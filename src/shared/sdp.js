@@ -1,5 +1,5 @@
 async function compress(str) {
-  if (typeof CompressionStream === 'undefined') throw new Error('CompressionStream not supported');
+  if (typeof CompressionStream === 'undefined') {throw new Error('CompressionStream not supported');}
   const buf = await new Response(new Response(str).body.pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer();
   const bytes = new Uint8Array(buf);
   return btoa(Array.from(bytes, (b) => String.fromCodePoint(b)).join('')).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');

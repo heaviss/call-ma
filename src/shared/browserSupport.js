@@ -12,16 +12,16 @@ const ERROR_MAP = {
 export function checkSupport(env = {}) {
   const win = env.window || globalThis.window || null;
   const nav = env.navigator || globalThis.navigator || null;
-  const RTC = 'RTCPeerConnection' in env ? env.RTCPeerConnection : globalThis.RTCPeerConnection;
+  const RTC = 'RTCPeerConnection' in env ? env.RTCPeerConnection : RTCPeerConnection;
 
-  if (!win || !win.isSecureContext) return { ok: false, reason: 'HTTPS is required.' };
-  if (!nav || !nav.mediaDevices) return { ok: false, reason: 'Media devices not available.' };
-  if (!RTC) return { ok: false, reason: 'WebRTC not supported in this browser.' };
+  if (!win || !win.isSecureContext) {return { ok: false, reason: 'HTTPS is required.' };}
+  if (!nav || !nav.mediaDevices) {return { ok: false, reason: 'Media devices not available.' };}
+  if (!RTC) {return { ok: false, reason: 'WebRTC not supported in this browser.' };}
   return { ok: true, reason: null };
 }
 
 export function mapMediaError(error) {
-  if (!error) return 'Unknown media error.';
+  if (!error) {return 'Unknown media error.';}
   const name = error.name || '';
   return ERROR_MAP[name] || `Media error: ${error.message || name}`;
 }

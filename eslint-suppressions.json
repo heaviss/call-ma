@@ -1,0 +1,276 @@
+{
+  "index.html": {
+    "unicorn/name-replacements": {
+      "count": 5
+    },
+    "unicorn/text-encoding-identifier-case": {
+      "count": 1
+    }
+  },
+  "src/__tests__/browserSupport.test.js": {
+    "unicorn/no-error-property-assignment": {
+      "count": 5
+    },
+    "vitest/prefer-strict-equal": {
+      "count": 1
+    }
+  },
+  "src/__tests__/connectionAdapter.test.js": {
+    "id-length": {
+      "count": 1
+    }
+  },
+  "src/__tests__/connectionConfig.test.js": {
+    "vitest/prefer-strict-equal": {
+      "count": 9
+    }
+  },
+  "src/__tests__/create-flow.test.js": {
+    "vitest/prefer-strict-equal": {
+      "count": 1
+    }
+  },
+  "src/__tests__/direct-flow.test.js": {
+    "id-denylist": {
+      "count": 2
+    },
+    "id-length": {
+      "count": 20
+    },
+    "promise/param-names": {
+      "count": 20
+    },
+    "require-await": {
+      "count": 5
+    },
+    "unicorn/consistent-class-member-order": {
+      "count": 1
+    },
+    "unicorn/no-global-object-property-assignment": {
+      "count": 1
+    },
+    "unicorn/no-unnecessary-parameters": {
+      "count": 1
+    }
+  },
+  "src/__tests__/directAdapter.test.js": {
+    "id-length": {
+      "count": 1
+    },
+    "require-await": {
+      "count": 5
+    },
+    "unicorn/no-global-object-property-assignment": {
+      "count": 1
+    },
+    "unicorn/prefer-private-class-fields": {
+      "count": 1
+    },
+    "vitest/prefer-strict-equal": {
+      "count": 1
+    }
+  },
+  "src/__tests__/error-retry.test.js": {
+    "unicorn/no-error-property-assignment": {
+      "count": 1
+    }
+  },
+  "src/__tests__/example.test.js": {
+    "id-length": {
+      "count": 2
+    },
+    "sonarjs/no-trivial-assertions": {
+      "count": 1
+    }
+  },
+  "src/__tests__/link.test.js": {
+    "id-length": {
+      "count": 1
+    },
+    "vitest/prefer-strict-equal": {
+      "count": 2
+    }
+  },
+  "src/__tests__/manifest.test.js": {
+    "require-await": {
+      "count": 1
+    },
+    "vitest/max-expects": {
+      "count": 5
+    }
+  },
+  "src/__tests__/pwa.test.js": {
+    "import-x/no-unresolved": {
+      "count": 1
+    }
+  },
+  "src/__tests__/roomContract.test.js": {
+    "require-await": {
+      "count": 1
+    },
+    "unicorn/no-return-array-push": {
+      "count": 1
+    },
+    "unicorn/no-unused-builtin-method-return": {
+      "count": 1
+    },
+    "vitest/prefer-strict-equal": {
+      "count": 1
+    }
+  },
+  "src/__tests__/sdp.test.js": {
+    "id-length": {
+      "count": 1
+    },
+    "unicorn/no-global-object-property-assignment": {
+      "count": 1
+    },
+    "vitest/prefer-strict-equal": {
+      "count": 2
+    },
+    "vitest/require-to-throw-message": {
+      "count": 2
+    }
+  },
+  "src/__tests__/stats.test.js": {
+    "id-length": {
+      "count": 1
+    },
+    "vitest/prefer-strict-equal": {
+      "count": 1
+    }
+  },
+  "src/__tests__/trysteroAdapter.test.js": {
+    "id-denylist": {
+      "count": 1
+    },
+    "id-length": {
+      "count": 1
+    },
+    "unicorn/no-unused-builtin-method-return": {
+      "count": 7
+    }
+  },
+  "src/__tests__/ui.test.js": {
+    "no-unsanitized/method": {
+      "count": 1
+    },
+    "require-await": {
+      "count": 2
+    },
+    "vitest/max-expects": {
+      "count": 1
+    }
+  },
+  "src/app/controller.js": {
+    "complexity": {
+      "count": 2
+    },
+    "max-lines-per-function": {
+      "count": 2
+    },
+    "max-statements": {
+      "count": 2
+    },
+    "no-magic-numbers": {
+      "count": 1
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 2
+    },
+    "sonarjs/pseudo-random": {
+      "count": 1
+    },
+    "unicorn/no-unused-builtin-method-return": {
+      "count": 1
+    },
+    "unicorn/prefer-await": {
+      "count": 2
+    }
+  },
+  "src/app/logger.js": {
+    "no-param-reassign": {
+      "count": 2
+    }
+  },
+  "src/connection/directAdapter.js": {
+    "no-magic-numbers": {
+      "count": 1
+    },
+    "unicorn/consistent-class-member-order": {
+      "count": 1
+    }
+  },
+  "src/connection/trysteroAdapter.js": {
+    "id-length": {
+      "count": 1
+    },
+    "max-statements": {
+      "count": 1
+    }
+  },
+  "src/public/offline.html": {
+    "unicorn/text-encoding-identifier-case": {
+      "count": 1
+    }
+  },
+  "src/pwa.js": {
+    "import-x/no-unresolved": {
+      "count": 1
+    }
+  },
+  "src/shared/browserSupport.js": {
+    "complexity": {
+      "count": 1
+    },
+    "unicorn/no-declarations-before-early-exit": {
+      "count": 1
+    }
+  },
+  "src/shared/config/connection.js": {
+    "id-denylist": {
+      "count": 3
+    },
+    "id-length": {
+      "count": 1
+    }
+  },
+  "src/shared/connection/ConnectionAdapter.js": {
+    "id-length": {
+      "count": 1
+    },
+    "sonarjs/no-duplicate-string": {
+      "count": 1
+    }
+  },
+  "src/shared/link.js": {
+    "id-length": {
+      "count": 1
+    }
+  },
+  "src/shared/sdp.js": {
+    "id-length": {
+      "count": 2
+    },
+    "require-await": {
+      "count": 2
+    }
+  },
+  "src/shared/stats.js": {
+    "complexity": {
+      "count": 1
+    },
+    "max-statements": {
+      "count": 1
+    },
+    "no-magic-numbers": {
+      "count": 2
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 1
+    },
+    "unicorn/prefer-continue": {
+      "count": 1
+    }
+  }
+}

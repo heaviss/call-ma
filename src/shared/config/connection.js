@@ -12,7 +12,7 @@ const fromParams = (searchParams, key) => searchParams.getAll(key).flatMap(split
 
 function pick(searchParams, key, envValue, isValid) {
   const fromUrl = fromParams(searchParams, key).filter(isValid);
-  if (fromUrl.length > 0) return fromUrl;
+  if (fromUrl.length > 0) {return fromUrl;}
   const fromEnv = splitList(envValue).filter(isValid);
   return fromEnv.length > 0 ? fromEnv : undefined;
 }
@@ -21,14 +21,14 @@ const isWss = (url) => url.startsWith('wss://');
 const isStun = (url) => /^stuns?:/i.test(url);
 
 /**
- * Everything a call needs to reach peers, read once from the build env and the page URL.
- * URL params win over env and travel in shared links; TURN credentials come from env only.
- */
+Everything a call needs to reach peers, read once from the build env and the page URL.
+URL params win over env and travel in shared links; TURN credentials come from env only.
+*/
 export function getConnectionConfig({ env, searchParams }) {
   const stunUrls = pick(searchParams, 'stun', env.VITE_STUN_SERVERS, isStun) ?? DEFAULT_STUN_URLS;
   const credentials = {
-    ...(env.VITE_TURN_USER ? { username: env.VITE_TURN_USER } : {}),
-    ...(env.VITE_TURN_PASS ? { credential: env.VITE_TURN_PASS } : {}),
+    ...(env.VITE_TURN_USER && { username: env.VITE_TURN_USER }),
+    ...(env.VITE_TURN_PASS && { credential: env.VITE_TURN_PASS }),
   };
 
   return {
