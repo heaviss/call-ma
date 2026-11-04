@@ -13,6 +13,8 @@ A change is done when `npm run lint`, `npm run typecheck`, `npm run test:coverag
 
 Rules are the strictest available, at wemake-python-styleguide level. Fix the code to satisfy a rule. When a line genuinely must break one, write `eslint-disable-next-line <rule> -- <reason>`.
 
+- `eslint-suppressions.json` freezes old ESLint violations per file and rule, and may only shrink. `eslint .` fails on a stale entry: after fixing a frozen violation, run `npx eslint . --prune-suppressions` and commit the shrunk file. Never add entries for new code, never use `--pass-on-unpruned-suppressions`.
+- Only `eslint-disable-next-line` with a `-- <reason>` is allowed; `npm run lint` fails on more than 10 `eslint-disable` comments. No `warn` level: every rule is `error` or `off`. Size and complexity thresholds apply to application code (`src/`, not tests).
 - `stylelint-suppressions.json` freezes old CSS violations and may only shrink. Stylelint 17 ignores stale entries, so CI runs `npm run lint:css:baseline`, which fails when the file would change. After fixing a frozen violation, run it locally and commit the shrunk file. Never add entries for new code.
 - Prettier owns formatting; linters must agree with it (hence the lowercase `<!doctype html>` in html-validate).
 
