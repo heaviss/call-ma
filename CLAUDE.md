@@ -13,6 +13,9 @@ A change is done when `npm run lint`, `npm run test:coverage` (coverage threshol
 
 Rules are the strictest available, at wemake-python-styleguide level. Fix the code to satisfy a rule. When a line genuinely must break one, write `eslint-disable-next-line <rule> -- <reason>`.
 
+- `stylelint-suppressions.json` freezes old CSS violations and may only shrink. Stylelint 17 ignores stale entries, so CI runs `npm run lint:css:baseline`, which fails when the file would change. After fixing a frozen violation, run it locally and commit the shrunk file. Never add entries for new code.
+- Prettier owns formatting; linters must agree with it (hence the lowercase `<!doctype html>` in html-validate).
+
 ## Seams
 
 - **Signaling flow.** The creator generates an 8-char room ID, builds the share link with `buildRoomUrl` and calls `TrysteroAdapter.join(roomId, stream)`. The joiner opens the link; `getRoomIdFromUrl` reads the room ID from the hash and the same join runs. Both sides `room.addStream(localStream)`; the remote stream arrives via `onPeerStream`.
