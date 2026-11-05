@@ -84,4 +84,33 @@ describe('deriveMetrics', () => {
 
     expect(deriveMetrics(curr, prev, 0).bitrate).toBeNull();
   });
+
+  it('takes each metric from the last entry that has it', () => {
+    const report = makeReport([
+      { id: 'p1', type: 'candidate-pair', state: 'succeeded', currentRoundTripTime: 0.01 },
+      { id: 'p2', type: 'candidate-pair', state: 'succeeded', currentRoundTripTime: 0.02 },
+      { id: 'p3', type: 'candidate-pair', state: 'succeeded' },
+      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', framesPerSecond: 24 },
+      { id: 'r2', type: 'inbound-rtp', mediaType: 'video', framesPerSecond: 30 },
+      { id: 'r3', type: 'inbound-rtp', mediaType: 'video' },
+    ]);
+
+    const { rtt, frameRate } = deriveMetrics(report);
+
+    expect(rtt).toBeCloseTo(20, 0);
+    expect(frameRate).toBe(30);
+  });
+
+  it('returns null bitrate when the previous report lacks the entry', () => {
+    const prev = makeReport([
+      { id: 'other', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
+    ]);
+    const curr = makeReport([
+      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
+    ]);
+
+    const { bitrate } = deriveMetrics(curr, prev, 1000);
+
+    expect(bitrate).toBeNull();
+  });
 });

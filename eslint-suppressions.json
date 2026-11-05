@@ -144,52 +144,7 @@
     }
   },
   "src/app/controller.ts": {
-    "@typescript-eslint/no-empty-function": {
-      "count": 2
-    },
-    "@typescript-eslint/no-floating-promises": {
-      "count": 2
-    },
-    "@typescript-eslint/no-magic-numbers": {
-      "count": 1
-    },
-    "@typescript-eslint/no-misused-promises": {
-      "count": 3
-    },
-    "@typescript-eslint/no-non-null-assertion": {
-      "count": 1
-    },
-    "@typescript-eslint/prefer-optional-chain": {
-      "count": 1
-    },
-    "@typescript-eslint/return-await": {
-      "count": 1
-    },
-    "complexity": {
-      "count": 2
-    },
-    "import-x/default": {
-      "count": 1
-    },
-    "import-x/no-named-as-default-member": {
-      "count": 1
-    },
-    "jsdoc/require-jsdoc": {
-      "count": 1
-    },
-    "max-lines-per-function": {
-      "count": 2
-    },
-    "max-statements": {
-      "count": 3
-    },
-    "sonarjs/cognitive-complexity": {
-      "count": 2
-    },
     "sonarjs/pseudo-random": {
-      "count": 1
-    },
-    "unicorn/no-non-function-verb-prefix": {
       "count": 1
     }
   },
@@ -244,17 +199,8 @@
     }
   },
   "src/shared/browserSupport.ts": {
-    "@typescript-eslint/no-unnecessary-condition": {
-      "count": 2
-    },
     "@typescript-eslint/prefer-nullish-coalescing": {
-      "count": 5
-    },
-    "complexity": {
       "count": 1
-    },
-    "jsdoc/require-jsdoc": {
-      "count": 2
     }
   },
   "src/shared/config/connection.ts": {
@@ -320,26 +266,6 @@
     },
     "jsdoc/require-jsdoc": {
       "count": 2
-    }
-  },
-  "src/shared/stats.ts": {
-    "@typescript-eslint/no-magic-numbers": {
-      "count": 2
-    },
-    "complexity": {
-      "count": 1
-    },
-    "jsdoc/require-jsdoc": {
-      "count": 1
-    },
-    "max-statements": {
-      "count": 1
-    },
-    "sonarjs/cognitive-complexity": {
-      "count": 1
-    },
-    "sonarjs/no-inverted-boolean-check": {
-      "count": 1
     }
   },
   "vite.config.ts": {
