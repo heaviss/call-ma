@@ -14,7 +14,7 @@ A change is done when `npm run lint`, `npm run typecheck`, `npm run test:coverag
 Rules are the strictest available, at wemake-python-styleguide level. Fix the code to satisfy a rule. When a line genuinely must break one, write `eslint-disable-next-line <rule> -- <reason>`.
 
 - `eslint-suppressions.json` freezes old ESLint violations per file and rule, and may only shrink. `eslint .` fails on a stale entry: after fixing a frozen violation, run `npx eslint . --prune-suppressions` and commit the shrunk file. Never add entries for new code, never use `--pass-on-unpruned-suppressions`.
-- Only `eslint-disable-next-line` with a `-- <reason>` is allowed; `npm run lint` fails on more than 10 `eslint-disable` comments. No `warn` level: every rule is `error` or `off`. Size and complexity thresholds apply to application code (`src/`, not tests).
+- Only `eslint-disable-next-line` with a `-- <reason>` is allowed; `npm run lint` fails on more than 10 `eslint-disable` comments. No `warn` level: every rule is `error` or `off`. Size and complexity thresholds apply to application code, tests and e2e alike; tests drop only `max-lines-per-function`, `no-magic-numbers` and `sonarjs/no-duplicate-string`. Tests also get `@vitest/eslint-plugin` `all` and e2e gets every `eslint-plugin-playwright` rule (exceptions in `eslint.config.js`).
 - `stylelint-suppressions.json` freezes old CSS violations and may only shrink. Stylelint 17 ignores stale entries, so CI runs `npm run lint:css:baseline`, which fails when the file would change. After fixing a frozen violation, run it locally and commit the shrunk file. Never add entries for new code.
 - Prettier owns formatting; linters must agree with it (hence the lowercase `<!doctype html>` in html-validate).
 
@@ -35,6 +35,8 @@ All code is TypeScript (`src/`, `e2e/`, `*.config.ts`); only `eslint.config.js` 
 - Adapter tests go through `src/__tests__/fakes/fakeRoom`; DOM and stream helpers (`getEl`, `fakeStream`, `makeNavigator`) live in `src/__tests__/fakes/dom`. `roomContract` runs the same checks against `FakeRoom` and a real offline Trystero room (`createStrategy` from `@trystero-p2p/core`), so the fake stays true to the library.
 - `vi.fn()` stands in for external dependencies only (`mediaDevices`, `clipboard`, `joinRoom`); everything else is a real object. `virtual:pwa-register` resolves to a stub in `src/__mocks__` via a Vitest alias.
 - Arrange / Act / Assert blocks are separated by blank lines.
+- Vitest globals are off: import `describe`, `it`, `expect`, `vi` and hooks from `'vitest'`. Wait for pending callbacks with `await setTimeout(ms)` from `node:timers/promises`, not `new Promise(r => setTimeout(r, ms))`. Give every `vi.fn` its function type: `vi.fn<Clipboard['writeText']>()`.
+- E2E locates elements by role or label (`getByRole`, `getByLabel`), never by CSS selector, and wraps tests in `test.describe`. Extra browser contexts come from a `test.extend` fixture, since hooks are banned.
 
 ## Agent skills
 
