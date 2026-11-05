@@ -5,13 +5,13 @@ import { checkSupport, mapMediaError } from '../shared/browserSupport.ts';
 import QRCode from 'qrcode';
 import { DirectAdapter, type PeerConnectionLike } from '../connection/directAdapter.ts';
 
-export interface AppWindow {
+interface AppWindow {
   location: Location;
   isSecureContext: boolean;
   RTCPeerConnection?: new (config: RTCConfiguration) => PeerConnectionLike;
 }
 
-export interface AppNavigator {
+interface AppNavigator {
   mediaDevices?: { getUserMedia?: MediaDevices['getUserMedia'] };
   clipboard?: Pick<Clipboard, 'writeText'>;
 }
