@@ -1,107 +1,71 @@
-import type { Mock } from 'vitest';
-
-import { JSDOM } from 'jsdom';
 import { setTimeout } from 'node:timers/promises';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-import type { JoinRoomLike } from '../connection/trysteroAdapter.ts';
+import { describe, expect, it } from 'vitest';
 
 import { initApp } from '../app/controller.ts';
-import { type FakeNavigator, fakeStream, getEl, makeNavigator } from './fakes/dom.ts';
-import { FakeRoom } from './fakes/fakeRoom.ts';
+import { setupCallPage } from './fakes/callPage.ts';
+import { fakeStream, getEl } from './fakes/dom.ts';
 
-
-function setupDomWithRoomId() {
-  const html = `<!doctype html><html><body>
-  <button id="createBtn">Create Conference</button>
-  <button id="copyBtn" disabled>Copy Link</button>
-  <video id="localVideo"></video>
-  <video id="remoteVideo"></video>
-  <div id="logs"></div>
-  </body></html>`;
-  return new JSDOM(html, { url: 'https://example.com/#abc12345' });
-}
+const SHARED_LINK = 'https://example.com/#abc12345';
 
 describe('auto-join flow (Person B opens shared link)', () => {
-  let fakeRoom: FakeRoom;
-  let fakeJoinRoom: Mock<JoinRoomLike>;
-  let navigatorLike: FakeNavigator;
-
-  beforeEach(() => {
-    fakeRoom = new FakeRoom();
-    fakeJoinRoom = vi.fn<JoinRoomLike>().mockReturnValue(fakeRoom);
-    navigatorLike = makeNavigator();
-  });
-
   it('auto-joins the room from URL hash without clicking Create', async () => {
     // Arrange
-    const dom = setupDomWithRoomId();
+    const { window, document, navigator, joinRoom } = setupCallPage(SHARED_LINK);
 
     // Act
-    const controller = initApp({
-      document: dom.window.document,
-      window: dom.window,
-      navigator: navigatorLike,
-      joinRoom: fakeJoinRoom,
-    });
+    const controller = initApp({ document, window, navigator, joinRoom });
     await setTimeout(0);
 
     // Assert
-    expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
-    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true, video: true });
-    expect(getEl<HTMLButtonElement>(dom.window.document, '#copyBtn').disabled).toBe(false);
+    expect(joinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
+    expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true, video: true });
+    expect(getEl<HTMLButtonElement>(document, '#copyBtn').disabled).toBe(false);
     expect(controller.state.link).toContain('#abc12345');
   });
 
   it('sets localVideo.srcObject on auto-join', async () => {
     // Arrange
+    const { window, document, navigator, joinRoom } = setupCallPage(SHARED_LINK);
     const localStream = fakeStream('local-stream');
-    navigatorLike.mediaDevices.getUserMedia.mockResolvedValue(localStream);
-    const dom = setupDomWithRoomId();
+    navigator.mediaDevices.getUserMedia.mockResolvedValue(localStream);
 
     // Act
-    initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    initApp({ document, window, navigator, joinRoom });
     await setTimeout(0);
 
     // Assert
-    expect(getEl<HTMLVideoElement>(dom.window.document, '#localVideo').srcObject).toBe(localStream);
+    expect(getEl<HTMLVideoElement>(document, '#localVideo').srcObject).toBe(localStream);
   });
 
   it('attaches remote stream to remoteVideo on auto-join', async () => {
     // Arrange
-    const dom = setupDomWithRoomId();
-    initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    const { window, document, navigator, joinRoom, room } = setupCallPage(SHARED_LINK);
+    initApp({ document, window, navigator, joinRoom });
     await setTimeout(0);
 
     // Act
     const remoteStream = fakeStream('remote-stream');
-    fakeRoom.simulatePeerStream(remoteStream, 'peer-1');
+    room.simulatePeerStream(remoteStream, 'peer-1');
 
     // Assert
-    expect(getEl<HTMLVideoElement>(dom.window.document, '#remoteVideo').srcObject).toBe(remoteStream);
+    expect(getEl<HTMLVideoElement>(document, '#remoteVideo').srcObject).toBe(remoteStream);
   });
 
-  it('does not auto-join when URL hash is not an 8-char room ID', async () => {
-    // Arrange — old v1.xxx SDP hash should not trigger auto-join
-    const dom = new JSDOM('<!doctype html><html><body><button id="createBtn"></button></body></html>', {
-      url: 'https://example.com/#v1.someLongSdpBase64EncodedBlob',
-    });
-
-    initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    await setTimeout(0);
-
-    expect(fakeJoinRoom).not.toHaveBeenCalled();
-  });
-
-  it('does not auto-join when there is no hash', async () => {
+  it.each([
+    [
+      'the hash is an old v1 SDP blob, not an 8-char room ID',
+      'https://example.com/#v1.someLongSdpBase64EncodedBlob',
+    ],
+    ['there is no hash', 'https://example.com/'],
+  ])('does not auto-join when %s', async (_case, url) => {
     // Arrange
-    const dom = new JSDOM('<!doctype html><html><body><button id="createBtn"></button></body></html>', {
-      url: 'https://example.com/',
-    });
+    const { window, document, navigator, joinRoom } = setupCallPage(url);
 
-    initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    // Act
+    initApp({ document, window, navigator, joinRoom });
     await setTimeout(0);
 
-    expect(fakeJoinRoom).not.toHaveBeenCalled();
+    // Assert
+    expect(joinRoom).not.toHaveBeenCalled();
   });
 });

@@ -27,39 +27,18 @@
   "src/__tests__/create-flow.test.ts": {
     "max-statements": {
       "count": 1
-    },
-    "unicorn/no-non-function-verb-prefix": {
-      "count": 1
     }
   },
   "src/__tests__/direct-flow.test.ts": {
-    "@typescript-eslint/require-await": {
-      "count": 5
-    },
     "id-denylist": {
       "count": 2
     },
-    "max-lines": {
-      "count": 1
-    },
     "max-statements": {
-      "count": 4
-    },
-    "no-restricted-syntax": {
       "count": 1
     }
   },
   "src/__tests__/directAdapter.test.ts": {
-    "@typescript-eslint/no-empty-function": {
-      "count": 1
-    },
-    "@typescript-eslint/require-await": {
-      "count": 6
-    },
     "max-statements": {
-      "count": 1
-    },
-    "no-restricted-syntax": {
       "count": 1
     }
   },
@@ -137,7 +116,7 @@
       "count": 1
     },
     "max-statements": {
-      "count": 3
+      "count": 1
     }
   },
   "src/__tests__/ui.test.ts": {

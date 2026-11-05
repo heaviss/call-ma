@@ -81,7 +81,7 @@ npm run lint:css      # CSS only (stylelint, baseline in stylelint-suppressions.
 npm run lint:html     # HTML only (html-validate)
 npm run lint:disable-limit # Fails on more than 10 eslint-disable comments
 npm run lint:knip     # Unused files, exports and dependencies (knip)
-npm run lint:dup      # Copy-paste detection in app code and e2e (jscpd, max 5 %)
+npm run lint:dup      # Copy-paste detection in app code, tests and e2e (jscpd, max 5 %)
 npm run format        # Prettier write
 npm run format:check  # Prettier check
 npm run test:coverage # Tests with branch/line coverage report

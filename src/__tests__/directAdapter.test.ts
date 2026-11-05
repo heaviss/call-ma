@@ -2,53 +2,19 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DirectAdapter } from '../connection/directAdapter.ts';
 import { fakeStream as makeStream } from './fakes/dom.ts';
-
-class FakePeerConnection {
-  localDescription: RTCSessionDescriptionInit | null = null;
-  remoteDescription: { type: RTCSdpType; sdp: string | undefined } | null = null;
-  iceGatheringState: RTCIceGatheringState = 'new';
-  connectionState: RTCPeerConnectionState = 'new';
-  onicegatheringstatechange: (() => void) | null = null;
-  onconnectionstatechange: (() => void) | null = null;
-  ontrack: ((event: { streams: readonly MediaStream[] }) => void) | null = null;
-  tracks: { track: MediaStreamTrack; stream: MediaStream }[] = [];
-
-  addTrack(track: MediaStreamTrack, stream: MediaStream): void { this.tracks.push({ track, stream }); }
-
-  async createOffer(): Promise<RTCSessionDescriptionInit> { return { type: 'offer', sdp: 'v=0\r\nfake-offer' }; }
-  async createAnswer(): Promise<RTCSessionDescriptionInit> { return { type: 'answer', sdp: 'v=0\r\nfake-answer' }; }
-
-  async setLocalDescription(desc: RTCSessionDescriptionInit): Promise<void> {
-    this.localDescription = desc;
-    this.iceGatheringState = 'complete';
-    this.onicegatheringstatechange?.();
-  }
-
-  async setRemoteDescription(desc: RTCSessionDescriptionInit): Promise<void> {
-    this.remoteDescription = { type: desc.type, sdp: desc.sdp };
-  }
-
-  close(): void {}
-
-  // Test helpers
-  simulateTrack(stream: MediaStream): void { this.ontrack?.({ streams: [stream] }); }
-  simulateConnected(): void {
-    this.connectionState = 'connected';
-    this.onconnectionstatechange?.();
-  }
-  simulateFailed(): void {
-    this.connectionState = 'failed';
-    this.onconnectionstatechange?.();
-  }
-}
+import {
+  type FakePeerConnection,
+  makePeerConnection,
+  stubPeerConnection,
+} from './fakes/peerConnection.ts';
 
 function fakeStream(id = 'stream-1'): MediaStream {
   return makeStream(id, [{ kind: 'video', id }]);
 }
 
-// Must be a regular function (not arrow) so it works with `new`.
-function stubPeerConnection(pc: FakePeerConnection) {
-  return vi.fn<() => FakePeerConnection>(function () { return pc; });
+function makePeer(): { pc: FakePeerConnection; adapter: DirectAdapter } {
+  const pc = makePeerConnection();
+  return { pc, adapter: new DirectAdapter({ PeerConnection: () => pc }) };
 }
 
 describe('DirectAdapter', () => {
@@ -56,8 +22,7 @@ describe('DirectAdapter', () => {
   let adapter: DirectAdapter;
 
   beforeEach(() => {
-    pc = new FakePeerConnection();
-    adapter = new DirectAdapter({ PeerConnection: () => pc });
+    ({ pc, adapter } = makePeer());
   });
 
   describe('createOffer', () => {
@@ -86,10 +51,12 @@ describe('DirectAdapter', () => {
   describe('createAnswer', () => {
     it('returns an encoded answer string', async () => {
       const offerEncoded = await adapter.createOffer(fakeStream());
-      const pc2 = new FakePeerConnection();
-      const answerAdapter = new DirectAdapter({ PeerConnection: () => pc2 });
+      const answerer = makePeer();
 
-      const answerEncoded = await answerAdapter.createAnswer(offerEncoded, fakeStream('stream-2'));
+      const answerEncoded = await answerer.adapter.createAnswer(
+        offerEncoded,
+        fakeStream('stream-2'),
+      );
 
       expect(answerEncoded).toBeTypeOf('string');
       expect(answerEncoded.length).toBeGreaterThan(0);
@@ -97,21 +64,21 @@ describe('DirectAdapter', () => {
 
     it('sets the offer as remote description before answering', async () => {
       const offerEncoded = await adapter.createOffer(fakeStream());
-      const pc2 = new FakePeerConnection();
-      const answerAdapter = new DirectAdapter({ PeerConnection: () => pc2 });
+      const answerer = makePeer();
 
-      await answerAdapter.createAnswer(offerEncoded, fakeStream('stream-2'));
+      await answerer.adapter.createAnswer(offerEncoded, fakeStream('stream-2'));
 
-      expect(pc2.remoteDescription?.type).toBe('offer');
+      expect(answerer.pc.remoteDescription?.type).toBe('offer');
     });
   });
 
   describe('applyAnswer', () => {
     it('sets the answer as remote description on the initiator side', async () => {
       const offerEncoded = await adapter.createOffer(fakeStream());
-      const pc2 = new FakePeerConnection();
-      const answerAdapter = new DirectAdapter({ PeerConnection: () => pc2 });
-      const answerEncoded = await answerAdapter.createAnswer(offerEncoded, fakeStream('stream-2'));
+      const answerEncoded = await makePeer().adapter.createAnswer(
+        offerEncoded,
+        fakeStream('stream-2'),
+      );
 
       await adapter.applyAnswer(answerEncoded);
 
@@ -150,7 +117,7 @@ describe('DirectAdapter', () => {
       adapter.onConnect(onConnect);
 
       await adapter.createOffer(fakeStream());
-      pc.simulateConnected();
+      pc.simulateConnectionState('connected');
 
       expect(onConnect).toHaveBeenCalledExactlyOnceWith();
     });
@@ -165,7 +132,10 @@ describe('DirectAdapter', () => {
   describe('ICE gathering timeout', () => {
     it('resolves after 5 s if ICE gathering never completes', async () => {
       vi.useFakeTimers();
-      pc.setLocalDescription = async (desc: RTCSessionDescriptionInit) => { pc.localDescription = desc; }; // never fires event
+      pc.setLocalDescription = (desc) => {
+        pc.localDescription = desc; // never fires the gathering event
+        return Promise.resolve();
+      };
 
       const offerPromise = adapter.createOffer(fakeStream());
       vi.advanceTimersByTime(5000);
@@ -177,10 +147,11 @@ describe('DirectAdapter', () => {
 
     it('keeps waiting while ICE gathering is still in progress', async () => {
       vi.useFakeTimers();
-      pc.setLocalDescription = async (desc: RTCSessionDescriptionInit) => {
+      pc.setLocalDescription = (desc) => {
         pc.localDescription = desc;
         pc.iceGatheringState = 'gathering';
         pc.onicegatheringstatechange?.();
+        return Promise.resolve();
       };
 
       const offerPromise = adapter.createOffer(fakeStream());
@@ -209,7 +180,7 @@ describe('DirectAdapter', () => {
       adapter.onError(onError);
 
       await adapter.createOffer(fakeStream());
-      pc.simulateFailed();
+      pc.simulateConnectionState('failed');
 
       expect(onError).toHaveBeenCalledExactlyOnceWith(expect.any(Error));
     });
@@ -217,14 +188,15 @@ describe('DirectAdapter', () => {
 
   describe('default PeerConnection factory', () => {
     it('falls back to globalThis.RTCPeerConnection when none is provided', async () => {
-      const fakePc = new FakePeerConnection();
-      const FakeRTC = stubPeerConnection(fakePc);
+      const FakeRTC = stubPeerConnection(makePeerConnection());
       vi.stubGlobal('RTCPeerConnection', FakeRTC);
 
       const defaultAdapter = new DirectAdapter({ iceServers: [{ urls: 'stun:stun.example.com' }] });
       const encoded = await defaultAdapter.createOffer(fakeStream());
 
-      expect(FakeRTC).toHaveBeenCalledExactlyOnceWith({ iceServers: [{ urls: 'stun:stun.example.com' }] });
+      expect(FakeRTC).toHaveBeenCalledExactlyOnceWith({
+        iceServers: [{ urls: 'stun:stun.example.com' }],
+      });
       expect(encoded).toBeTypeOf('string');
 
       vi.unstubAllGlobals();

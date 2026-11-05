@@ -18,7 +18,7 @@ Rules are the strictest available, at wemake-python-styleguide level. Fix the co
 - `stylelint-suppressions.json` freezes old CSS violations and may only shrink. Stylelint 17 ignores stale entries, so CI runs `npm run lint:css:baseline`, which fails when the file would change. After fixing a frozen violation, run it locally and commit the shrunk file. Never add entries for new code.
 - Prettier owns formatting; linters must agree with it (hence the lowercase `<!doctype html>` in html-validate).
 - knip runs without a config, on its Vite/Vitest/Playwright plugins. Export only what another module imports; drop unused deps instead of ignoring them.
-- jscpd checks app code and `e2e/` only; tests are excluded for now.
+- jscpd checks app code, tests and `e2e/` at the same 5 % threshold. Move a repeated arrange block into `src/__tests__/fakes/`.
 
 ## TypeScript
 
@@ -34,7 +34,7 @@ All code is TypeScript (`src/`, `e2e/`, `*.config.ts`); only `eslint.config.js` 
 ## Tests
 
 - Integration tests build a `JSDOM` and inject it into `initApp`. Tests of pure functions use no DOM.
-- Adapter tests go through `src/__tests__/fakes/fakeRoom`; DOM and stream helpers (`getEl`, `fakeStream`, `makeNavigator`) live in `src/__tests__/fakes/dom`. `roomContract` runs the same checks against `FakeRoom` and a real offline Trystero room (`createStrategy` from `@trystero-p2p/core`), so the fake stays true to the library.
+- Adapter tests go through `src/__tests__/fakes/fakeRoom` (`FakeRoom`, `fakeTransport`); DOM and stream helpers (`getEl`, `fakeStream`, `makeNavigator`) live in `src/__tests__/fakes/dom`. `fakes/callPage` builds the pages for `initApp` (`setupCallPage`, `makeDirectDom`) and `clickAndSettle`; `fakes/peerConnection` holds the RTCPeerConnection fake for Direct mode. Helpers hide setup, never assertions. `roomContract` runs the same checks against `FakeRoom` and a real offline Trystero room (`createStrategy` from `@trystero-p2p/core`), so the fake stays true to the library.
 - `vi.fn()` stands in for external dependencies only (`mediaDevices`, `clipboard`, `joinRoom`); everything else is a real object. `virtual:pwa-register` resolves to a stub in `src/__mocks__` via a Vitest alias.
 - Arrange / Act / Assert blocks are separated by blank lines.
 - Vitest globals are off: import `describe`, `it`, `expect`, `vi` and hooks from `'vitest'`. Wait for pending callbacks with `await setTimeout(ms)` from `node:timers/promises`, not `new Promise(r => setTimeout(r, ms))`. Give every `vi.fn` its function type: `vi.fn<Clipboard['writeText']>()`.
