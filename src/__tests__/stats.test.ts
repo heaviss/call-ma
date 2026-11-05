@@ -6,6 +6,11 @@ function makeReport(entries: StatsEntry[]): Map<string, StatsEntry> {
   return new Map(entries.map((e) => [e.id, e]));
 }
 
+// A report with one inbound video entry that has received `bytesReceived` so far.
+function videoBytes(id: string, bytesReceived: number): Map<string, StatsEntry> {
+  return makeReport([{ id, type: 'inbound-rtp', mediaType: 'video', bytesReceived }]);
+}
+
 describe('deriveMetrics', () => {
   it('returns all nulls for an empty report', () => {
     expect(deriveMetrics(new Map())).toStrictEqual({ rtt: null, bitrate: null, frameRate: null });
@@ -73,12 +78,8 @@ describe('deriveMetrics', () => {
 
   describe('bitrate', () => {
     it('computes bitrate in kbps from two consecutive reports', () => {
-      const prev = makeReport([
-        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
-      ]);
-      const curr = makeReport([
-        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
-      ]);
+      const prev = videoBytes('r1', 1000);
+      const curr = videoBytes('r1', 2000);
 
       const { bitrate } = deriveMetrics(curr, prev, 1000);
 
@@ -86,31 +87,21 @@ describe('deriveMetrics', () => {
     });
 
     it('returns null bitrate when no prevReport is provided', () => {
-      const report = makeReport([
-        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 500 },
-      ]);
+      const report = videoBytes('r1', 500);
 
       expect(deriveMetrics(report).bitrate).toBeNull();
     });
 
     it('returns null bitrate when timeDeltaMs is zero', () => {
-      const prev = makeReport([
-        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
-      ]);
-      const curr = makeReport([
-        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
-      ]);
+      const prev = videoBytes('r1', 1000);
+      const curr = videoBytes('r1', 2000);
 
       expect(deriveMetrics(curr, prev, 0).bitrate).toBeNull();
     });
 
     it('returns null bitrate when the previous report lacks the entry', () => {
-      const prev = makeReport([
-        { id: 'other', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
-      ]);
-      const curr = makeReport([
-        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
-      ]);
+      const prev = videoBytes('other', 1000);
+      const curr = videoBytes('r1', 2000);
 
       const { bitrate } = deriveMetrics(curr, prev, 1000);
 

@@ -2,28 +2,16 @@ import type { DOMWindow } from 'jsdom';
 import type { Mock } from 'vitest';
 
 import { JSDOM } from 'jsdom';
-import { setTimeout } from 'node:timers/promises';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { JoinRoomLike } from '../connection/trysteroAdapter.ts';
+import type { FakeRoom } from './fakes/fakeRoom.ts';
 
 import { initApp } from '../app/controller.ts';
+import { clickAndSettle, setupCallPage } from './fakes/callPage.ts';
 import { type FakeNavigator, fakeStream, getEl, makeNavigator } from './fakes/dom.ts';
-import { FakeRoom } from './fakes/fakeRoom.ts';
-
-function setupDom() {
-  const html = `<!doctype html><html><body>
-  <button id="createBtn">Create Conference</button>
-  <button id="copyBtn" disabled>Copy Link</button>
-  <video id="localVideo"></video>
-  <video id="remoteVideo"></video>
-  <div id="logs"></div>
-  </body></html>`;
-  return new JSDOM(html, { url: 'https://example.com/' });
-}
 
 describe('create conference flow (integration, jsdom)', () => {
-  let dom: JSDOM;
   let window: DOMWindow;
   let document: Document;
   let navigatorLike: FakeNavigator;
@@ -31,12 +19,13 @@ describe('create conference flow (integration, jsdom)', () => {
   let fakeJoinRoom: Mock<JoinRoomLike>;
 
   beforeEach(() => {
-    dom = setupDom();
-    window = dom.window;
-    document = dom.window.document;
-    fakeRoom = new FakeRoom();
-    fakeJoinRoom = vi.fn<JoinRoomLike>().mockReturnValue(fakeRoom);
-    navigatorLike = makeNavigator();
+    ({
+      window,
+      document,
+      navigator: navigatorLike,
+      room: fakeRoom,
+      joinRoom: fakeJoinRoom,
+    } = setupCallPage());
   });
 
   it('clicking Create gets media, joins a room, and enables the copy button', async () => {
@@ -47,12 +36,10 @@ describe('create conference flow (integration, jsdom)', () => {
       navigator: navigatorLike,
       joinRoom: fakeJoinRoom,
     });
-    const createBtn = getEl<HTMLButtonElement>(document, '#createBtn');
     const copyBtn = getEl<HTMLButtonElement>(document, '#copyBtn');
 
     // Act
-    createBtn.click();
-    await setTimeout(0);
+    await clickAndSettle(document, '#createBtn');
 
     // Assert
     expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalledWith({
@@ -75,8 +62,7 @@ describe('create conference flow (integration, jsdom)', () => {
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
 
     // Act
-    getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await setTimeout(0);
+    await clickAndSettle(document, '#createBtn');
 
     // Assert
     expect(getEl<HTMLVideoElement>(document, '#localVideo').srcObject).toBe(localStream);
@@ -85,8 +71,7 @@ describe('create conference flow (integration, jsdom)', () => {
   it('attaches remote stream to remoteVideo when a peer sends their stream', async () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await setTimeout(0);
+    await clickAndSettle(document, '#createBtn');
 
     // Act
     const remoteStream = fakeStream('remote-stream');
@@ -99,8 +84,7 @@ describe('create conference flow (integration, jsdom)', () => {
   it('logs "Peer joined" when a peer connects', async () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await setTimeout(0);
+    await clickAndSettle(document, '#createBtn');
 
     // Act
     fakeRoom.simulatePeerJoin('peer-1');
@@ -112,8 +96,9 @@ describe('create conference flow (integration, jsdom)', () => {
   it('room URL is shared with the same appId across calls', async () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await setTimeout(0);
+
+    // Act
+    await clickAndSettle(document, '#createBtn');
 
     // Assert — appId is consistent
     expect(fakeJoinRoom.mock.calls[0]?.[0]).toStrictEqual({ appId: 'call-ma' });
@@ -122,13 +107,11 @@ describe('create conference flow (integration, jsdom)', () => {
   it('copies the link and logs confirmation when copy button is clicked after creating a room', async () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await setTimeout(0);
+    await clickAndSettle(document, '#createBtn');
+    navigatorLike.clipboard.writeText.mockResolvedValue(undefined);
 
     // Act
-    navigatorLike.clipboard.writeText.mockResolvedValue(undefined);
-    getEl<HTMLButtonElement>(document, '#copyBtn').click();
-    await setTimeout(0);
+    await clickAndSettle(document, '#copyBtn');
 
     // Assert
     expect(navigatorLike.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('#'));
@@ -139,12 +122,10 @@ describe('create conference flow (integration, jsdom)', () => {
     // Arrange — navigator without clipboard
     const noClipboardNavigator = { mediaDevices: makeNavigator(fakeStream('stream')).mediaDevices };
     initApp({ document, window, navigator: noClipboardNavigator, joinRoom: fakeJoinRoom });
-    getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await setTimeout(0);
+    await clickAndSettle(document, '#createBtn');
 
     // Act
-    getEl<HTMLButtonElement>(document, '#copyBtn').click();
-    await setTimeout(0);
+    await clickAndSettle(document, '#copyBtn');
 
     // Assert
     expect(getEl(document, '#logs').textContent).toMatch(/could not copy/i);
