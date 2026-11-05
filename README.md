@@ -1,6 +1,6 @@
 # call-ma
 
-A minimalist peer-to-peer WebRTC video call app. Signaling uses [Trystero](https://github.com/dmotz/trystero) over four transports racing in parallel — MQTT, BitTorrent, Nostr, and IPFS (via Waku) — whichever connects first wins; duplicate streams from the same peer are discarded. No server or account required.
+A minimalist peer-to-peer WebRTC video call app in TypeScript. Signaling uses [Trystero](https://github.com/dmotz/trystero) over four transports racing in parallel — MQTT, BitTorrent, Nostr, and IPFS (via Waku) — whichever connects first wins; duplicate streams from the same peer are discarded. No server or account required.
 
 ![Coverage](https://heaviss.github.io/call-ma/coverage-badge.svg)
 
@@ -25,7 +25,7 @@ No server stores anything. Stats (RTT, bitrate, FPS) are shown in the Logs panel
 
 ## ICE servers and relays
 
-All connection settings live in `src/shared/config/connection.js`. One ICE server list is used by every transport and by direct mode; it replaces Trystero's built-in defaults.
+All connection settings live in `src/shared/config/connection.ts`. One ICE server list is used by every transport and by direct mode; it replaces Trystero's built-in defaults.
 
 Default STUN servers: `stun.l.google.com:19302`, plus `stun.nextcloud.com:3478`, `stun.sonetel.com`, `stun.telnyx.com` (reachable from Russia, where Google STUN is blocked).
 
@@ -74,7 +74,8 @@ VITE_BASE=/call-ma/ npm run build
 ## Development
 
 ```bash
-npm run lint          # ESLint (JS + HTML) + Stylelint (CSS) + html-validate
+npm run lint          # ESLint (TS + HTML) + Stylelint (CSS) + html-validate
+npm run typecheck     # tsc --noEmit (strict, see tsconfig.json)
 npm run lint:fix      # Auto-fix
 npm run lint:css      # CSS only (stylelint, baseline in stylelint-suppressions.json)
 npm run lint:html     # HTML only (html-validate)
@@ -86,5 +87,5 @@ npm run test:e2e      # Playwright e2e tests (run `npx playwright install --with
 
 Run a single test file:
 ```bash
-npx vitest run src/__tests__/trysteroAdapter.test.js
+npx vitest run src/__tests__/trysteroAdapter.test.ts
 ```
