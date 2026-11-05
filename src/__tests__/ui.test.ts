@@ -28,7 +28,9 @@ describe('UI Skeleton', () => {
     // Act
 
     // Assert
-    const required = ['#createBtn', '#copyBtn', '#localVideo', '#remoteVideo', '#logs'].map((selector) => document.querySelector(selector));
+    const required = ['#createBtn', '#copyBtn', '#localVideo', '#remoteVideo', '#logs'].map(
+      (selector) => document.querySelector(selector),
+    );
 
     expect(required).not.toContain(null);
     expect(document.querySelector('#inviteInput')).toBeNull();

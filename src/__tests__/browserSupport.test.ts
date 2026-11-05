@@ -11,7 +11,7 @@ function fakeEnv(overrides: FakeEnvOverrides = {}): SupportEnv {
   return {
     window: { isSecureContext: true, ...overrides.window },
     navigator: { mediaDevices: {}, ...overrides.navigator },
-    RTCPeerConnection () {},
+    RTCPeerConnection() {},
     ...overrides,
   };
 }

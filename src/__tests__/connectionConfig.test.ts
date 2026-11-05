@@ -20,16 +20,24 @@ describe('getConnectionConfig — ICE servers', () => {
 
     const { iceServers } = getConnectionConfig({ env, searchParams: noParams });
 
-    expect(iceServers).toStrictEqual([{ urls: 'stun:a.example.com:3478' }, { urls: 'stun:b.example.com' }]);
+    expect(iceServers).toStrictEqual([
+      { urls: 'stun:a.example.com:3478' },
+      { urls: 'stun:b.example.com' },
+    ]);
   });
 
   it('lets ?stun= override VITE_STUN_SERVERS', () => {
     const env = { VITE_STUN_SERVERS: 'stun:env.example.com' };
-    const searchParams = new URLSearchParams('stun=stun:url.example.com&stun=stun:url2.example.com');
+    const searchParams = new URLSearchParams(
+      'stun=stun:url.example.com&stun=stun:url2.example.com',
+    );
 
     const { iceServers } = getConnectionConfig({ env, searchParams });
 
-    expect(iceServers).toStrictEqual([{ urls: 'stun:url.example.com' }, { urls: 'stun:url2.example.com' }]);
+    expect(iceServers).toStrictEqual([
+      { urls: 'stun:url.example.com' },
+      { urls: 'stun:url2.example.com' },
+    ]);
   });
 
   it('ignores ?stun= entries that are not STUN URLs', () => {
@@ -87,8 +95,13 @@ describe('getConnectionConfig — relays', () => {
   });
 
   it('lets URL params override env relays', () => {
-    const env = { VITE_MQTT_RELAYS: 'wss://env.example.com', VITE_TORRENT_TRACKERS: 'wss://env-t.example.com' };
-    const searchParams = new URLSearchParams('mqttRelay=wss://url.example.com&torrentTracker=wss://url-t.example.com');
+    const env = {
+      VITE_MQTT_RELAYS: 'wss://env.example.com',
+      VITE_TORRENT_TRACKERS: 'wss://env-t.example.com',
+    };
+    const searchParams = new URLSearchParams(
+      'mqttRelay=wss://url.example.com&torrentTracker=wss://url-t.example.com',
+    );
 
     const config = getConnectionConfig({ env, searchParams });
 

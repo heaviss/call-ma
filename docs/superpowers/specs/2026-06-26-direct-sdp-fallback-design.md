@@ -80,7 +80,7 @@ export function parseDirectUrl(url)
   <button id="directCopyBtn" type="button" disabled>Copy link</button>
   <label>
     Paste their response link:
-    <input id="directAnswerInput" type="url" placeholder="https://…#answer=…">
+    <input id="directAnswerInput" type="url" placeholder="https://…#answer=…" />
   </label>
   <button id="directConnectBtn" type="button" disabled>Connect</button>
 </section>
@@ -107,11 +107,11 @@ QR rendering: `import QRCode from 'qrcode'`, render to `#directQr` canvas.
 
 ## URL scheme
 
-| Hash pattern | Meaning |
-|---|---|
+| Hash pattern                   | Meaning                  |
+| ------------------------------ | ------------------------ |
 | `#a1b2c3d8` (8 alphanum chars) | Trystero room (existing) |
-| `#offer=<base64url>` | Direct mode — SDP offer |
-| `#answer=<base64url>` | Direct mode — SDP answer |
+| `#offer=<base64url>`           | Direct mode — SDP offer  |
+| `#answer=<base64url>`          | Direct mode — SDP answer |
 
 `buildRoomUrl` and `getRoomIdFromUrl` are unchanged.
 
@@ -157,22 +157,22 @@ QR rendering: `import QRCode from 'qrcode'`, render to `#directQr` canvas.
 
 ## Error handling
 
-| Scenario | Behaviour |
-|---|---|
-| `CompressionStream` unavailable | `encodeSdp` throws; controller logs warning and hides the "Try directly" button |
-| ICE gathering timeout (5 s) | Proceeds with host-only candidates; logs "STUN unreachable, LAN-only" |
-| Invalid / missing SDP in URL | `parseDirectUrl` returns `null`; treated as no hash |
-| `#answer=…` opened directly | Show "Paste this link where the call was created" |
-| `applyAnswer` before `createOffer` | Throws `Error('no pending offer')` |
-| `qrcode` render failure | Log error; "Copy link" button still works |
+| Scenario                           | Behaviour                                                                       |
+| ---------------------------------- | ------------------------------------------------------------------------------- |
+| `CompressionStream` unavailable    | `encodeSdp` throws; controller logs warning and hides the "Try directly" button |
+| ICE gathering timeout (5 s)        | Proceeds with host-only candidates; logs "STUN unreachable, LAN-only"           |
+| Invalid / missing SDP in URL       | `parseDirectUrl` returns `null`; treated as no hash                             |
+| `#answer=…` opened directly        | Show "Paste this link where the call was created"                               |
+| `applyAnswer` before `createOffer` | Throws `Error('no pending offer')`                                              |
+| `qrcode` render failure            | Log error; "Copy link" button still works                                       |
 
 ## Tests
 
-| File | What it covers |
-|---|---|
-| `src/__tests__/sdp.test.js` | `encodeSdp`/`decodeSdp` roundtrip; invalid input; `CompressionStream` absent |
+| File                                  | What it covers                                                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `src/__tests__/sdp.test.js`           | `encodeSdp`/`decodeSdp` roundtrip; invalid input; `CompressionStream` absent                                                     |
 | `src/__tests__/directAdapter.test.js` | `FakePeerConnection` stub; `createOffer`, `createAnswer`, `applyAnswer`; ICE timeout; `onStream`/`onConnect`/`onError` callbacks |
-| `src/__tests__/link.test.js` | `buildDirectUrl`, `parseDirectUrl` (extend existing file) |
-| `src/__tests__/direct-flow.test.js` | Integration: initiator + receiver via JSDOM; both `onStream` callbacks fire |
+| `src/__tests__/link.test.js`          | `buildDirectUrl`, `parseDirectUrl` (extend existing file)                                                                        |
+| `src/__tests__/direct-flow.test.js`   | Integration: initiator + receiver via JSDOM; both `onStream` callbacks fire                                                      |
 
 Test patterns follow existing conventions: `FakeRoom`-style stubs, `vi.fn()` for external deps, Arrange/Act/Assert blocks.

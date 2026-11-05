@@ -10,7 +10,6 @@ import { initApp } from '../app/controller.ts';
 import { type FakeNavigator, fakeStream, getEl, makeNavigator } from './fakes/dom.ts';
 import { FakeRoom } from './fakes/fakeRoom.ts';
 
-
 function setupDomWithRoomId() {
   const html = `<!doctype html><html><body>
   <button id="createBtn">Create Conference</button>
@@ -48,7 +47,10 @@ describe('auto-join flow (Person B opens shared link)', () => {
 
     // Assert
     expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
-    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true, video: true });
+    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalledWith({
+      audio: true,
+      video: true,
+    });
     expect(getEl<HTMLButtonElement>(dom.window.document, '#copyBtn').disabled).toBe(false);
     expect(controller.state.link).toContain('#abc12345');
   });
@@ -60,7 +62,12 @@ describe('auto-join flow (Person B opens shared link)', () => {
     const dom = setupDomWithRoomId();
 
     // Act
-    initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    initApp({
+      document: dom.window.document,
+      window: dom.window,
+      navigator: navigatorLike,
+      joinRoom: fakeJoinRoom,
+    });
     await setTimeout(0);
 
     // Assert
@@ -70,7 +77,12 @@ describe('auto-join flow (Person B opens shared link)', () => {
   it('attaches remote stream to remoteVideo on auto-join', async () => {
     // Arrange
     const dom = setupDomWithRoomId();
-    initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    initApp({
+      document: dom.window.document,
+      window: dom.window,
+      navigator: navigatorLike,
+      joinRoom: fakeJoinRoom,
+    });
     await setTimeout(0);
 
     // Act
@@ -78,16 +90,26 @@ describe('auto-join flow (Person B opens shared link)', () => {
     fakeRoom.simulatePeerStream(remoteStream, 'peer-1');
 
     // Assert
-    expect(getEl<HTMLVideoElement>(dom.window.document, '#remoteVideo').srcObject).toBe(remoteStream);
+    expect(getEl<HTMLVideoElement>(dom.window.document, '#remoteVideo').srcObject).toBe(
+      remoteStream,
+    );
   });
 
   it('does not auto-join when URL hash is not an 8-char room ID', async () => {
     // Arrange — old v1.xxx SDP hash should not trigger auto-join
-    const dom = new JSDOM('<!doctype html><html><body><button id="createBtn"></button></body></html>', {
-      url: 'https://example.com/#v1.someLongSdpBase64EncodedBlob',
-    });
+    const dom = new JSDOM(
+      '<!doctype html><html><body><button id="createBtn"></button></body></html>',
+      {
+        url: 'https://example.com/#v1.someLongSdpBase64EncodedBlob',
+      },
+    );
 
-    initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    initApp({
+      document: dom.window.document,
+      window: dom.window,
+      navigator: navigatorLike,
+      joinRoom: fakeJoinRoom,
+    });
     await setTimeout(0);
 
     expect(fakeJoinRoom).not.toHaveBeenCalled();
@@ -95,11 +117,19 @@ describe('auto-join flow (Person B opens shared link)', () => {
 
   it('does not auto-join when there is no hash', async () => {
     // Arrange
-    const dom = new JSDOM('<!doctype html><html><body><button id="createBtn"></button></body></html>', {
-      url: 'https://example.com/',
-    });
+    const dom = new JSDOM(
+      '<!doctype html><html><body><button id="createBtn"></button></body></html>',
+      {
+        url: 'https://example.com/',
+      },
+    );
 
-    initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    initApp({
+      document: dom.window.document,
+      window: dom.window,
+      navigator: navigatorLike,
+      joinRoom: fakeJoinRoom,
+    });
     await setTimeout(0);
 
     expect(fakeJoinRoom).not.toHaveBeenCalled();

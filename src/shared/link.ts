@@ -36,7 +36,10 @@ export function getRoomIdFromUrl(url: string): string | null {
   }
 }
 
-export async function copyToClipboard(navigatorLike: ClipboardNavigatorLike | null | undefined, text: string) {
+export async function copyToClipboard(
+  navigatorLike: ClipboardNavigatorLike | null | undefined,
+  text: string,
+) {
   try {
     if (navigatorLike?.clipboard?.writeText) {
       await navigatorLike.clipboard.writeText(text);
@@ -48,7 +51,11 @@ export async function copyToClipboard(navigatorLike: ClipboardNavigatorLike | nu
   return false;
 }
 
-export function buildDirectUrl(locationLike: LocationLike, type: DirectLinkType, encoded: string): string {
+export function buildDirectUrl(
+  locationLike: LocationLike,
+  type: DirectLinkType,
+  encoded: string,
+): string {
   return `${base(locationLike)}#${type}=${encoded}`;
 }
 
@@ -56,7 +63,9 @@ export function parseDirectUrl(url: string): DirectLink | null {
   try {
     const params = new URLSearchParams(new URL(url).hash.slice(1));
     const type = DIRECT_LINK_TYPES.find((t) => params.has(t)) ?? null;
-    if (!type) { return null; }
+    if (!type) {
+      return null;
+    }
     const encoded = params.get(type);
     return encoded ? { type, encoded } : null;
   } catch {

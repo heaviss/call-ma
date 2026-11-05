@@ -5,7 +5,12 @@ import { setTimeout } from 'node:timers/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { initApp } from '../app/controller.ts';
-import { type FakeNavigator, fakeStream, getEl, makeNavigator as makeFakeNavigator } from './fakes/dom.ts';
+import {
+  type FakeNavigator,
+  fakeStream,
+  getEl,
+  makeNavigator as makeFakeNavigator,
+} from './fakes/dom.ts';
 
 // eslint-disable-next-line vitest/prefer-import-in-mock -- the typed import() form checks the factory against @types/qrcode, whose overloaded toCanvas cannot be expressed as a Mock
 vi.mock('qrcode', () => ({ toCanvas: vi.fn<() => Promise<void>>().mockResolvedValue(undefined) }));
@@ -19,16 +24,26 @@ class FakePeerConnection {
   onicegatheringstatechange: (() => void) | null = null;
   onconnectionstatechange: (() => void) | null = null;
   ontrack: ((event: { streams: readonly MediaStream[] }) => void) | null = null;
-  addTrack(track: MediaStreamTrack, stream: MediaStream): void { this.#tracks.push({ track, stream }); }
-  async createOffer(): Promise<RTCSessionDescriptionInit> { return { type: 'offer', sdp: 'v=0\r\nfake-offer' }; }
-  async createAnswer(): Promise<RTCSessionDescriptionInit> { return { type: 'answer', sdp: 'v=0\r\nfake-answer' }; }
+  addTrack(track: MediaStreamTrack, stream: MediaStream): void {
+    this.#tracks.push({ track, stream });
+  }
+  async createOffer(): Promise<RTCSessionDescriptionInit> {
+    return { type: 'offer', sdp: 'v=0\r\nfake-offer' };
+  }
+  async createAnswer(): Promise<RTCSessionDescriptionInit> {
+    return { type: 'answer', sdp: 'v=0\r\nfake-answer' };
+  }
   async setLocalDescription(desc: RTCSessionDescriptionInit): Promise<void> {
     this.localDescription = desc;
     this.iceGatheringState = 'complete';
     this.onicegatheringstatechange?.();
   }
-  async setRemoteDescription(desc: RTCSessionDescriptionInit): Promise<void> { this.remoteDescription = { type: desc.type, sdp: desc.sdp }; }
-  simulateTrack(stream: MediaStream): void { this.ontrack?.({ streams: [stream] }); }
+  async setRemoteDescription(desc: RTCSessionDescriptionInit): Promise<void> {
+    this.remoteDescription = { type: desc.type, sdp: desc.sdp };
+  }
+  simulateTrack(stream: MediaStream): void {
+    this.ontrack?.({ streams: [stream] });
+  }
 }
 
 function makeDOM(url = 'https://example.com/'): JSDOM {
@@ -59,7 +74,9 @@ function makeNavigator(): FakeNavigator {
 
 // The controller only calls `new window.RTCPeerConnection(cfg)`; a regular function works with `new`.
 function stubPeerConnection(pc: FakePeerConnection): Mock {
-  return vi.fn<() => FakePeerConnection>(function () { return pc; });
+  return vi.fn<() => FakePeerConnection>(function () {
+    return pc;
+  });
 }
 
 describe('direct mode — initiator flow', () => {
@@ -154,11 +171,14 @@ describe('direct mode — initiator flow', () => {
     await setTimeout(50);
 
     // Make setRemoteDescription throw so applyAnswer fails
-    pc.setRemoteDescription = async () => { throw new Error('SDP error'); };
+    pc.setRemoteDescription = async () => {
+      throw new Error('SDP error');
+    };
 
     const { encodeSdp } = await import('../shared/sdp.ts');
     const answerEncoded = await encodeSdp({ type: 'answer', sdp: 'v=0\r\nfake-answer' });
-    getEl<HTMLInputElement>(dom.window.document, '#directAnswerInput').value = `https://example.com/#answer=${answerEncoded}`;
+    getEl<HTMLInputElement>(dom.window.document, '#directAnswerInput').value =
+      `https://example.com/#answer=${answerEncoded}`;
     const connectBtn = getEl<HTMLButtonElement>(dom.window.document, '#directConnectBtn');
     connectBtn.disabled = false;
     connectBtn.click();
@@ -175,7 +195,9 @@ describe('direct mode — initiator flow', () => {
     const remoteStream = fakeStream('remote');
     pc.simulateTrack(remoteStream);
 
-    expect(getEl<HTMLVideoElement>(dom.window.document, '#remoteVideo').srcObject).toBe(remoteStream);
+    expect(getEl<HTMLVideoElement>(dom.window.document, '#remoteVideo').srcObject).toBe(
+      remoteStream,
+    );
   });
 
   it('onConnect callback logs connection established', async () => {
@@ -186,7 +208,9 @@ describe('direct mode — initiator flow', () => {
     pc.connectionState = 'connected';
     pc.onconnectionstatechange?.();
 
-    expect(getEl(dom.window.document, '#logs').textContent).toContain('Direct connection established');
+    expect(getEl(dom.window.document, '#logs').textContent).toContain(
+      'Direct connection established',
+    );
   });
 
   it('onError callback logs connection error', async () => {
@@ -204,7 +228,12 @@ describe('direct mode — initiator flow', () => {
     const failNav = makeNavigator();
     vi.spyOn(failNav.mediaDevices, 'getUserMedia').mockRejectedValue(new Error('denied'));
 
-    initApp({ document: dom.window.document, window: dom.window, navigator: failNav, transports: [] });
+    initApp({
+      document: dom.window.document,
+      window: dom.window,
+      navigator: failNav,
+      transports: [],
+    });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
     await setTimeout(50);
 
@@ -215,13 +244,19 @@ describe('direct mode — initiator flow', () => {
 
   it('logs a direct mode error when the browser has no RTCPeerConnection', async () => {
     const bareDom = makeDOM();
-    initApp({ document: bareDom.window.document, window: bareDom.window, navigator, transports: [] });
+    initApp({
+      document: bareDom.window.document,
+      window: bareDom.window,
+      navigator,
+      transports: [],
+    });
 
     getEl<HTMLButtonElement>(bareDom.window.document, '#directBtn').click();
     await setTimeout(50);
 
-    expect(getEl(bareDom.window.document, '#logs').textContent)
-      .toContain('Direct mode error: window.RTCPeerConnection is not a constructor');
+    expect(getEl(bareDom.window.document, '#logs').textContent).toContain(
+      'Direct mode error: window.RTCPeerConnection is not a constructor',
+    );
   });
 
   it('startDirectMode works when optional DOM elements are absent', async () => {
@@ -239,7 +274,12 @@ describe('direct mode — initiator flow', () => {
     const minNav = makeNavigator();
     minDom.window['RTCPeerConnection'] = stubPeerConnection(minPc);
 
-    initApp({ document: minDom.window.document, window: minDom.window, navigator: minNav, transports: [] });
+    initApp({
+      document: minDom.window.document,
+      window: minDom.window,
+      navigator: minNav,
+      transports: [],
+    });
     getEl<HTMLButtonElement>(minDom.window.document, '#directBtn').click();
     await setTimeout(50);
 
@@ -278,7 +318,12 @@ describe('CompressionStream unavailable', () => {
 
     const dom2 = makeDOM();
     const nav2 = makeNavigator();
-    initApp({ document: dom2.window.document, window: dom2.window, navigator: nav2, transports: [] });
+    initApp({
+      document: dom2.window.document,
+      window: dom2.window,
+      navigator: nav2,
+      transports: [],
+    });
 
     vi.unstubAllGlobals();
 
@@ -300,7 +345,12 @@ describe('direct mode — receiver flow (offer in URL hash)', () => {
     const nav2 = makeNavigator();
     dom2.window['RTCPeerConnection'] = stubPeerConnection(pc2); // ponytail: vi.fn().mockReturnValue fails with `new` in Vitest 4
 
-    initApp({ document: dom2.window.document, window: dom2.window, navigator: nav2, transports: [] });
+    initApp({
+      document: dom2.window.document,
+      window: dom2.window,
+      navigator: nav2,
+      transports: [],
+    });
     await setTimeout(50);
 
     expect(pc2.localDescription?.type).toBe('answer');
@@ -312,7 +362,12 @@ describe('direct mode — receiver flow (offer in URL hash)', () => {
     const dom3 = makeDOM('https://example.com/#answer=someencoded');
     const nav3 = makeNavigator();
 
-    initApp({ document: dom3.window.document, window: dom3.window, navigator: nav3, transports: [] });
+    initApp({
+      document: dom3.window.document,
+      window: dom3.window,
+      navigator: nav3,
+      transports: [],
+    });
     await setTimeout(0);
 
     const status = getEl(dom3.window.document, '#directStatus');

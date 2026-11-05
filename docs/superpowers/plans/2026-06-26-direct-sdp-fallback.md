@@ -20,27 +20,29 @@
 
 ## File Map
 
-| File | Action | Responsibility |
-|---|---|---|
-| `src/shared/sdp.js` | **Create** | `encodeSdp` / `decodeSdp` via `CompressionStream` |
-| `src/shared/link.js` | **Modify** | Add `buildDirectUrl`, `parseDirectUrl` |
-| `src/connection/directAdapter.js` | **Create** | `DirectAdapter` wrapping `RTCPeerConnection` |
-| `index.html` | **Modify** | Add `#directBtn` and `#directPanel` section |
-| `src/app/controller.js` | **Modify** | Detect offer/answer hash, wire direct mode |
-| `src/__tests__/sdp.test.js` | **Create** | Unit tests for encode/decode |
-| `src/__tests__/link.test.js` | **Modify** | Extend with `buildDirectUrl`, `parseDirectUrl` tests |
-| `src/__tests__/directAdapter.test.js` | **Create** | Unit tests via `FakePeerConnection` stub |
-| `src/__tests__/direct-flow.test.js` | **Create** | Integration test: initiator + receiver via JSDOM |
+| File                                  | Action     | Responsibility                                       |
+| ------------------------------------- | ---------- | ---------------------------------------------------- |
+| `src/shared/sdp.js`                   | **Create** | `encodeSdp` / `decodeSdp` via `CompressionStream`    |
+| `src/shared/link.js`                  | **Modify** | Add `buildDirectUrl`, `parseDirectUrl`               |
+| `src/connection/directAdapter.js`     | **Create** | `DirectAdapter` wrapping `RTCPeerConnection`         |
+| `index.html`                          | **Modify** | Add `#directBtn` and `#directPanel` section          |
+| `src/app/controller.js`               | **Modify** | Detect offer/answer hash, wire direct mode           |
+| `src/__tests__/sdp.test.js`           | **Create** | Unit tests for encode/decode                         |
+| `src/__tests__/link.test.js`          | **Modify** | Extend with `buildDirectUrl`, `parseDirectUrl` tests |
+| `src/__tests__/directAdapter.test.js` | **Create** | Unit tests via `FakePeerConnection` stub             |
+| `src/__tests__/direct-flow.test.js`   | **Create** | Integration test: initiator + receiver via JSDOM     |
 
 ---
 
 ## Task 1: SDP encode/decode (`src/shared/sdp.js`)
 
 **Files:**
+
 - Create: `src/shared/sdp.js`
 - Create: `src/__tests__/sdp.test.js`
 
 **Interfaces:**
+
 - Produces:
   - `encodeSdp(desc: RTCSessionDescriptionInit): Promise<string>` — base64url string, URL-safe
   - `decodeSdp(str: string): Promise<RTCSessionDescriptionInit>` — throws on invalid input or missing API
@@ -53,7 +55,10 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { encodeSdp, decodeSdp } from '../shared/sdp.js';
 
 describe('sdp', () => {
-  const desc = { type: 'offer', sdp: 'v=0\r\no=- 1234 2 IN IP4 127.0.0.1\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n' };
+  const desc = {
+    type: 'offer',
+    sdp: 'v=0\r\no=- 1234 2 IN IP4 127.0.0.1\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n',
+  };
 
   it('encodes to a URL-safe string without +, /, or =', async () => {
     const encoded = await encodeSdp(desc);
@@ -155,10 +160,12 @@ git commit -m "feat: add SDP encode/decode via CompressionStream"
 ## Task 2: Direct URL helpers (extend `src/shared/link.js`)
 
 **Files:**
+
 - Modify: `src/shared/link.js`
 - Modify: `src/__tests__/link.test.js`
 
 **Interfaces:**
+
 - Consumes: nothing from other tasks
 - Produces:
   - `buildDirectUrl(locationLike, type: 'offer'|'answer', encoded: string): string`
@@ -184,17 +191,25 @@ describe('buildDirectUrl', () => {
 
   it('preserves search params in the URL', () => {
     const locWithSearch = { origin: 'https://example.com', pathname: '/', search: '?foo=bar' };
-    expect(buildDirectUrl(locWithSearch, 'offer', 'abc')).toBe('https://example.com/?foo=bar#offer=abc');
+    expect(buildDirectUrl(locWithSearch, 'offer', 'abc')).toBe(
+      'https://example.com/?foo=bar#offer=abc',
+    );
   });
 });
 
 describe('parseDirectUrl', () => {
   it('returns type and encoded for an offer hash', () => {
-    expect(parseDirectUrl('https://example.com/#offer=abc123')).toEqual({ type: 'offer', encoded: 'abc123' });
+    expect(parseDirectUrl('https://example.com/#offer=abc123')).toEqual({
+      type: 'offer',
+      encoded: 'abc123',
+    });
   });
 
   it('returns type and encoded for an answer hash', () => {
-    expect(parseDirectUrl('https://example.com/#answer=xyz789')).toEqual({ type: 'answer', encoded: 'xyz789' });
+    expect(parseDirectUrl('https://example.com/#answer=xyz789')).toEqual({
+      type: 'answer',
+      encoded: 'xyz789',
+    });
   });
 
   it('returns null for a Trystero room hash', () => {
@@ -272,10 +287,12 @@ git commit -m "feat: add buildDirectUrl and parseDirectUrl helpers"
 ## Task 3: DirectAdapter (`src/connection/directAdapter.js`)
 
 **Files:**
+
 - Create: `src/connection/directAdapter.js`
 - Create: `src/__tests__/directAdapter.test.js`
 
 **Interfaces:**
+
 - Consumes: `encodeSdp`, `decodeSdp` from `../shared/sdp.js`
 - Produces: `DirectAdapter` class with:
   - `constructor({ iceServers?, turnConfig?, PeerConnection? })`
@@ -305,10 +322,16 @@ class FakePeerConnection {
     this._tracks = [];
   }
 
-  addTrack(track, stream) { this._tracks.push({ track, stream }); }
+  addTrack(track, stream) {
+    this._tracks.push({ track, stream });
+  }
 
-  async createOffer() { return { type: 'offer', sdp: 'v=0\r\nfake-offer' }; }
-  async createAnswer() { return { type: 'answer', sdp: 'v=0\r\nfake-answer' }; }
+  async createOffer() {
+    return { type: 'offer', sdp: 'v=0\r\nfake-offer' };
+  }
+  async createAnswer() {
+    return { type: 'answer', sdp: 'v=0\r\nfake-answer' };
+  }
 
   async setLocalDescription(desc) {
     this.localDescription = desc;
@@ -323,7 +346,9 @@ class FakePeerConnection {
   close() {}
 
   // Test helpers
-  simulateTrack(stream) { this.ontrack?.({ streams: [stream] }); }
+  simulateTrack(stream) {
+    this.ontrack?.({ streams: [stream] });
+  }
   simulateConnected() {
     this.connectionState = 'connected';
     this.onconnectionstatechange?.();
@@ -438,7 +463,9 @@ describe('DirectAdapter', () => {
   describe('ICE gathering timeout', () => {
     it('resolves after 5 s if ICE gathering never completes', async () => {
       vi.useFakeTimers();
-      pc.setLocalDescription = async (desc) => { pc.localDescription = desc; }; // never fires event
+      pc.setLocalDescription = async (desc) => {
+        pc.localDescription = desc;
+      }; // never fires event
 
       const offerPromise = adapter.createOffer(fakeStream());
       vi.advanceTimersByTime(5000);
@@ -473,14 +500,27 @@ export class DirectAdapter {
   #onConnectCb = null;
   #onErrorCb = null;
 
-  constructor({ iceServers = [], turnConfig, PeerConnection = () => new globalThis.RTCPeerConnection({ iceServers }) } = {}) {
+  constructor({
+    iceServers = [],
+    turnConfig,
+    PeerConnection = () => new globalThis.RTCPeerConnection({ iceServers }),
+  } = {}) {
     this.#PeerConnection = PeerConnection;
     this.#iceConfig = { iceServers: [...iceServers, ...(turnConfig ?? [])] };
   }
 
-  onStream(cb)  { this.#onStreamCb  = cb; return this; }
-  onConnect(cb) { this.#onConnectCb = cb; return this; }
-  onError(cb)   { this.#onErrorCb   = cb; return this; }
+  onStream(cb) {
+    this.#onStreamCb = cb;
+    return this;
+  }
+  onConnect(cb) {
+    this.#onConnectCb = cb;
+    return this;
+  }
+  onError(cb) {
+    this.#onErrorCb = cb;
+    return this;
+  }
 
   async createOffer(stream) {
     this.#pc = this.#PeerConnection(this.#iceConfig);
@@ -521,7 +561,10 @@ export class DirectAdapter {
 
   #waitForIce() {
     return new Promise((resolve) => {
-      if (this.#pc.iceGatheringState === 'complete') { resolve(); return; }
+      if (this.#pc.iceGatheringState === 'complete') {
+        resolve();
+        return;
+      }
       const timer = setTimeout(resolve, 5000);
       this.#pc.onicegatheringstatechange = () => {
         if (this.#pc.iceGatheringState === 'complete') {
@@ -554,11 +597,13 @@ git commit -m "feat: add DirectAdapter for serverless SDP exchange"
 ## Task 4: HTML panel, QR rendering, and controller wiring
 
 **Files:**
+
 - Modify: `index.html`
 - Modify: `src/app/controller.js`
 - Create: `src/__tests__/direct-flow.test.js`
 
 **Interfaces:**
+
 - Consumes:
   - `DirectAdapter` from `../connection/directAdapter.js`
   - `buildDirectUrl`, `parseDirectUrl` from `../shared/link.js`
@@ -595,16 +640,26 @@ class FakePeerConnection {
     this.ontrack = null;
     this._tracks = [];
   }
-  addTrack(track, stream) { this._tracks.push({ track, stream }); }
-  async createOffer() { return { type: 'offer', sdp: 'v=0\r\nfake-offer' }; }
-  async createAnswer() { return { type: 'answer', sdp: 'v=0\r\nfake-answer' }; }
+  addTrack(track, stream) {
+    this._tracks.push({ track, stream });
+  }
+  async createOffer() {
+    return { type: 'offer', sdp: 'v=0\r\nfake-offer' };
+  }
+  async createAnswer() {
+    return { type: 'answer', sdp: 'v=0\r\nfake-answer' };
+  }
   async setLocalDescription(desc) {
     this.localDescription = desc;
     this.iceGatheringState = 'complete';
     this.onicegatheringstatechange?.();
   }
-  async setRemoteDescription(desc) { this.remoteDescription = { type: desc.type, sdp: desc.sdp }; }
-  simulateTrack(stream) { this.ontrack?.({ streams: [stream] }); }
+  async setRemoteDescription(desc) {
+    this.remoteDescription = { type: desc.type, sdp: desc.sdp };
+  }
+  simulateTrack(stream) {
+    this.ontrack?.({ streams: [stream] });
+  }
 }
 
 function makeDOM(url = 'https://example.com/') {
@@ -697,7 +752,12 @@ describe('direct mode — receiver flow (offer in URL hash)', () => {
     const nav2 = makeNavigator();
     dom2.window.RTCPeerConnection = vi.fn().mockReturnValue(pc2);
 
-    initApp({ document: dom2.window.document, window: dom2.window, navigator: nav2, transports: [] });
+    initApp({
+      document: dom2.window.document,
+      window: dom2.window,
+      navigator: nav2,
+      transports: [],
+    });
     await new Promise((r) => setTimeout(r, 50));
 
     expect(pc2.localDescription?.type).toBe('answer');
@@ -709,7 +769,12 @@ describe('direct mode — receiver flow (offer in URL hash)', () => {
     const dom3 = makeDOM('https://example.com/#answer=someencoded');
     const nav3 = makeNavigator();
 
-    initApp({ document: dom3.window.document, window: dom3.window, navigator: nav3, transports: [] });
+    initApp({
+      document: dom3.window.document,
+      window: dom3.window,
+      navigator: nav3,
+      transports: [],
+    });
     await new Promise((r) => setTimeout(r, 0));
 
     const status = dom3.window.document.querySelector('#directStatus');
@@ -731,22 +796,22 @@ Expected: FAIL — elements not found / logic not wired
 Inside `<div class="controls" ...>`, after the existing `<button id="copyBtn" ...>` block, add:
 
 ```html
-        <button id="directBtn" type="button">Can't connect? Try directly</button>
+<button id="directBtn" type="button">Can't connect? Try directly</button>
 ```
 
 Before `</main>`, add the hidden panel:
 
 ```html
-      <section id="directPanel" aria-label="Direct connection" hidden>
-        <p id="directStatus"></p>
-        <canvas id="directQr"></canvas>
-        <button id="directCopyBtn" type="button" disabled>Copy link</button>
-        <label>
-          Paste their response link:
-          <input id="directAnswerInput" type="url" placeholder="https://…#answer=…">
-        </label>
-        <button id="directConnectBtn" type="button" disabled>Connect</button>
-      </section>
+<section id="directPanel" aria-label="Direct connection" hidden>
+  <p id="directStatus"></p>
+  <canvas id="directQr"></canvas>
+  <button id="directCopyBtn" type="button" disabled>Copy link</button>
+  <label>
+    Paste their response link:
+    <input id="directAnswerInput" type="url" placeholder="https://…#answer=…" />
+  </label>
+  <button id="directConnectBtn" type="button" disabled>Connect</button>
+</section>
 ```
 
 - [ ] **Step 5: Add direct mode logic to `src/app/controller.js`**
@@ -762,78 +827,80 @@ import { buildDirectUrl, parseDirectUrl } from '../shared/link.js';
 Inside `initApp`, after the existing element queries (`const logsSection = ...`), add:
 
 ```js
-  const directBtn    = document.querySelector('#directBtn');
-  const directPanel  = document.querySelector('#directPanel');
-  const directQr     = document.querySelector('#directQr');
-  const directCopyBtn = document.querySelector('#directCopyBtn');
-  const directStatus = document.querySelector('#directStatus');
-  const directAnswerInput = document.querySelector('#directAnswerInput');
-  const directConnectBtn  = document.querySelector('#directConnectBtn');
+const directBtn = document.querySelector('#directBtn');
+const directPanel = document.querySelector('#directPanel');
+const directQr = document.querySelector('#directQr');
+const directCopyBtn = document.querySelector('#directCopyBtn');
+const directStatus = document.querySelector('#directStatus');
+const directAnswerInput = document.querySelector('#directAnswerInput');
+const directConnectBtn = document.querySelector('#directConnectBtn');
 ```
 
 Add a helper function after `getMedia()`:
 
 ```js
-  async function startDirectMode(offerEncoded = null) {
-    if (directPanel) directPanel.hidden = false;
+async function startDirectMode(offerEncoded = null) {
+  if (directPanel) directPanel.hidden = false;
 
-    const iceServers = getIceServers();
-    const turnConfig = getTurnConfig();
-    const directAdapter = new DirectAdapter({ iceServers, turnConfig });
+  const iceServers = getIceServers();
+  const turnConfig = getTurnConfig();
+  const directAdapter = new DirectAdapter({ iceServers, turnConfig });
 
-    directAdapter
-      .onStream((remote) => { if (remoteVideo) remoteVideo.srcObject = remote; })
-      .onConnect(()       => { logger.log('Direct connection established!'); })
-      .onError((err)      => { logger.log(`Direct connection error: ${err.message}`); });
+  directAdapter
+    .onStream((remote) => {
+      if (remoteVideo) remoteVideo.srcObject = remote;
+    })
+    .onConnect(() => {
+      logger.log('Direct connection established!');
+    })
+    .onError((err) => {
+      logger.log(`Direct connection error: ${err.message}`);
+    });
 
-    let encodedSdp;
-    try {
-      const stream = await getMedia();
-      if (localVideo) localVideo.srcObject = stream;
+  let encodedSdp;
+  try {
+    const stream = await getMedia();
+    if (localVideo) localVideo.srcObject = stream;
 
-      if (offerEncoded) {
-        encodedSdp = await directAdapter.createAnswer(offerEncoded, stream);
-        if (directStatus) directStatus.textContent = 'Share your answer with the caller:';
-      } else {
-        encodedSdp = await directAdapter.createOffer(stream);
-        if (directStatus) directStatus.textContent = 'Share this with the other person:';
-        if (directConnectBtn) directConnectBtn.disabled = false;
-      }
-    } catch {
-      return;
+    if (offerEncoded) {
+      encodedSdp = await directAdapter.createAnswer(offerEncoded, stream);
+      if (directStatus) directStatus.textContent = 'Share your answer with the caller:';
+    } else {
+      encodedSdp = await directAdapter.createOffer(stream);
+      if (directStatus) directStatus.textContent = 'Share this with the other person:';
+      if (directConnectBtn) directConnectBtn.disabled = false;
     }
-
-    const directUrl = buildDirectUrl(
-      window.location,
-      offerEncoded ? 'answer' : 'offer',
-      encodedSdp,
-    );
-
-    if (directQr) await QRCode.toCanvas(directQr, directUrl, { width: 256, margin: 2 });
-    if (directCopyBtn) {
-      directCopyBtn.disabled = false;
-      directCopyBtn.addEventListener('click', async () => {
-        await copyToClipboard(navigator, directUrl);
-        logger.log('Direct link copied.');
-      });
-    }
-
-    if (directConnectBtn && !offerEncoded) {
-      directConnectBtn.addEventListener('click', async () => {
-        const inputUrl = directAnswerInput?.value ?? '';
-        const parsed = parseDirectUrl(inputUrl);
-        if (!parsed || parsed.type !== 'answer') {
-          logger.log('Invalid answer link — paste the link from the other person.');
-          return;
-        }
-        try {
-          await directAdapter.applyAnswer(parsed.encoded);
-        } catch (err) {
-          logger.log(`Direct connect error: ${err.message}`);
-        }
-      });
-    }
+  } catch {
+    return;
   }
+
+  const directUrl = buildDirectUrl(window.location, offerEncoded ? 'answer' : 'offer', encodedSdp);
+
+  if (directQr) await QRCode.toCanvas(directQr, directUrl, { width: 256, margin: 2 });
+  if (directCopyBtn) {
+    directCopyBtn.disabled = false;
+    directCopyBtn.addEventListener('click', async () => {
+      await copyToClipboard(navigator, directUrl);
+      logger.log('Direct link copied.');
+    });
+  }
+
+  if (directConnectBtn && !offerEncoded) {
+    directConnectBtn.addEventListener('click', async () => {
+      const inputUrl = directAnswerInput?.value ?? '';
+      const parsed = parseDirectUrl(inputUrl);
+      if (!parsed || parsed.type !== 'answer') {
+        logger.log('Invalid answer link — paste the link from the other person.');
+        return;
+      }
+      try {
+        await directAdapter.applyAnswer(parsed.encoded);
+      } catch (err) {
+        logger.log(`Direct connect error: ${err.message}`);
+      }
+    });
+  }
+}
 ```
 
 You also need to add `getIceServers` to the existing import at the top:
@@ -845,15 +912,18 @@ import { getTurnConfig, getIceServers } from '../shared/config/stun.js';
 After the existing Trystero `onCreate` and button listeners, add the direct mode wiring:
 
 ```js
-  if (directBtn) directBtn.addEventListener('click', () => { startDirectMode(); });
+if (directBtn)
+  directBtn.addEventListener('click', () => {
+    startDirectMode();
+  });
 
-  const directParsed = parseDirectUrl(window.location.href);
-  if (directParsed?.type === 'offer') {
-    startDirectMode(directParsed.encoded);
-  } else if (directParsed?.type === 'answer') {
-    if (directPanel) directPanel.hidden = false;
-    if (directStatus) directStatus.textContent = 'Paste this link where the call was created.';
-  }
+const directParsed = parseDirectUrl(window.location.href);
+if (directParsed?.type === 'offer') {
+  startDirectMode(directParsed.encoded);
+} else if (directParsed?.type === 'answer') {
+  if (directPanel) directPanel.hidden = false;
+  if (directStatus) directStatus.textContent = 'Paste this link where the call was created.';
+}
 ```
 
 - [ ] **Step 6: Run the direct-flow tests**

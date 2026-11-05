@@ -3,7 +3,9 @@ import { vi } from 'vitest';
 // querySelector for elements a test relies on: fails loudly instead of returning null.
 export function getEl<T extends Element = HTMLElement>(root: ParentNode, selector: string): T {
   const el = root.querySelector<T>(selector);
-  if (!el) { throw new Error(`Element not found: ${selector}`); }
+  if (!el) {
+    throw new Error(`Element not found: ${selector}`);
+  }
   return el;
 }
 
