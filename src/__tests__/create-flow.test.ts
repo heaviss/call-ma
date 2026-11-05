@@ -11,7 +11,6 @@ import { initApp } from '../app/controller.ts';
 import { type FakeNavigator, fakeStream, getEl, makeNavigator } from './fakes/dom.ts';
 import { FakeRoom } from './fakes/fakeRoom.ts';
 
-
 function setupDom() {
   const html = `<!doctype html><html><body>
   <button id="createBtn">Create Conference</button>
@@ -42,7 +41,12 @@ describe('create conference flow (integration, jsdom)', () => {
 
   it('clicking Create gets media, joins a room, and enables the copy button', async () => {
     // Arrange
-    const controller = initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    const controller = initApp({
+      document,
+      window,
+      navigator: navigatorLike,
+      joinRoom: fakeJoinRoom,
+    });
     const createBtn = getEl<HTMLButtonElement>(document, '#createBtn');
     const copyBtn = getEl<HTMLButtonElement>(document, '#copyBtn');
 
@@ -51,8 +55,15 @@ describe('create conference flow (integration, jsdom)', () => {
     await setTimeout(0);
 
     // Assert
-    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true, video: true });
-    expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, expect.stringMatching(/^[a-z0-9]{8}$/), expect.any(Object));
+    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalledWith({
+      audio: true,
+      video: true,
+    });
+    expect(fakeJoinRoom).toHaveBeenCalledWith(
+      { appId: 'call-ma' },
+      expect.stringMatching(/^[a-z0-9]{8}$/),
+      expect.any(Object),
+    );
     expect(copyBtn.disabled).toBe(false);
     expect(controller.state.link).toMatch(/#[a-z0-9]{8}$/);
   });

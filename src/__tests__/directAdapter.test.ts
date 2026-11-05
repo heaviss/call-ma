@@ -13,10 +13,16 @@ class FakePeerConnection {
   ontrack: ((event: { streams: readonly MediaStream[] }) => void) | null = null;
   tracks: { track: MediaStreamTrack; stream: MediaStream }[] = [];
 
-  addTrack(track: MediaStreamTrack, stream: MediaStream): void { this.tracks.push({ track, stream }); }
+  addTrack(track: MediaStreamTrack, stream: MediaStream): void {
+    this.tracks.push({ track, stream });
+  }
 
-  async createOffer(): Promise<RTCSessionDescriptionInit> { return { type: 'offer', sdp: 'v=0\r\nfake-offer' }; }
-  async createAnswer(): Promise<RTCSessionDescriptionInit> { return { type: 'answer', sdp: 'v=0\r\nfake-answer' }; }
+  async createOffer(): Promise<RTCSessionDescriptionInit> {
+    return { type: 'offer', sdp: 'v=0\r\nfake-offer' };
+  }
+  async createAnswer(): Promise<RTCSessionDescriptionInit> {
+    return { type: 'answer', sdp: 'v=0\r\nfake-answer' };
+  }
 
   async setLocalDescription(desc: RTCSessionDescriptionInit): Promise<void> {
     this.localDescription = desc;
@@ -31,7 +37,9 @@ class FakePeerConnection {
   close(): void {}
 
   // Test helpers
-  simulateTrack(stream: MediaStream): void { this.ontrack?.({ streams: [stream] }); }
+  simulateTrack(stream: MediaStream): void {
+    this.ontrack?.({ streams: [stream] });
+  }
   simulateConnected(): void {
     this.connectionState = 'connected';
     this.onconnectionstatechange?.();
@@ -48,7 +56,9 @@ function fakeStream(id = 'stream-1'): MediaStream {
 
 // Must be a regular function (not arrow) so it works with `new`.
 function stubPeerConnection(pc: FakePeerConnection) {
-  return vi.fn<() => FakePeerConnection>(function () { return pc; });
+  return vi.fn<() => FakePeerConnection>(function () {
+    return pc;
+  });
 }
 
 describe('DirectAdapter', () => {
@@ -165,7 +175,9 @@ describe('DirectAdapter', () => {
   describe('ICE gathering timeout', () => {
     it('resolves after 5 s if ICE gathering never completes', async () => {
       vi.useFakeTimers();
-      pc.setLocalDescription = async (desc: RTCSessionDescriptionInit) => { pc.localDescription = desc; }; // never fires event
+      pc.setLocalDescription = async (desc: RTCSessionDescriptionInit) => {
+        pc.localDescription = desc;
+      }; // never fires event
 
       const offerPromise = adapter.createOffer(fakeStream());
       vi.advanceTimersByTime(5000);
@@ -224,7 +236,9 @@ describe('DirectAdapter', () => {
       const defaultAdapter = new DirectAdapter({ iceServers: [{ urls: 'stun:stun.example.com' }] });
       const encoded = await defaultAdapter.createOffer(fakeStream());
 
-      expect(FakeRTC).toHaveBeenCalledExactlyOnceWith({ iceServers: [{ urls: 'stun:stun.example.com' }] });
+      expect(FakeRTC).toHaveBeenCalledExactlyOnceWith({
+        iceServers: [{ urls: 'stun:stun.example.com' }],
+      });
       expect(encoded).toBeTypeOf('string');
 
       vi.unstubAllGlobals();

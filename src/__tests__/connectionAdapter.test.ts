@@ -5,14 +5,28 @@ import { assertAdapterShape, ConnectionAdapter } from '../shared/connection/Conn
 class MinimalAdapter extends ConnectionAdapter {}
 
 class ConcreteAdapter extends ConnectionAdapter {
-  override createInitiator() { return 'initiator'; }
-  override createResponder() { return 'responder'; }
-  override onSignal() { return this; }
+  override createInitiator() {
+    return 'initiator';
+  }
+  override createResponder() {
+    return 'responder';
+  }
+  override onSignal() {
+    return this;
+  }
   override signal() {}
-  override onStream() { return this; }
-  override onError() { return this; }
-  override onClose() { return this; }
-  override onConnect() { return this; }
+  override onStream() {
+    return this;
+  }
+  override onError() {
+    return this;
+  }
+  override onClose() {
+    return this;
+  }
+  override onConnect() {
+    return this;
+  }
 }
 
 describe('ConnectionAdapter', () => {
@@ -49,7 +63,14 @@ describe('ConnectionAdapter', () => {
 });
 
 describe('assertAdapterShape', () => {
-  const required = ['createInitiator', 'createResponder', 'destroy', 'onSignal', 'signal', 'onStream'];
+  const required = [
+    'createInitiator',
+    'createResponder',
+    'destroy',
+    'onSignal',
+    'signal',
+    'onStream',
+  ];
   const fullAdapter = Object.fromEntries(required.map((m) => [m, () => {}]));
 
   it('returns true for a fully implemented adapter', () => {

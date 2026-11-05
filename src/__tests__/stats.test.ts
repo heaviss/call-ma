@@ -47,9 +47,7 @@ describe('deriveMetrics', () => {
     });
 
     it('returns null rtt when succeeded pair has no currentRoundTripTime', () => {
-      const report = makeReport([
-        { id: 'p1', type: 'candidate-pair', state: 'succeeded' },
-      ]);
+      const report = makeReport([{ id: 'p1', type: 'candidate-pair', state: 'succeeded' }]);
 
       expect(deriveMetrics(report).rtt).toBeNull();
     });

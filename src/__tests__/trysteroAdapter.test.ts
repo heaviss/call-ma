@@ -8,7 +8,6 @@ import { TrysteroAdapter } from '../connection/trysteroAdapter.ts';
 import { fakeStream } from './fakes/dom.ts';
 import { FakeRoom } from './fakes/fakeRoom.ts';
 
-
 describe('TrysteroAdapter', () => {
   let fakeRoom: FakeRoom;
   let fakeJoinRoom: Mock<JoinRoomLike>;
@@ -31,7 +30,9 @@ describe('TrysteroAdapter', () => {
     adapter.join('abc12345', localStream);
     fakeRoom.simulatePeerJoin('peer-1');
 
-    expect(fakeRoom.addStreamCalls.some((c) => c.stream === localStream && c.target === 'peer-1')).toBe(true);
+    expect(
+      fakeRoom.addStreamCalls.some((c) => c.stream === localStream && c.target === 'peer-1'),
+    ).toBe(true);
   });
 
   it('fires onConnect when a peer joins', () => {
@@ -84,14 +85,21 @@ describe('TrysteroAdapter', () => {
     adapter.onError(onError).join('abc12345', localStream);
     const callbacks = fakeJoinRoom.mock.calls[0]?.[2];
 
-    callbacks?.onJoinError?.({ error: 'configure TURN servers', appId: 'call-ma', roomId: 'abc12345', peerId: 'self' });
+    callbacks?.onJoinError?.({
+      error: 'configure TURN servers',
+      appId: 'call-ma',
+      roomId: 'abc12345',
+      peerId: 'self',
+    });
 
     expect(onError).toHaveBeenCalledWith(new Error('configure TURN servers'));
   });
 
   it('lets programmer errors from joinRoom propagate instead of hiding them in onError', () => {
     const onError = vi.fn<Parameters<TrysteroAdapter['onError']>[0]>();
-    fakeJoinRoom.mockImplementation(() => { throw new TypeError('bad config'); });
+    fakeJoinRoom.mockImplementation(() => {
+      throw new TypeError('bad config');
+    });
 
     expect(() => adapter.onError(onError).join('abc12345', localStream)).toThrow('bad config');
     expect(onError).not.toHaveBeenCalled();
@@ -108,16 +116,21 @@ describe('TrysteroAdapter', () => {
       const fakeRoom2 = new FakeRoom();
       const fakeJoinRoom2 = vi.fn<JoinRoomLike>().mockReturnValue(fakeRoom2);
       const multiAdapter = new TrysteroAdapter({
-        transports: [
-          { joinRoom: fakeJoinRoom },
-          { joinRoom: fakeJoinRoom2 },
-        ],
+        transports: [{ joinRoom: fakeJoinRoom }, { joinRoom: fakeJoinRoom2 }],
       });
 
       multiAdapter.join('abc12345', localStream);
 
-      expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
-      expect(fakeJoinRoom2).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
+      expect(fakeJoinRoom).toHaveBeenCalledWith(
+        { appId: 'call-ma' },
+        'abc12345',
+        expect.any(Object),
+      );
+      expect(fakeJoinRoom2).toHaveBeenCalledWith(
+        { appId: 'call-ma' },
+        'abc12345',
+        expect.any(Object),
+      );
     });
 
     it('passes relayConfig per transport and the same ICE servers to every transport', () => {
@@ -125,7 +138,7 @@ describe('TrysteroAdapter', () => {
       const fakeJoinRoom2 = vi.fn<JoinRoomLike>().mockReturnValue(fakeRoom2);
       const multiAdapter = new TrysteroAdapter({
         transports: [
-          { joinRoom: fakeJoinRoom,  relayUrls: ['wss://mqtt.example.com'] },
+          { joinRoom: fakeJoinRoom, relayUrls: ['wss://mqtt.example.com'] },
           { joinRoom: fakeJoinRoom2, relayUrls: ['wss://tracker.example.com'] },
         ],
         iceServers: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
@@ -133,16 +146,28 @@ describe('TrysteroAdapter', () => {
 
       multiAdapter.join('abc12345', localStream);
 
-      expect(fakeJoinRoom).toHaveBeenCalledWith({
-        appId: 'call-ma',
-        relayConfig: { urls: ['wss://mqtt.example.com'] },
-        rtcConfig: { iceServers: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }] },
-      }, 'abc12345', expect.any(Object));
-      expect(fakeJoinRoom2).toHaveBeenCalledWith({
-        appId: 'call-ma',
-        relayConfig: { urls: ['wss://tracker.example.com'] },
-        rtcConfig: { iceServers: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }] },
-      }, 'abc12345', expect.any(Object));
+      expect(fakeJoinRoom).toHaveBeenCalledWith(
+        {
+          appId: 'call-ma',
+          relayConfig: { urls: ['wss://mqtt.example.com'] },
+          rtcConfig: {
+            iceServers: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
+          },
+        },
+        'abc12345',
+        expect.any(Object),
+      );
+      expect(fakeJoinRoom2).toHaveBeenCalledWith(
+        {
+          appId: 'call-ma',
+          relayConfig: { urls: ['wss://tracker.example.com'] },
+          rtcConfig: {
+            iceServers: [{ urls: 'turn:turn.example.com', username: 'u', credential: 'p' }],
+          },
+        },
+        'abc12345',
+        expect.any(Object),
+      );
     });
 
     it('fires onStream only once when same peer connects via both transports', () => {

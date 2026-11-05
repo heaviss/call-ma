@@ -10,9 +10,18 @@ describe('PWA manifest config', () => {
     // Act
 
     // Assert
-    const requiredFields = [manifest.name, manifest.short_name, manifest.start_url, manifest.theme_color, manifest.background_color];
+    const requiredFields = [
+      manifest.name,
+      manifest.short_name,
+      manifest.start_url,
+      manifest.theme_color,
+      manifest.background_color,
+    ];
 
-    expect(manifest).toMatchObject({ display: 'standalone', icons: [{ type: 'image/webp', sizes: 'any' }] });
+    expect(manifest).toMatchObject({
+      display: 'standalone',
+      icons: [{ type: 'image/webp', sizes: 'any' }],
+    });
     expect(requiredFields).not.toContain(undefined);
     expect(requiredFields).not.toContain('');
   });

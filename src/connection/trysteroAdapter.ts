@@ -9,7 +9,11 @@ export interface RoomLike {
   onPeerStream: Room['onPeerStream'];
 }
 
-export type JoinRoomLike = (config: JoinRoomConfig, roomId: string, callbacks?: JoinRoomCallbacks) => RoomLike;
+export type JoinRoomLike = (
+  config: JoinRoomConfig,
+  roomId: string,
+  callbacks?: JoinRoomCallbacks,
+) => RoomLike;
 
 export interface Transport {
   joinRoom: JoinRoomLike;
@@ -40,34 +44,57 @@ export class TrysteroAdapter {
   private _onPeerLeave: PeerCallback | null = null;
 
   constructor(options: TrysteroAdapterOptions) {
-    this._transports = options.transports === undefined ? [{ joinRoom: options.joinRoom }] : options.transports;
+    this._transports =
+      options.transports === undefined ? [{ joinRoom: options.joinRoom }] : options.transports;
     this._iceServers = options.iceServers;
   }
 
-  onStream(cb: StreamCallback): this    { this._onStream = cb;    return this; }
-  onConnect(cb: PeerCallback): this     { this._onConnect = cb;   return this; }
-  onError(cb: ErrorCallback): this      { this._onError = cb;     return this; }
-  onPeerLeave(cb: PeerCallback): this   { this._onPeerLeave = cb; return this; }
+  onStream(cb: StreamCallback): this {
+    this._onStream = cb;
+    return this;
+  }
+  onConnect(cb: PeerCallback): this {
+    this._onConnect = cb;
+    return this;
+  }
+  onError(cb: ErrorCallback): this {
+    this._onError = cb;
+    return this;
+  }
+  onPeerLeave(cb: PeerCallback): this {
+    this._onPeerLeave = cb;
+    return this;
+  }
 
   // Programmer errors (bad config, API drift) throw; network failures arrive via onError.
   join(roomId: string, localStream: MediaStream): this {
     const connectedPeers = new Set<string>();
-    const callbacks: JoinRoomCallbacks = { onJoinError: ({ error }) => this._onError?.(new Error(error)) };
+    const callbacks: JoinRoomCallbacks = {
+      onJoinError: ({ error }) => this._onError?.(new Error(error)),
+    };
 
     for (const { joinRoom, relayUrls } of this._transports) {
       const config: JoinRoomConfig = { appId: 'call-ma' };
-      if (relayUrls?.length)        {config.relayConfig = { urls: relayUrls };}
-      if (this._iceServers?.length) {config.rtcConfig   = { iceServers: this._iceServers };}
+      if (relayUrls?.length) {
+        config.relayConfig = { urls: relayUrls };
+      }
+      if (this._iceServers?.length) {
+        config.rtcConfig = { iceServers: this._iceServers };
+      }
 
       const room = joinRoom(config, roomId, callbacks);
       this._rooms.push(room);
 
       room.onPeerJoin = (peerId) => {
         room.addStream(localStream, { target: peerId });
-        if (!connectedPeers.has(peerId)) { this._onConnect?.(peerId); }
+        if (!connectedPeers.has(peerId)) {
+          this._onConnect?.(peerId);
+        }
       };
       room.onPeerStream = (stream, peerId) => {
-        if (connectedPeers.has(peerId)) { return; }
+        if (connectedPeers.has(peerId)) {
+          return;
+        }
         connectedPeers.add(peerId);
         this._onStream?.(stream, peerId);
       };
@@ -80,7 +107,9 @@ export class TrysteroAdapter {
   }
 
   destroy(): void {
-    for (const r of this._rooms) { r?.leave?.(); }
+    for (const r of this._rooms) {
+      r?.leave?.();
+    }
     this._rooms = [];
   }
 }

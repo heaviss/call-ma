@@ -1,13 +1,9 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8">
-    <link
-      rel="icon"
-      type="image/webp"
-      href="/icons/call_ma_icon.webp"
-    >
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/webp" href="/icons/call_ma_icon.webp" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>call-ma</title>
     <style>
       body {
@@ -125,17 +121,9 @@
     <a href="#main" class="visually-hidden">Skip to content</a>
     <header>
       <h1>call-ma</h1>
-      <div
-        class="controls"
-        role="group"
-        aria-label="Call controls"
-      >
+      <div class="controls" role="group" aria-label="Call controls">
         <button id="createBtn" type="button">Create Conference</button>
-        <button
-          id="copyBtn"
-          type="button"
-          disabled
-        >Copy Link</button>
+        <button id="copyBtn" type="button" disabled>Copy Link</button>
         <button id="directBtn" type="button">Can't connect? Try directly</button>
       </div>
     </header>
@@ -143,55 +131,26 @@
       <section class="videos" aria-label="Video">
         <div class="video-wrapper video-wrapper-local">
           <h2 class="video-label">Local</h2>
-          <video
-            id="localVideo"
-            autoplay
-            muted
-            playsinline
-          ></video>
+          <video id="localVideo" autoplay muted playsinline></video>
         </div>
         <div class="video-wrapper video-wrapper-remote">
           <h2 class="video-label">Remote</h2>
-          <video
-            id="remoteVideo"
-            autoplay
-            playsinline
-          ></video>
+          <video id="remoteVideo" autoplay playsinline></video>
         </div>
       </section>
-      <section
-        id="logsSection"
-        aria-label="Logs and stats"
-        hidden
-      >
+      <section id="logsSection" aria-label="Logs and stats" hidden>
         <h2>Logs</h2>
         <div id="logs" aria-live="polite"></div>
       </section>
-      <section
-        id="directPanel"
-        aria-label="Direct connection"
-        hidden
-      >
+      <section id="directPanel" aria-label="Direct connection" hidden>
         <p id="directStatus"></p>
         <canvas id="directQr"></canvas>
-        <button
-          id="directCopyBtn"
-          type="button"
-          disabled
-        >Copy link</button>
+        <button id="directCopyBtn" type="button" disabled>Copy link</button>
         <label>
           Paste their response link:
-          <input
-            id="directAnswerInput"
-            type="url"
-            placeholder="https://…#answer=…"
-          >
+          <input id="directAnswerInput" type="url" placeholder="https://…#answer=…" />
         </label>
-        <button
-          id="directConnectBtn"
-          type="button"
-          disabled
-        >Connect</button>
+        <button id="directConnectBtn" type="button" disabled>Connect</button>
       </section>
     </main>
 

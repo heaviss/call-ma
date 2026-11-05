@@ -11,7 +11,6 @@ import { initApp } from '../app/controller.ts';
 import { type FakeNavigator, fakeStream, getEl, makeNavigator } from './fakes/dom.ts';
 import { FakeRoom } from './fakes/fakeRoom.ts';
 
-
 function setupDom() {
   const html = `<!doctype html><html><body>
   <button id="createBtn">Create Conference</button>
@@ -43,7 +42,12 @@ describe('error/connection events (integration, jsdom)', () => {
   it('logs an error message to #logs when a transport reports a join error', async () => {
     // Arrange
     fakeJoinRoom.mockImplementation((_config, _roomId, callbacks) => {
-      callbacks?.onJoinError?.({ error: 'relay unreachable', appId: 'call-ma', roomId: 'room', peerId: 'self' });
+      callbacks?.onJoinError?.({
+        error: 'relay unreachable',
+        appId: 'call-ma',
+        roomId: 'room',
+        peerId: 'self',
+      });
       return fakeRoom;
     });
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
@@ -80,7 +84,12 @@ describe('error/connection events (integration, jsdom)', () => {
     // Arrange
     const permissionError = new DOMException('denied', 'NotAllowedError');
     navigatorLike.mediaDevices.getUserMedia.mockRejectedValue(permissionError);
-    const { onCreate } = initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
+    const { onCreate } = initApp({
+      document,
+      window,
+      navigator: navigatorLike,
+      joinRoom: fakeJoinRoom,
+    });
 
     // Act — call onCreate directly so we can catch the rethrown error
     await expect(onCreate()).rejects.toThrow('denied');

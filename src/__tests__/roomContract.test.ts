@@ -8,8 +8,12 @@ import { FakeRoom } from './fakes/fakeRoom.ts';
 class StubPeerConnection {
   addEventListener() {}
   removeEventListener() {}
-  createDataChannel() { return { addEventListener() {}, close() {} }; }
-  async createOffer() { return { type: 'offer', sdp: '' }; }
+  createDataChannel() {
+    return { addEventListener() {}, close() {} };
+  }
+  async createOffer() {
+    return { type: 'offer', sdp: '' };
+  }
   async setLocalDescription() {}
   close() {}
 }
@@ -66,9 +70,15 @@ describe('TrysteroAdapter against a real Trystero room', () => {
     const joinRoom = offlineJoinRoom();
     const errors: Error[] = [];
     const adapter = new TrysteroAdapter({
-      transports: [{ joinRoom: (config, roomId, callbacks) =>
-        joinRoom({ ...config, rtcPolyfill }, roomId, callbacks) }],
-    }).onError((error) => { errors.push(error); });
+      transports: [
+        {
+          joinRoom: (config, roomId, callbacks) =>
+            joinRoom({ ...config, rtcPolyfill }, roomId, callbacks),
+        },
+      ],
+    }).onError((error) => {
+      errors.push(error);
+    });
 
     adapter.join('room', fakeStream('local'));
 

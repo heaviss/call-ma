@@ -10,10 +10,20 @@ export class FakeRoom implements RoomLike {
   addStreamCalls: { stream: MediaStream; target: PeerTarget | undefined }[] = [];
   left = false;
 
-  addStream(stream: MediaStream, options: AddMediaOptions = {}): void { this.addStreamCalls.push({ stream, target: options.target }); }
-  leave(): void { this.left = true; }
+  addStream(stream: MediaStream, options: AddMediaOptions = {}): void {
+    this.addStreamCalls.push({ stream, target: options.target });
+  }
+  leave(): void {
+    this.left = true;
+  }
 
-  simulatePeerJoin(peerId: string): void                        { this.onPeerJoin?.(peerId); }
-  simulatePeerLeave(peerId: string): void                       { this.onPeerLeave?.(peerId); }
-  simulatePeerStream(stream: MediaStream, peerId: string): void { this.onPeerStream?.(stream, peerId); }
+  simulatePeerJoin(peerId: string): void {
+    this.onPeerJoin?.(peerId);
+  }
+  simulatePeerLeave(peerId: string): void {
+    this.onPeerLeave?.(peerId);
+  }
+  simulatePeerStream(stream: MediaStream, peerId: string): void {
+    this.onPeerStream?.(stream, peerId);
+  }
 }
