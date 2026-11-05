@@ -10,9 +10,7 @@ export const manifest = {
   display: 'standalone',
   theme_color: '#121212',
   background_color: '#ffffff',
-  icons: [
-    { src: '/icons/call_ma_icon.webp', sizes: 'any', type: 'image/webp' },
-  ],
+  icons: [{ src: '/icons/call_ma_icon.webp', sizes: 'any', type: 'image/webp' }],
 } satisfies Partial<ManifestOptions>;
 
 export default defineConfig({

@@ -34,10 +34,10 @@ Import both `joinRoom` functions and append to the existing `transports` array, 
 
 ```js
 import { joinRoom as nostrJoinRoom } from '@trystero-p2p/nostr';
-import { joinRoom as ipfsJoinRoom }  from '@trystero-p2p/ipfs';
+import { joinRoom as ipfsJoinRoom } from '@trystero-p2p/ipfs';
 
 const transports = [
-  { joinRoom: mqttJoinRoom,    relayUrls: getMqttRelayUrls(undefined, searchParams) },
+  { joinRoom: mqttJoinRoom, relayUrls: getMqttRelayUrls(undefined, searchParams) },
   { joinRoom: torrentJoinRoom, relayUrls: getTorrentRelayUrls(undefined, searchParams) },
   { joinRoom: nostrJoinRoom },
   { joinRoom: ipfsJoinRoom },
@@ -112,9 +112,9 @@ Run `/ponytail:ponytail-review` on the diff before merging — check for reinven
 
 ## Test summary
 
-| File | What it covers |
-|---|---|
-| `e2e/direct-connect.spec.js` (new) | Two real browsers complete the DirectAdapter QR/link flow end to end; connection established on both sides |
-| `src/__tests__/trysteroAdapter.test.js` (existing, unchanged) | Adapter remains transport-agnostic; no new cases needed for the 2 added transports |
+| File                                                          | What it covers                                                                                             |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `e2e/direct-connect.spec.js` (new)                            | Two real browsers complete the DirectAdapter QR/link flow end to end; connection established on both sides |
+| `src/__tests__/trysteroAdapter.test.js` (existing, unchanged) | Adapter remains transport-agnostic; no new cases needed for the 2 added transports                         |
 
 No new unit tests needed for Part 1 (pure wiring in `main.js`, which is untested/excluded by existing convention).

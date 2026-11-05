@@ -26,37 +26,78 @@ const VITEST_FILES = ['src/__tests__/**/*.ts', 'src/**/*.{test,spec}.ts'];
 const TESTS = [...VITEST_FILES, 'e2e/**/*.ts'];
 
 const THRESHOLDS = {
-  'complexity':                     ['error', 6],
-  'max-depth':                      ['error', 3],
-  'max-params':                     ['error', 5],
-  'max-statements':                 ['error', 9],
-  'max-lines':                      ['error', { max: 200, skipBlankLines: true, skipComments: true }],
-  'max-nested-callbacks':           ['error', 3],
-  'max-classes-per-file':           ['error', 1],
-  'no-magic-numbers':               'off',
-  'sonarjs/cognitive-complexity':   ['error', 12],
-  'sonarjs/expression-complexity':  ['error', { max: 3 }],
-  'sonarjs/nested-control-flow':    ['error', { maximumNestingLevel: 3 }],
-  'import-x/max-dependencies':      ['error', { max: 12 }],
+  complexity: ['error', 6],
+  'max-depth': ['error', 3],
+  'max-params': ['error', 5],
+  'max-statements': ['error', 9],
+  'max-lines': ['error', { max: 200, skipBlankLines: true, skipComments: true }],
+  'max-nested-callbacks': ['error', 3],
+  'max-classes-per-file': ['error', 1],
+  'no-magic-numbers': 'off',
+  'sonarjs/cognitive-complexity': ['error', 12],
+  'sonarjs/expression-complexity': ['error', { max: 3 }],
+  'sonarjs/nested-control-flow': ['error', { maximumNestingLevel: 3 }],
+  'import-x/max-dependencies': ['error', { max: 12 }],
 };
 
 // Off in tests (#15): describe callbacks span the file, test data is numeric, fixtures repeat.
 const APP_ONLY_THRESHOLDS = {
-  'max-lines-per-function':         ['error', { max: 30, skipBlankLines: true, skipComments: true }],
-  '@typescript-eslint/no-magic-numbers': ['error', { ignore: [-1, 0, 1, 2], ignoreDefaultValues: true, ignoreArrayIndexes: true, enforceConst: true }],
-  'sonarjs/no-duplicate-string':    ['error', { threshold: 3 }],
+  'max-lines-per-function': ['error', { max: 30, skipBlankLines: true, skipComments: true }],
+  '@typescript-eslint/no-magic-numbers': [
+    'error',
+    {
+      ignore: [-1, 0, 1, 2],
+      ignoreDefaultValues: true,
+      ignoreArrayIndexes: true,
+      enforceConst: true,
+    },
+  ],
+  'sonarjs/no-duplicate-string': ['error', { threshold: 3 }],
 };
 
 // wemake-python-styleguide VARIABLE_NAMES_BLACKLIST (constants.py), complete
 const VARIABLE_NAMES_BLACKLIST = [
   // Meaningless words
-  'arr', 'content', 'contents', 'data', 'do', 'file', 'handle', 'handler', 'info',
-  'item', 'items', 'obj', 'objects', 'objs', 'param', 'parameters', 'params',
-  'result', 'results', 'some', 'val', 'vals', 'value', 'values', 'var', 'variable', 'vars',
+  'arr',
+  'content',
+  'contents',
+  'data',
+  'do',
+  'file',
+  'handle',
+  'handler',
+  'info',
+  'item',
+  'items',
+  'obj',
+  'objects',
+  'objs',
+  'param',
+  'parameters',
+  'params',
+  'result',
+  'results',
+  'some',
+  'val',
+  'vals',
+  'value',
+  'values',
+  'var',
+  'variable',
+  'vars',
   // Confusables
-  'false', 'no', 'true', 'yes',
+  'false',
+  'no',
+  'true',
+  'yes',
   // Names from examples
-  'bar', 'baz', 'foo', 'ham', 'spam', 'temp', 'tmp',
+  'bar',
+  'baz',
+  'foo',
+  'ham',
+  'spam',
+  'temp',
+  'tmp',
 ];
 
 const scoped = (files, configs) => configs.map((config) => ({ ...config, files }));
@@ -121,55 +162,69 @@ export default [
       'import-x/resolver-next': [createTypeScriptImportResolver()],
     },
     rules: {
-      'no-unused-vars':             ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-      'no-console':                 'error',
-      'no-empty':                   ['error', { allowEmptyCatch: true }],
-      'eqeqeq':                     ['error', 'always', { null: 'ignore' }],
-      'no-shadow':                  'error',
-      'no-var':                     'error',
-      'prefer-const':               'error',
-      'prefer-template':            'error',
-      'object-shorthand':           'error',
-      'no-param-reassign':          ['error', { props: true }],
-      'no-implicit-coercion':       'error',
-      'no-throw-literal':           'error',
-      'no-use-before-define':       ['error', { functions: false }],
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-console': 'error',
+      'no-empty': ['error', { allowEmptyCatch: true }],
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
+      'no-shadow': 'error',
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'prefer-template': 'error',
+      'object-shorthand': 'error',
+      'no-param-reassign': ['error', { props: true }],
+      'no-implicit-coercion': 'error',
+      'no-throw-literal': 'error',
+      'no-use-before-define': ['error', { functions: false }],
       'no-promise-executor-return': 'error',
-      'no-constructor-return':      'error',
-      'consistent-return':          'error',
-      'default-case':               'error',
-      'guard-for-in':               'error',
-      'curly':                      ['error', 'all'],
-      'id-length':                  ['error', { min: 2, max: 45, exceptions: ['_'] }],
-      'id-denylist':                ['error', ...VARIABLE_NAMES_BLACKLIST],
-      'no-restricted-syntax': ['error',
-        { selector: 'ImportDeclaration[specifiers.length>8]', message: 'Не больше 8 имён в одном импорте (wemake MAX_IMPORT_FROM_MEMBERS).' },
-        { selector: 'ArrayPattern[elements.length>4]', message: 'Не больше 4 элементов в деструктуризации массива (wemake MAX_TUPLE_UNPACK_LENGTH).' },
-        { selector: 'ClassBody[body.length>7]', message: 'Не больше 7 членов класса (wemake MAX_METHODS).' },
+      'no-constructor-return': 'error',
+      'consistent-return': 'error',
+      'default-case': 'error',
+      'guard-for-in': 'error',
+      curly: ['error', 'all'],
+      'id-length': ['error', { min: 2, max: 45, exceptions: ['_'] }],
+      'id-denylist': ['error', ...VARIABLE_NAMES_BLACKLIST],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'ImportDeclaration[specifiers.length>8]',
+          message: 'Не больше 8 имён в одном импорте (wemake MAX_IMPORT_FROM_MEMBERS).',
+        },
+        {
+          selector: 'ArrayPattern[elements.length>4]',
+          message:
+            'Не больше 4 элементов в деструктуризации массива (wemake MAX_TUPLE_UNPACK_LENGTH).',
+        },
+        {
+          selector: 'ClassBody[body.length>7]',
+          message: 'Не больше 7 членов класса (wemake MAX_METHODS).',
+        },
       ],
 
       // Inline directives: only the next-line form, always with a reason
-      '@eslint-community/eslint-comments/no-use': ['error', { allow: ['eslint-disable-next-line'] }],
+      '@eslint-community/eslint-comments/no-use': [
+        'error',
+        { allow: ['eslint-disable-next-line'] },
+      ],
       '@eslint-community/eslint-comments/require-description': 'error',
       '@eslint-community/eslint-comments/no-unlimited-disable': 'error',
 
-      'import-x/no-cycle':           'error',
+      'import-x/no-cycle': 'error',
       'import-x/no-mutable-exports': 'error',
-      'import-x/no-unresolved':      ['error', { ignore: ['^virtual:'] }], // Vite virtual modules
+      'import-x/no-unresolved': ['error', { ignore: ['^virtual:'] }], // Vite virtual modules
 
       // Import order is owned by perfectionist
-      'perfectionist/sort-imports':       'error',
+      'perfectionist/sort-imports': 'error',
       'perfectionist/sort-named-imports': 'error',
 
       'security/detect-object-injection': 'off', // flags every obj[key]; noise without type info
       '@typescript-eslint/non-nullable-type-assertion-style': 'off', // its fix (`as T` → `x!`) violates no-non-null-assertion
 
       // Project conventions override unicorn defaults
-      'unicorn/name-replacements':          'off', // err, nav, el, btn are established
-      'unicorn/no-null':                    'off', // null used intentionally
-      'unicorn/no-negated-condition':       'off',
+      'unicorn/name-replacements': 'off', // err, nav, el, btn are established
+      'unicorn/no-null': 'off', // null used intentionally
+      'unicorn/no-negated-condition': 'off',
       'unicorn/no-array-callback-reference': 'off',
-      'unicorn/filename-case':              'off', // camelCase files are established
+      'unicorn/filename-case': 'off', // camelCase files are established
       'unicorn/no-unused-builtin-method-return': 'off', // false positives on our own .join() (TrysteroAdapter/FakeRoom), unrelated to Array#join
     },
   },
@@ -178,22 +233,28 @@ export default [
   {
     files: TS,
     rules: {
-      'no-undef':                           'off', // tsc checks undefined names, incl. DOM/lib types ESLint does not know
-      'no-unused-vars':                     'off', // reports parameter names in function types
-      '@typescript-eslint/no-unused-vars':  ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      'no-undef': 'off', // tsc checks undefined names, incl. DOM/lib types ESLint does not know
+      'no-unused-vars': 'off', // reports parameter names in function types
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+      ],
       // Fixers off: they insert empty stub comments that only silence the rule
       'jsdoc/require-param': ['error', { enableFixer: false }],
-      'jsdoc/require-jsdoc': ['error', {
-        enableFixer: false,
-        publicOnly: true,
-        require: {
-          ArrowFunctionExpression: true,
-          ClassDeclaration: true,
-          FunctionDeclaration: true,
-          FunctionExpression: true,
-          MethodDefinition: true,
+      'jsdoc/require-jsdoc': [
+        'error',
+        {
+          enableFixer: false,
+          publicOnly: true,
+          require: {
+            ArrowFunctionExpression: true,
+            ClassDeclaration: true,
+            FunctionDeclaration: true,
+            FunctionExpression: true,
+            MethodDefinition: true,
+          },
         },
-      }],
+      ],
       'jsdoc/no-types': 'error',
       'jsdoc/check-alignment': 'off', // conflicts with unicorn/no-asterisk-prefix-in-documentation-comments (asterisk-free doc blocks)
     },
@@ -222,14 +283,14 @@ export default [
           .filter((name) => name.startsWith('vitest/padding-around-'))
           .map((name) => [name, 'off']),
       ),
-      'vitest/prefer-expect-assertions':       'off', // noise for synchronous tests
-      'vitest/no-hooks':                       'off', // beforeEach is fine
-      'vitest/prefer-lowercase-title':         'off',
+      'vitest/prefer-expect-assertions': 'off', // noise for synchronous tests
+      'vitest/no-hooks': 'off', // beforeEach is fine
+      'vitest/prefer-lowercase-title': 'off',
       'vitest/prefer-describe-function-title': 'off',
-      'vitest/max-expects':                    ['error', { max: 5 }],
-      'vitest/max-nested-describe':            ['error', { max: 2 }],
-      'no-param-reassign':                     'off',
-      'unicorn/no-useless-undefined':          'off',
+      'vitest/max-expects': ['error', { max: 5 }],
+      'vitest/max-nested-describe': ['error', { max: 2 }],
+      'no-param-reassign': 'off',
+      'unicorn/no-useless-undefined': 'off',
     },
   },
 
@@ -238,8 +299,10 @@ export default [
     files: ['e2e/**/*.ts', 'playwright.config.ts'],
     plugins: { playwright },
     rules: {
-      ...Object.fromEntries(Object.keys(playwright.rules).map((name) => [`playwright/${name}`, 'error'])),
-      'playwright/require-tags':            'off', // two specs, tags add nothing
+      ...Object.fromEntries(
+        Object.keys(playwright.rules).map((name) => [`playwright/${name}`, 'error']),
+      ),
+      'playwright/require-tags': 'off', // two specs, tags add nothing
       'playwright/require-soft-assertions': 'off', // e2e must fail fast
     },
   },
@@ -252,15 +315,20 @@ export default [
     languageOptions: { parser: htmlParser },
     rules: {
       ...html.configs.recommended.rules,
-      'html/require-lang':          'error',
-      'html/require-meta-charset':  'error',
+      'html/require-lang': 'error',
+      'html/require-meta-charset': 'error',
       'html/require-meta-viewport': 'error',
-      'html/no-duplicate-id':       'error',
-      'html/require-button-type':   'error',
-      'html/no-target-blank':       'error',
-      'html/no-inline-styles':      'error',
-      'html/use-baseline':          'off', // playsinline is required for WebRTC on iOS
-      'html/indent':                ['error', 2],
+      'html/no-duplicate-id': 'error',
+      'html/require-button-type': 'error',
+      'html/no-target-blank': 'error',
+      'html/no-inline-styles': 'error',
+      'html/use-baseline': 'off', // playsinline is required for WebRTC on iOS
+      'html/indent': ['error', 2],
+      // Prettier owns HTML formatting: it self-closes void elements as `<meta ... />`
+      // and decides where attributes wrap.
+      'html/require-closing-tags': ['error', { selfClosing: 'always' }],
+      'html/no-extra-spacing-tags': ['error', { enforceBeforeSelfClose: true }],
+      'html/attrs-newline': 'off',
     },
   },
 ].map(noWarn);

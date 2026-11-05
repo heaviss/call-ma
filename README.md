@@ -31,12 +31,12 @@ Default STUN servers: `stun.l.google.com:19302`, plus `stun.nextcloud.com:3478`,
 
 Build-time overrides (Vite env, comma-separated):
 
-| Variable | Meaning |
-|---|---|
-| `VITE_STUN_SERVERS` | Replace the default STUN list |
+| Variable                                            | Meaning                                    |
+| --------------------------------------------------- | ------------------------------------------ |
+| `VITE_STUN_SERVERS`                                 | Replace the default STUN list              |
 | `VITE_TURN_URL`, `VITE_TURN_USER`, `VITE_TURN_PASS` | Add TURN server(s) with shared credentials |
-| `VITE_MQTT_RELAYS` | `wss://` MQTT brokers |
-| `VITE_TORRENT_TRACKERS` | `wss://` BitTorrent trackers |
+| `VITE_MQTT_RELAYS`                                  | `wss://` MQTT brokers                      |
+| `VITE_TORRENT_TRACKERS`                             | `wss://` BitTorrent trackers               |
 
 ```bash
 VITE_STUN_SERVERS=stun:mystun.example.com:3478 npm run build
@@ -67,6 +67,7 @@ No server is involved — the SDP offer/answer is compressed and encoded directl
 Push to `main` — the deploy workflow builds, runs coverage, generates a badge, and publishes to GitHub Pages automatically. The Pages source must be set to **GitHub Actions** in repo settings.
 
 To build for a subpath manually:
+
 ```bash
 VITE_BASE=/call-ma/ npm run build
 ```
@@ -89,6 +90,7 @@ npm run test:e2e      # Playwright e2e tests (run `npx playwright install --with
 ```
 
 Run a single test file:
+
 ```bash
 npx vitest run src/__tests__/trysteroAdapter.test.ts
 ```

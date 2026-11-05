@@ -176,9 +176,6 @@
     "jsdoc/require-jsdoc": {
       "count": 8
     },
-    "max-statements": {
-      "count": 1
-    },
     "no-restricted-syntax": {
       "count": 1
     }

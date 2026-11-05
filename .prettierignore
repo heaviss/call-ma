@@ -2,4 +2,9 @@ node_modules
 coverage
 dist
 packages/app/dist
+playwright-report
+test-results
+.claude/
 eslint-suppressions.json
+stylelint-suppressions.json
+package-lock.json

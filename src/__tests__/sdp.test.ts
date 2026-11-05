@@ -3,7 +3,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { decodeSdp, encodeSdp } from '../shared/sdp.ts';
 
 describe('sdp', () => {
-  const desc: RTCSessionDescriptionInit = { type: 'offer', sdp: 'v=0\r\no=- 1234 2 IN IP4 127.0.0.1\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n' };
+  const desc: RTCSessionDescriptionInit = {
+    type: 'offer',
+    sdp: 'v=0\r\no=- 1234 2 IN IP4 127.0.0.1\r\nm=audio 9 UDP/TLS/RTP/SAVPF 111\r\n',
+  };
 
   it('encodes to a URL-safe string without +, /, or =', async () => {
     const encoded = await encodeSdp(desc);
@@ -39,7 +42,10 @@ describe('sdp', () => {
 
 describe('decodeSdp with output larger than the stream buffer', () => {
   it('round-trips without deadlocking', async () => {
-    const sdp = Array.from({ length: 5000 }, (_, i) => `a=candidate:${i} 1 udp 2122260223 192.0.2.${i % 255} ${50_000 + i} typ host`).join('\r\n');
+    const sdp = Array.from(
+      { length: 5000 },
+      (_, i) => `a=candidate:${i} 1 udp 2122260223 192.0.2.${i % 255} ${50_000 + i} typ host`,
+    ).join('\r\n');
     const desc: RTCSessionDescriptionInit = { type: 'offer', sdp };
 
     const decoded = await decodeSdp(await encodeSdp(desc));

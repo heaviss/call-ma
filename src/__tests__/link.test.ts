@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { buildDirectUrl, buildRoomUrl, copyToClipboard, getRoomIdFromUrl, parseDirectUrl } from '../shared/link.ts';
+import {
+  buildDirectUrl,
+  buildRoomUrl,
+  copyToClipboard,
+  getRoomIdFromUrl,
+  parseDirectUrl,
+} from '../shared/link.ts';
 
 function makeLocation(href: string) {
   const u = new URL(href);
@@ -104,17 +110,25 @@ describe('buildDirectUrl', () => {
 
   it('preserves search params in the URL', () => {
     const locWithSearch = { origin: 'https://example.com', pathname: '/', search: '?foo=bar' };
-    expect(buildDirectUrl(locWithSearch, 'offer', 'abc')).toBe('https://example.com/?foo=bar#offer=abc');
+    expect(buildDirectUrl(locWithSearch, 'offer', 'abc')).toBe(
+      'https://example.com/?foo=bar#offer=abc',
+    );
   });
 });
 
 describe('parseDirectUrl', () => {
   it('returns type and encoded for an offer hash', () => {
-    expect(parseDirectUrl('https://example.com/#offer=abc123')).toStrictEqual({ type: 'offer', encoded: 'abc123' });
+    expect(parseDirectUrl('https://example.com/#offer=abc123')).toStrictEqual({
+      type: 'offer',
+      encoded: 'abc123',
+    });
   });
 
   it('returns type and encoded for an answer hash', () => {
-    expect(parseDirectUrl('https://example.com/#answer=xyz789')).toStrictEqual({ type: 'answer', encoded: 'xyz789' });
+    expect(parseDirectUrl('https://example.com/#answer=xyz789')).toStrictEqual({
+      type: 'answer',
+      encoded: 'xyz789',
+    });
   });
 
   it('returns null for a Trystero room hash', () => {

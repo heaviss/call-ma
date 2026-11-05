@@ -37,35 +37,57 @@ export class DirectAdapter {
 
   #setup(pc: PeerConnectionLike): void {
     pc.ontrack = ({ streams }) => {
-      if (this.#onStreamCb) { this.#onStreamCb(streams[0] ?? null); }
+      if (this.#onStreamCb) {
+        this.#onStreamCb(streams[0] ?? null);
+      }
     };
     pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'connected' && this.#onConnectCb) { this.#onConnectCb(); }
-      if (pc.connectionState === 'failed' && this.#onErrorCb) { this.#onErrorCb(new Error('connection failed')); }
+      if (pc.connectionState === 'connected' && this.#onConnectCb) {
+        this.#onConnectCb();
+      }
+      if (pc.connectionState === 'failed' && this.#onErrorCb) {
+        this.#onErrorCb(new Error('connection failed'));
+      }
     };
   }
 
   #waitForIce(pc: PeerConnectionLike): Promise<void> {
     return new Promise((resolve) => {
-      if (pc.iceGatheringState === 'complete') { resolve(); return; }
+      if (pc.iceGatheringState === 'complete') {
+        resolve();
+        return;
+      }
       const timer = setTimeout(resolve, 5000);
       pc.onicegatheringstatechange = () => {
-        if (pc.iceGatheringState !== 'complete') { return; }
+        if (pc.iceGatheringState !== 'complete') {
+          return;
+        }
         clearTimeout(timer);
         resolve();
       };
     });
   }
 
-  onStream(cb: (stream: MediaStream | null) => void): this { this.#onStreamCb  = cb; return this; }
-  onConnect(cb: () => void): this                               { this.#onConnectCb = cb; return this; }
-  onError(cb: (error: Error) => void): this                     { this.#onErrorCb   = cb; return this; }
+  onStream(cb: (stream: MediaStream | null) => void): this {
+    this.#onStreamCb = cb;
+    return this;
+  }
+  onConnect(cb: () => void): this {
+    this.#onConnectCb = cb;
+    return this;
+  }
+  onError(cb: (error: Error) => void): this {
+    this.#onErrorCb = cb;
+    return this;
+  }
 
   async createOffer(stream: MediaStream): Promise<string> {
     const pc = this.#PeerConnection(this.#iceConfig);
     this.#pc = pc;
     this.#setup(pc);
-    for (const track of stream.getTracks()) { pc.addTrack(track, stream); }
+    for (const track of stream.getTracks()) {
+      pc.addTrack(track, stream);
+    }
     const iceWaiter = this.#waitForIce(pc); // ponytail: register timer before any await so fake-timers tests work
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
@@ -80,7 +102,9 @@ export class DirectAdapter {
     const iceWaiter = this.#waitForIce(pc); // ponytail: register timer before any await so fake-timers tests work
     const offer = await decodeSdp(offerEncoded);
     await pc.setRemoteDescription(offer);
-    for (const track of stream.getTracks()) { pc.addTrack(track, stream); }
+    for (const track of stream.getTracks()) {
+      pc.addTrack(track, stream);
+    }
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
     await iceWaiter;
@@ -88,7 +112,9 @@ export class DirectAdapter {
   }
 
   async applyAnswer(answerEncoded: string): Promise<void> {
-    if (!this.#pc) { throw new Error('no pending offer'); }
+    if (!this.#pc) {
+      throw new Error('no pending offer');
+    }
     const answer = await decodeSdp(answerEncoded);
     await this.#pc.setRemoteDescription(answer);
   }
