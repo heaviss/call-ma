@@ -17,6 +17,8 @@ Rules are the strictest available, at wemake-python-styleguide level. Fix the co
 - Only `eslint-disable-next-line` with a `-- <reason>` is allowed; `npm run lint` fails on more than 10 `eslint-disable` comments. No `warn` level: every rule is `error` or `off`. Size and complexity thresholds apply to application code (`src/`, not tests).
 - `stylelint-suppressions.json` freezes old CSS violations and may only shrink. Stylelint 17 ignores stale entries, so CI runs `npm run lint:css:baseline`, which fails when the file would change. After fixing a frozen violation, run it locally and commit the shrunk file. Never add entries for new code.
 - Prettier owns formatting; linters must agree with it (hence the lowercase `<!doctype html>` in html-validate).
+- knip runs without a config, on its Vite/Vitest/Playwright plugins. Export only what another module imports; drop unused deps instead of ignoring them.
+- jscpd checks app code and `e2e/` only; tests are excluded for now.
 
 ## TypeScript
 

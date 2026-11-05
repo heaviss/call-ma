@@ -6,13 +6,13 @@ import { checkSupport, mapMediaError } from '../shared/browserSupport.ts';
 import { buildDirectUrl, buildRoomUrl, copyToClipboard, getRoomIdFromUrl, parseDirectUrl } from '../shared/link.ts';
 import { createLogger, type Logger } from './logger.ts';
 
-export interface AppWindow {
+interface AppWindow {
   location: Location;
   isSecureContext: boolean;
   RTCPeerConnection?: new (config: RTCConfiguration) => PeerConnectionLike;
 }
 
-export interface AppNavigator {
+interface AppNavigator {
   mediaDevices?: { getUserMedia?: MediaDevices['getUserMedia'] };
   clipboard?: Pick<Clipboard, 'writeText'>;
 }
