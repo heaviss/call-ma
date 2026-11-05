@@ -312,9 +312,6 @@
     }
   },
   "src/shared/sdp.ts": {
-    "@typescript-eslint/non-nullable-type-assertion-style": {
-      "count": 1
-    },
     "id-length": {
       "count": 2
     },
