@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { deriveMetrics, type StatsEntry } from '../shared/stats.ts';
 
 function makeReport(entries: StatsEntry[]): Map<string, StatsEntry> {

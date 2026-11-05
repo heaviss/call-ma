@@ -1,8 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { JSDOM } from 'jsdom';
 import type { Mock } from 'vitest';
+
+import { JSDOM } from 'jsdom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { initApp } from '../app/controller.ts';
-import { fakeStream, getEl, makeNavigator as makeFakeNavigator, type FakeNavigator } from './fakes/dom.ts';
+import { type FakeNavigator, fakeStream, getEl, makeNavigator as makeFakeNavigator } from './fakes/dom.ts';
 
 vi.mock('qrcode', () => ({ default: { toCanvas: vi.fn().mockResolvedValue(undefined) } }));
 

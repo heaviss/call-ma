@@ -27,7 +27,7 @@ const fromParams = (searchParams: URLSearchParams, key: string): string[] => sea
 
 function pick(searchParams: URLSearchParams, key: string, envValue: string | undefined, isValid: (url: string) => boolean): string[] | undefined {
   const fromUrl = fromParams(searchParams, key).filter(isValid);
-  if (fromUrl.length > 0) return fromUrl;
+  if (fromUrl.length > 0) { return fromUrl; }
   const fromEnv = splitList(envValue).filter(isValid);
   return fromEnv.length > 0 ? fromEnv : undefined;
 }

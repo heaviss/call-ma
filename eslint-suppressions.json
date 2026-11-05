@@ -1,0 +1,347 @@
+{
+  "src/__tests__/browserSupport.test.ts": {
+    "@typescript-eslint/no-empty-function": {
+      "count": 1
+    }
+  },
+  "src/__tests__/connectionAdapter.test.ts": {
+    "@typescript-eslint/no-confusing-void-expression": {
+      "count": 1
+    },
+    "@typescript-eslint/no-dynamic-delete": {
+      "count": 1
+    },
+    "@typescript-eslint/no-empty-function": {
+      "count": 2
+    },
+    "id-length": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "src/__tests__/create-flow.test.ts": {
+    "unicorn/no-non-function-verb-prefix": {
+      "count": 1
+    }
+  },
+  "src/__tests__/direct-flow.test.ts": {
+    "@typescript-eslint/require-await": {
+      "count": 5
+    },
+    "id-denylist": {
+      "count": 2
+    },
+    "id-length": {
+      "count": 20
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    },
+    "promise/param-names": {
+      "count": 20
+    }
+  },
+  "src/__tests__/directAdapter.test.ts": {
+    "@typescript-eslint/no-empty-function": {
+      "count": 1
+    },
+    "@typescript-eslint/require-await": {
+      "count": 6
+    },
+    "id-length": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "src/__tests__/example.test.ts": {
+    "id-length": {
+      "count": 2
+    },
+    "sonarjs/no-trivial-assertions": {
+      "count": 1
+    }
+  },
+  "src/__tests__/fakes/dom.ts": {
+    "@typescript-eslint/no-unnecessary-type-parameters": {
+      "count": 1
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 3
+    }
+  },
+  "src/__tests__/fakes/fakeRoom.ts": {
+    "jsdoc/require-jsdoc": {
+      "count": 6
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    },
+    "unicorn/no-non-function-verb-prefix": {
+      "count": 1
+    }
+  },
+  "src/__tests__/link.test.ts": {
+    "id-length": {
+      "count": 1
+    }
+  },
+  "src/__tests__/manifest.test.ts": {
+    "@typescript-eslint/require-await": {
+      "count": 1
+    }
+  },
+  "src/__tests__/roomContract.test.ts": {
+    "@typescript-eslint/no-empty-function": {
+      "count": 7
+    },
+    "@typescript-eslint/no-floating-promises": {
+      "count": 3
+    },
+    "@typescript-eslint/require-await": {
+      "count": 1
+    }
+  },
+  "src/__tests__/sdp.test.ts": {
+    "@typescript-eslint/restrict-template-expressions": {
+      "count": 3
+    },
+    "id-length": {
+      "count": 1
+    }
+  },
+  "src/__tests__/stats.test.ts": {
+    "id-length": {
+      "count": 1
+    }
+  },
+  "src/__tests__/trysteroAdapter.test.ts": {
+    "id-denylist": {
+      "count": 1
+    },
+    "id-length": {
+      "count": 1
+    }
+  },
+  "src/__tests__/ui.test.ts": {
+    "@typescript-eslint/no-deprecated": {
+      "count": 1
+    },
+    "@typescript-eslint/require-await": {
+      "count": 2
+    },
+    "no-unsanitized/method": {
+      "count": 1
+    },
+    "sonarjs/deprecation": {
+      "count": 1
+    },
+    "unicorn/no-non-function-verb-prefix": {
+      "count": 1
+    }
+  },
+  "src/app/controller.ts": {
+    "@typescript-eslint/no-empty-function": {
+      "count": 2
+    },
+    "@typescript-eslint/no-floating-promises": {
+      "count": 2
+    },
+    "@typescript-eslint/no-magic-numbers": {
+      "count": 1
+    },
+    "@typescript-eslint/no-misused-promises": {
+      "count": 3
+    },
+    "@typescript-eslint/no-non-null-assertion": {
+      "count": 1
+    },
+    "@typescript-eslint/prefer-optional-chain": {
+      "count": 1
+    },
+    "@typescript-eslint/return-await": {
+      "count": 1
+    },
+    "complexity": {
+      "count": 2
+    },
+    "import-x/default": {
+      "count": 1
+    },
+    "import-x/no-named-as-default-member": {
+      "count": 1
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 1
+    },
+    "max-lines-per-function": {
+      "count": 2
+    },
+    "max-statements": {
+      "count": 3
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 2
+    },
+    "sonarjs/pseudo-random": {
+      "count": 1
+    },
+    "unicorn/no-non-function-verb-prefix": {
+      "count": 1
+    }
+  },
+  "src/app/logger.ts": {
+    "jsdoc/require-jsdoc": {
+      "count": 1
+    },
+    "no-param-reassign": {
+      "count": 2
+    }
+  },
+  "src/connection/directAdapter.ts": {
+    "@typescript-eslint/no-magic-numbers": {
+      "count": 1
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 8
+    },
+    "max-statements": {
+      "count": 2
+    },
+    "no-param-reassign": {
+      "count": 3
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "src/connection/trysteroAdapter.ts": {
+    "@typescript-eslint/no-unnecessary-condition": {
+      "count": 2
+    },
+    "@typescript-eslint/prefer-nullish-coalescing": {
+      "count": 1
+    },
+    "id-length": {
+      "count": 1
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 8
+    },
+    "max-statements": {
+      "count": 1
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "src/pwa.ts": {
+    "jsdoc/require-jsdoc": {
+      "count": 1
+    }
+  },
+  "src/shared/browserSupport.ts": {
+    "@typescript-eslint/no-unnecessary-condition": {
+      "count": 2
+    },
+    "@typescript-eslint/prefer-nullish-coalescing": {
+      "count": 5
+    },
+    "complexity": {
+      "count": 1
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 2
+    }
+  },
+  "src/shared/config/connection.ts": {
+    "id-denylist": {
+      "count": 3
+    },
+    "id-length": {
+      "count": 1
+    },
+    "jsdoc/require-param": {
+      "count": 3
+    },
+    "jsdoc/require-returns": {
+      "count": 1
+    }
+  },
+  "src/shared/connection/ConnectionAdapter.ts": {
+    "@typescript-eslint/no-empty-function": {
+      "count": 1
+    },
+    "id-denylist": {
+      "count": 1
+    },
+    "id-length": {
+      "count": 1
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 12
+    },
+    "no-restricted-syntax": {
+      "count": 1
+    },
+    "sonarjs/no-duplicate-string": {
+      "count": 1
+    },
+    "unicorn/consistent-boolean-name": {
+      "count": 1
+    }
+  },
+  "src/shared/link.ts": {
+    "@typescript-eslint/prefer-nullish-coalescing": {
+      "count": 1
+    },
+    "id-denylist": {
+      "count": 5
+    },
+    "id-length": {
+      "count": 1
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 5
+    },
+    "unicorn/consistent-boolean-name": {
+      "count": 1
+    }
+  },
+  "src/shared/sdp.ts": {
+    "id-length": {
+      "count": 2
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 2
+    }
+  },
+  "src/shared/stats.ts": {
+    "@typescript-eslint/no-magic-numbers": {
+      "count": 2
+    },
+    "complexity": {
+      "count": 1
+    },
+    "jsdoc/require-jsdoc": {
+      "count": 1
+    },
+    "max-statements": {
+      "count": 1
+    },
+    "sonarjs/cognitive-complexity": {
+      "count": 1
+    },
+    "sonarjs/no-inverted-boolean-check": {
+      "count": 1
+    }
+  },
+  "vite.config.ts": {
+    "@typescript-eslint/prefer-nullish-coalescing": {
+      "count": 2
+    }
+  }
+}

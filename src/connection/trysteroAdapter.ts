@@ -56,18 +56,18 @@ export class TrysteroAdapter {
 
     for (const { joinRoom, relayUrls } of this._transports) {
       const config: JoinRoomConfig = { appId: 'call-ma' };
-      if (relayUrls?.length)        config.relayConfig = { urls: relayUrls };
-      if (this._iceServers?.length) config.rtcConfig   = { iceServers: this._iceServers };
+      if (relayUrls?.length)        {config.relayConfig = { urls: relayUrls };}
+      if (this._iceServers?.length) {config.rtcConfig   = { iceServers: this._iceServers };}
 
       const room = joinRoom(config, roomId, callbacks);
       this._rooms.push(room);
 
       room.onPeerJoin = (peerId) => {
         room.addStream(localStream, { target: peerId });
-        if (!connectedPeers.has(peerId)) this._onConnect?.(peerId);
+        if (!connectedPeers.has(peerId)) { this._onConnect?.(peerId); }
       };
       room.onPeerStream = (stream, peerId) => {
-        if (connectedPeers.has(peerId)) return;
+        if (connectedPeers.has(peerId)) { return; }
         connectedPeers.add(peerId);
         this._onStream?.(stream, peerId);
       };
@@ -80,7 +80,7 @@ export class TrysteroAdapter {
   }
 
   destroy(): void {
-    for (const r of this._rooms) r?.leave?.();
+    for (const r of this._rooms) { r?.leave?.(); }
     this._rooms = [];
   }
 }

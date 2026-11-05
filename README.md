@@ -74,11 +74,12 @@ VITE_BASE=/call-ma/ npm run build
 ## Development
 
 ```bash
-npm run lint          # ESLint (TS + HTML) + Stylelint (CSS) + html-validate + knip + jscpd
+npm run lint          # ESLint (TS + HTML, baseline in eslint-suppressions.json) + eslint-disable limit + Stylelint (CSS) + html-validate + knip + jscpd
 npm run typecheck     # tsc --noEmit (strict, see tsconfig.json)
 npm run lint:fix      # Auto-fix
 npm run lint:css      # CSS only (stylelint, baseline in stylelint-suppressions.json)
 npm run lint:html     # HTML only (html-validate)
+npm run lint:disable-limit # Fails on more than 10 eslint-disable comments
 npm run lint:knip     # Unused files, exports and dependencies (knip)
 npm run lint:dup      # Copy-paste detection in app code and e2e (jscpd, max 5 %)
 npm run format        # Prettier write

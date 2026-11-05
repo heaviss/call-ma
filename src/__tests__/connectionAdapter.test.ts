@@ -1,5 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import { ConnectionAdapter, assertAdapterShape } from '../shared/connection/ConnectionAdapter.ts';
+import { describe, expect, it } from 'vitest';
+
+import { assertAdapterShape, ConnectionAdapter } from '../shared/connection/ConnectionAdapter.ts';
 
 class MinimalAdapter extends ConnectionAdapter {}
 
