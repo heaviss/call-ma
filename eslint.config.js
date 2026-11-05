@@ -324,6 +324,11 @@ export default [
       'html/no-inline-styles': 'error',
       'html/use-baseline': 'off', // playsinline is required for WebRTC on iOS
       'html/indent': ['error', 2],
+      // Prettier owns HTML formatting: it self-closes void elements as `<meta ... />`
+      // and decides where attributes wrap.
+      'html/require-closing-tags': ['error', { selfClosing: 'always' }],
+      'html/no-extra-spacing-tags': ['error', { enforceBeforeSelfClose: true }],
+      'html/attrs-newline': 'off',
     },
   },
 ].map(noWarn);
