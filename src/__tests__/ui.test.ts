@@ -2,6 +2,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { getEl } from './fakes/dom.ts';
 
@@ -27,18 +28,10 @@ describe('UI Skeleton', () => {
     // Act
 
     // Assert
-    const createBtn = document.querySelector('#createBtn');
-    const copyBtn = document.querySelector('#copyBtn');
-    const localVideo = document.querySelector('#localVideo');
-    const remoteVideo = document.querySelector('#remoteVideo');
-    const logs = document.querySelector('#logs');
+    const required = ['#createBtn', '#copyBtn', '#localVideo', '#remoteVideo', '#logs'].map((selector) => document.querySelector(selector));
 
-    expect(createBtn).toBeTruthy();
-    expect(copyBtn).toBeTruthy();
+    expect(required).not.toContain(null);
     expect(document.querySelector('#inviteInput')).toBeNull();
-    expect(localVideo).toBeTruthy();
-    expect(remoteVideo).toBeTruthy();
-    expect(logs).toBeTruthy();
   });
 
   it('has accessible labels and initial states', async () => {

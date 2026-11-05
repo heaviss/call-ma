@@ -18,7 +18,7 @@ function fakeEnv(overrides: FakeEnvOverrides = {}): SupportEnv {
 
 describe('checkSupport', () => {
   it('returns ok:true in a fully capable environment', () => {
-    expect(checkSupport(fakeEnv())).toEqual({ ok: true, reason: null });
+    expect(checkSupport(fakeEnv())).toStrictEqual({ ok: true, reason: null });
   });
 
   it('returns ok:false when not a secure context', () => {

@@ -40,7 +40,7 @@ describe.each([
   it.each(HANDLERS)('%s is unset until assigned, not a subscribe method', (key) => {
     const room = makeRoom();
 
-    expect(typeof room[key]).not.toBe('function');
+    expect(room[key]).not.toBeTypeOf('function');
     room.leave();
   });
 
@@ -56,8 +56,7 @@ describe.each([
   it('exposes addStream and leave as methods', () => {
     const room = makeRoom();
 
-    expect(typeof room.addStream).toBe('function');
-    expect(typeof room.leave).toBe('function');
+    expect([typeof room.addStream, typeof room.leave]).toStrictEqual(['function', 'function']);
     room.leave();
   });
 });
@@ -73,7 +72,7 @@ describe('TrysteroAdapter against a real Trystero room', () => {
 
     adapter.join('room', fakeStream('local'));
 
-    expect(errors).toEqual([]);
+    expect(errors).toStrictEqual([]);
     adapter.destroy();
   });
 });
