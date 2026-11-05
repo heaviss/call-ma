@@ -162,6 +162,7 @@ export default [
       'perfectionist/sort-named-imports': 'error',
 
       'security/detect-object-injection': 'off', // flags every obj[key]; noise without type info
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off', // its fix (`as T` → `x!`) violates no-non-null-assertion
 
       // Project conventions override unicorn defaults
       'unicorn/name-replacements':          'off', // err, nav, el, btn are established
