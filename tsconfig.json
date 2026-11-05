@@ -5,7 +5,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "moduleDetection": "force",
-    "types": ["node", "vite/client", "vite-plugin-pwa/client", "vitest/globals"],
+    "types": ["node", "vite/client", "vite-plugin-pwa/client"],
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "isolatedModules": true,

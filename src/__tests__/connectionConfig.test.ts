@@ -8,7 +8,7 @@ describe('getConnectionConfig — ICE servers', () => {
   it('uses the default STUN list when nothing is configured', () => {
     const { iceServers } = getConnectionConfig({ env: {}, searchParams: noParams });
 
-    expect(iceServers).toEqual(DEFAULT_STUN_URLS.map((urls) => ({ urls })));
+    expect(iceServers).toStrictEqual(DEFAULT_STUN_URLS.map((urls) => ({ urls })));
   });
 
   it('includes STUN servers reachable from Russia by default', () => {
@@ -20,7 +20,7 @@ describe('getConnectionConfig — ICE servers', () => {
 
     const { iceServers } = getConnectionConfig({ env, searchParams: noParams });
 
-    expect(iceServers).toEqual([{ urls: 'stun:a.example.com:3478' }, { urls: 'stun:b.example.com' }]);
+    expect(iceServers).toStrictEqual([{ urls: 'stun:a.example.com:3478' }, { urls: 'stun:b.example.com' }]);
   });
 
   it('lets ?stun= override VITE_STUN_SERVERS', () => {
@@ -29,7 +29,7 @@ describe('getConnectionConfig — ICE servers', () => {
 
     const { iceServers } = getConnectionConfig({ env, searchParams });
 
-    expect(iceServers).toEqual([{ urls: 'stun:url.example.com' }, { urls: 'stun:url2.example.com' }]);
+    expect(iceServers).toStrictEqual([{ urls: 'stun:url.example.com' }, { urls: 'stun:url2.example.com' }]);
   });
 
   it('ignores ?stun= entries that are not STUN URLs', () => {
@@ -37,7 +37,7 @@ describe('getConnectionConfig — ICE servers', () => {
 
     const { iceServers } = getConnectionConfig({ env: {}, searchParams });
 
-    expect(iceServers).toEqual(DEFAULT_STUN_URLS.map((urls) => ({ urls })));
+    expect(iceServers).toStrictEqual(DEFAULT_STUN_URLS.map((urls) => ({ urls })));
   });
 
   it('appends TURN servers with credentials from env', () => {
@@ -50,7 +50,7 @@ describe('getConnectionConfig — ICE servers', () => {
 
     const { iceServers } = getConnectionConfig({ env, searchParams: noParams });
 
-    expect(iceServers).toEqual([
+    expect(iceServers).toStrictEqual([
       { urls: 'stun:a.example.com' },
       { urls: 'turns:t1.example.com:5349', username: 'u', credential: 'p' },
       { urls: 'turn:t2.example.com', username: 'u', credential: 'p' },
@@ -82,8 +82,8 @@ describe('getConnectionConfig — relays', () => {
 
     const config = getConnectionConfig({ env, searchParams: noParams });
 
-    expect(config.mqttRelayUrls).toEqual(['wss://a.example.com/mqtt']);
-    expect(config.torrentRelayUrls).toEqual(['wss://t.example.com']);
+    expect(config.mqttRelayUrls).toStrictEqual(['wss://a.example.com/mqtt']);
+    expect(config.torrentRelayUrls).toStrictEqual(['wss://t.example.com']);
   });
 
   it('lets URL params override env relays', () => {
@@ -92,7 +92,7 @@ describe('getConnectionConfig — relays', () => {
 
     const config = getConnectionConfig({ env, searchParams });
 
-    expect(config.mqttRelayUrls).toEqual(['wss://url.example.com']);
-    expect(config.torrentRelayUrls).toEqual(['wss://url-t.example.com']);
+    expect(config.mqttRelayUrls).toStrictEqual(['wss://url.example.com']);
+    expect(config.torrentRelayUrls).toStrictEqual(['wss://url-t.example.com']);
   });
 });

@@ -22,6 +22,30 @@ const SCRIPTS = ['**/*.{js,ts}'];
 const TS = ['**/*.ts'];
 const APP = ['src/**/*.ts'];
 const APP_EXCLUDES = ['src/__tests__/**', 'src/**/*.test.ts'];
+const VITEST_FILES = ['src/__tests__/**/*.ts', 'src/**/*.{test,spec}.ts'];
+const TESTS = [...VITEST_FILES, 'e2e/**/*.ts'];
+
+const THRESHOLDS = {
+  'complexity':                     ['error', 6],
+  'max-depth':                      ['error', 3],
+  'max-params':                     ['error', 5],
+  'max-statements':                 ['error', 9],
+  'max-lines':                      ['error', { max: 200, skipBlankLines: true, skipComments: true }],
+  'max-nested-callbacks':           ['error', 3],
+  'max-classes-per-file':           ['error', 1],
+  'no-magic-numbers':               'off',
+  'sonarjs/cognitive-complexity':   ['error', 12],
+  'sonarjs/expression-complexity':  ['error', { max: 3 }],
+  'sonarjs/nested-control-flow':    ['error', { maximumNestingLevel: 3 }],
+  'import-x/max-dependencies':      ['error', { max: 12 }],
+};
+
+// Off in tests (#15): describe callbacks span the file, test data is numeric, fixtures repeat.
+const APP_ONLY_THRESHOLDS = {
+  'max-lines-per-function':         ['error', { max: 30, skipBlankLines: true, skipComments: true }],
+  '@typescript-eslint/no-magic-numbers': ['error', { ignore: [-1, 0, 1, 2], ignoreDefaultValues: true, ignoreArrayIndexes: true, enforceConst: true }],
+  'sonarjs/no-duplicate-string':    ['error', { threshold: 3 }],
+};
 
 // wemake-python-styleguide VARIABLE_NAMES_BLACKLIST (constants.py), complete
 const VARIABLE_NAMES_BLACKLIST = [
@@ -138,6 +162,7 @@ export default [
       'perfectionist/sort-named-imports': 'error',
 
       'security/detect-object-injection': 'off', // flags every obj[key]; noise without type info
+      '@typescript-eslint/non-nullable-type-assertion-style': 'off', // its fix (`as T` → `x!`) violates no-non-null-assertion
 
       // Project conventions override unicorn defaults
       'unicorn/name-replacements':          'off', // err, nav, el, btn are established
@@ -174,48 +199,49 @@ export default [
     },
   },
 
-  // ── Application code: thresholds (wemake numbers where they exist) ───────
+  // ── Thresholds (wemake numbers where they exist) ─────────────────────────
+  // Application code gets all of them; tests and e2e drop the three in TEST_RELAXED.
   {
     files: APP,
     ignores: APP_EXCLUDES,
-    rules: {
-      'complexity':                     ['error', 6],
-      'max-depth':                      ['error', 3],
-      'max-params':                     ['error', 5],
-      'max-statements':                 ['error', 9],
-      'max-lines-per-function':         ['error', { max: 30, skipBlankLines: true, skipComments: true }],
-      'max-lines':                      ['error', { max: 200, skipBlankLines: true, skipComments: true }],
-      'max-nested-callbacks':           ['error', 3],
-      'max-classes-per-file':           ['error', 1],
-      'no-magic-numbers':               'off',
-      '@typescript-eslint/no-magic-numbers': ['error', { ignore: [-1, 0, 1, 2], ignoreDefaultValues: true, ignoreArrayIndexes: true, enforceConst: true }],
-      'sonarjs/cognitive-complexity':   ['error', 12],
-      'sonarjs/expression-complexity':  ['error', { max: 3 }],
-      'sonarjs/no-duplicate-string':    ['error', { threshold: 3 }],
-      'sonarjs/nested-control-flow':    ['error', { maximumNestingLevel: 3 }],
-      'import-x/max-dependencies':      ['error', { max: 12 }],
-    },
+    rules: { ...THRESHOLDS, ...APP_ONLY_THRESHOLDS },
+  },
+  {
+    files: TESTS,
+    rules: THRESHOLDS,
   },
 
   // ── Test files ─────────────────────────────────────────────────────────────
   {
-    files: ['src/**/*.{test,spec}.ts'],
-    plugins: { vitest },
+    ...vitest.configs.all,
+    files: VITEST_FILES,
     rules: {
-      ...vitest.configs.recommended.rules,
-      'no-param-reassign':              'off',
-      'unicorn/no-useless-undefined':   'off',
-      'no-promise-executor-return':     'off', // tick-flush pattern: new Promise(r => setTimeout(r, 0))
-    },
-    languageOptions: {
-      globals: { ...vitest.environments.env.globals },
+      ...vitest.configs.all.rules,
+      ...Object.fromEntries(
+        Object.keys(vitest.configs.all.rules)
+          .filter((name) => name.startsWith('vitest/padding-around-'))
+          .map((name) => [name, 'off']),
+      ),
+      'vitest/prefer-expect-assertions':       'off', // noise for synchronous tests
+      'vitest/no-hooks':                       'off', // beforeEach is fine
+      'vitest/prefer-lowercase-title':         'off',
+      'vitest/prefer-describe-function-title': 'off',
+      'vitest/max-expects':                    ['error', { max: 5 }],
+      'vitest/max-nested-describe':            ['error', { max: 2 }],
+      'no-param-reassign':                     'off',
+      'unicorn/no-useless-undefined':          'off',
     },
   },
 
   // ── E2E files ────────────────────────────────────────────────────────────
   {
     files: ['e2e/**/*.ts', 'playwright.config.ts'],
-    ...playwright.configs['flat/recommended'],
+    plugins: { playwright },
+    rules: {
+      ...Object.fromEntries(Object.keys(playwright.rules).map((name) => [`playwright/${name}`, 'error'])),
+      'playwright/require-tags':            'off', // two specs, tags add nothing
+      'playwright/require-soft-assertions': 'off', // e2e must fail fast
+    },
   },
 
   // ── HTML files ─────────────────────────────────────────────────────────────

@@ -35,7 +35,7 @@ describe('TrysteroAdapter', () => {
   });
 
   it('fires onConnect when a peer joins', () => {
-    const onConnect = vi.fn();
+    const onConnect = vi.fn<Parameters<TrysteroAdapter['onConnect']>[0]>();
     adapter.onConnect(onConnect).join('abc12345', localStream);
     fakeRoom.simulatePeerJoin('peer-1');
 
@@ -44,7 +44,7 @@ describe('TrysteroAdapter', () => {
 
   it('does not fire onConnect when the peer stream arrived before the join event', () => {
     // Arrange — stream arrives first, adding peer to connectedPeers
-    const onConnect = vi.fn();
+    const onConnect = vi.fn<Parameters<TrysteroAdapter['onConnect']>[0]>();
     adapter.onConnect(onConnect).join('abc12345', localStream);
     fakeRoom.simulatePeerStream(fakeStream('remote'), 'peer-1');
 
@@ -56,7 +56,7 @@ describe('TrysteroAdapter', () => {
   });
 
   it('fires onStream when a peer sends their stream', () => {
-    const onStream = vi.fn();
+    const onStream = vi.fn<Parameters<TrysteroAdapter['onStream']>[0]>();
     const remoteStream = fakeStream('remote');
     adapter.onStream(onStream).join('abc12345', localStream);
     fakeRoom.simulatePeerStream(remoteStream, 'peer-1');
@@ -65,7 +65,7 @@ describe('TrysteroAdapter', () => {
   });
 
   it('fires onPeerLeave when a peer leaves', () => {
-    const onPeerLeave = vi.fn();
+    const onPeerLeave = vi.fn<Parameters<TrysteroAdapter['onPeerLeave']>[0]>();
     adapter.onPeerLeave(onPeerLeave).join('abc12345', localStream);
     fakeRoom.simulatePeerLeave('peer-1');
 
@@ -80,7 +80,7 @@ describe('TrysteroAdapter', () => {
   });
 
   it('reports transport join errors through onError', () => {
-    const onError = vi.fn();
+    const onError = vi.fn<Parameters<TrysteroAdapter['onError']>[0]>();
     adapter.onError(onError).join('abc12345', localStream);
     const callbacks = fakeJoinRoom.mock.calls[0]?.[2];
 
@@ -90,7 +90,7 @@ describe('TrysteroAdapter', () => {
   });
 
   it('lets programmer errors from joinRoom propagate instead of hiding them in onError', () => {
-    const onError = vi.fn();
+    const onError = vi.fn<Parameters<TrysteroAdapter['onError']>[0]>();
     fakeJoinRoom.mockImplementation(() => { throw new TypeError('bad config'); });
 
     expect(() => adapter.onError(onError).join('abc12345', localStream)).toThrow('bad config');
@@ -151,7 +151,7 @@ describe('TrysteroAdapter', () => {
       const multiAdapter = new TrysteroAdapter({
         transports: [{ joinRoom: fakeJoinRoom }, { joinRoom: fakeJoinRoom2 }],
       });
-      const onStream = vi.fn();
+      const onStream = vi.fn<Parameters<TrysteroAdapter['onStream']>[0]>();
       const remoteStream1 = fakeStream('remote-mqtt');
       const remoteStream2 = fakeStream('remote-torrent');
 
@@ -169,7 +169,7 @@ describe('TrysteroAdapter', () => {
       const multiAdapter = new TrysteroAdapter({
         transports: [{ joinRoom: fakeJoinRoom }, { joinRoom: fakeJoinRoom2 }],
       });
-      const onStream = vi.fn();
+      const onStream = vi.fn<Parameters<TrysteroAdapter['onStream']>[0]>();
       const remoteStream = fakeStream('remote');
 
       multiAdapter.onStream(onStream).join('abc12345', localStream);

@@ -1,12 +1,14 @@
 import type { Mock } from 'vitest';
 
 import { JSDOM } from 'jsdom';
+import { setTimeout } from 'node:timers/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { initApp } from '../app/controller.ts';
 import { type FakeNavigator, fakeStream, getEl, makeNavigator as makeFakeNavigator } from './fakes/dom.ts';
 
-vi.mock('qrcode', () => ({ toCanvas: vi.fn().mockResolvedValue(undefined) }));
+// eslint-disable-next-line vitest/prefer-import-in-mock -- the typed import() form checks the factory against @types/qrcode, whose overloaded toCanvas cannot be expressed as a Mock
+vi.mock('qrcode', () => ({ toCanvas: vi.fn<() => Promise<void>>().mockResolvedValue(undefined) }));
 
 class FakePeerConnection {
   #tracks: { track: MediaStreamTrack; stream: MediaStream }[] = [];
@@ -57,7 +59,7 @@ function makeNavigator(): FakeNavigator {
 
 // The controller only calls `new window.RTCPeerConnection(cfg)`; a regular function works with `new`.
 function stubPeerConnection(pc: FakePeerConnection): Mock {
-  return vi.fn(function () { return pc; });
+  return vi.fn<() => FakePeerConnection>(function () { return pc; });
 }
 
 describe('direct mode — initiator flow', () => {
@@ -78,7 +80,7 @@ describe('direct mode — initiator flow', () => {
     const directPanel = getEl(dom.window.document, '#directPanel');
 
     directBtn.click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     expect(directPanel.hidden).toBe(false);
   });
@@ -86,7 +88,7 @@ describe('direct mode — initiator flow', () => {
   it('directCopyBtn is enabled after offer is created', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     expect(getEl<HTMLButtonElement>(dom.window.document, '#directCopyBtn').disabled).toBe(false);
   });
@@ -94,7 +96,7 @@ describe('direct mode — initiator flow', () => {
   it('directConnectBtn is enabled after offer is created', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     expect(getEl<HTMLButtonElement>(dom.window.document, '#directConnectBtn').disabled).toBe(false);
   });
@@ -102,7 +104,7 @@ describe('direct mode — initiator flow', () => {
   it('directConnectBtn applies the answer and enables connect', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     // Simulate pasting a valid answer URL (we use the offer URL as a stand-in for structure)
     const answerInput = getEl<HTMLInputElement>(dom.window.document, '#directAnswerInput');
@@ -115,7 +117,7 @@ describe('direct mode — initiator flow', () => {
     // Assert button was enabled by the controller (not manually)
     expect(connectBtn.disabled).toBe(false);
     connectBtn.click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     expect(pc.remoteDescription?.type).toBe('answer');
   });
@@ -123,25 +125,25 @@ describe('direct mode — initiator flow', () => {
   it('directCopyBtn click copies the direct URL to clipboard', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     getEl<HTMLButtonElement>(dom.window.document, '#directCopyBtn').click();
-    await new Promise((r) => setTimeout(r, 10));
+    await setTimeout(10);
 
-    expect(navigator.clipboard.writeText).toHaveBeenCalled();
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(expect.any(String));
     expect(getEl(dom.window.document, '#logs').textContent).toContain('Direct link copied');
   });
 
   it('directConnectBtn with invalid URL logs error message', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     // Leave input empty — invalid answer URL
     const connectBtn = getEl<HTMLButtonElement>(dom.window.document, '#directConnectBtn');
     connectBtn.disabled = false;
     connectBtn.click();
-    await new Promise((r) => setTimeout(r, 10));
+    await setTimeout(10);
 
     expect(getEl(dom.window.document, '#logs').textContent).toContain('Invalid answer link');
   });
@@ -149,7 +151,7 @@ describe('direct mode — initiator flow', () => {
   it('directConnectBtn logs error when applyAnswer throws', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     // Make setRemoteDescription throw so applyAnswer fails
     pc.setRemoteDescription = async () => { throw new Error('SDP error'); };
@@ -160,7 +162,7 @@ describe('direct mode — initiator flow', () => {
     const connectBtn = getEl<HTMLButtonElement>(dom.window.document, '#directConnectBtn');
     connectBtn.disabled = false;
     connectBtn.click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     expect(getEl(dom.window.document, '#logs').textContent).toContain('Direct connect error');
   });
@@ -168,7 +170,7 @@ describe('direct mode — initiator flow', () => {
   it('onStream callback sets remoteVideo srcObject', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     const remoteStream = fakeStream('remote');
     pc.simulateTrack(remoteStream);
@@ -179,7 +181,7 @@ describe('direct mode — initiator flow', () => {
   it('onConnect callback logs connection established', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     pc.connectionState = 'connected';
     pc.onconnectionstatechange?.();
@@ -190,7 +192,7 @@ describe('direct mode — initiator flow', () => {
   it('onError callback logs connection error', async () => {
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     pc.connectionState = 'failed';
     pc.onconnectionstatechange?.();
@@ -200,11 +202,11 @@ describe('direct mode — initiator flow', () => {
 
   it('startDirectMode returns silently when getMedia throws', async () => {
     const failNav = makeNavigator();
-    failNav.mediaDevices.getUserMedia = vi.fn().mockRejectedValue(new Error('denied'));
+    vi.spyOn(failNav.mediaDevices, 'getUserMedia').mockRejectedValue(new Error('denied'));
 
     initApp({ document: dom.window.document, window: dom.window, navigator: failNav, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     // Panel shows (happens before getMedia), but offer never completes
     expect(getEl(dom.window.document, '#directPanel').hidden).toBe(false);
@@ -216,7 +218,7 @@ describe('direct mode — initiator flow', () => {
     initApp({ document: bareDom.window.document, window: bareDom.window, navigator, transports: [] });
 
     getEl<HTMLButtonElement>(bareDom.window.document, '#directBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await setTimeout(50);
 
     expect(getEl(bareDom.window.document, '#logs').textContent)
       .toContain('Direct mode error: window.RTCPeerConnection is not a constructor');
@@ -239,7 +241,7 @@ describe('direct mode — initiator flow', () => {
 
     initApp({ document: minDom.window.document, window: minDom.window, navigator: minNav, transports: [] });
     getEl<HTMLButtonElement>(minDom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     // directCopyBtn should be enabled even without optional elements
     expect(getEl<HTMLButtonElement>(minDom.window.document, '#directCopyBtn').disabled).toBe(false);
@@ -251,7 +253,7 @@ describe('direct mode — initiator flow', () => {
 
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     expect(getEl<HTMLButtonElement>(dom.window.document, '#directCopyBtn').disabled).toBe(false);
     expect(getEl(dom.window.document, '#logs').textContent).toContain('QR rendering failed');
@@ -264,7 +266,7 @@ describe('direct mode — initiator flow', () => {
     directBtn.click();
     directBtn.click();
     directBtn.click();
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     expect(navigator.mediaDevices.getUserMedia).toHaveBeenCalledTimes(1);
   });
@@ -299,7 +301,7 @@ describe('direct mode — receiver flow (offer in URL hash)', () => {
     dom2.window['RTCPeerConnection'] = stubPeerConnection(pc2); // ponytail: vi.fn().mockReturnValue fails with `new` in Vitest 4
 
     initApp({ document: dom2.window.document, window: dom2.window, navigator: nav2, transports: [] });
-    await new Promise((r) => setTimeout(r, 50));
+    await setTimeout(50);
 
     expect(pc2.localDescription?.type).toBe('answer');
     expect(getEl(dom2.window.document, '#directPanel').hidden).toBe(false);
@@ -311,7 +313,7 @@ describe('direct mode — receiver flow (offer in URL hash)', () => {
     const nav3 = makeNavigator();
 
     initApp({ document: dom3.window.document, window: dom3.window, navigator: nav3, transports: [] });
-    await new Promise((r) => setTimeout(r, 0));
+    await setTimeout(0);
 
     const status = getEl(dom3.window.document, '#directStatus');
     expect(status.textContent).toContain('Paste this link');

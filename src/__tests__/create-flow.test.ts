@@ -2,6 +2,7 @@ import type { DOMWindow } from 'jsdom';
 import type { Mock } from 'vitest';
 
 import { JSDOM } from 'jsdom';
+import { setTimeout } from 'node:timers/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { JoinRoomLike } from '../connection/trysteroAdapter.ts';
@@ -47,10 +48,10 @@ describe('create conference flow (integration, jsdom)', () => {
 
     // Act
     createBtn.click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert
-    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalled();
+    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true, video: true });
     expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, expect.stringMatching(/^[a-z0-9]{8}$/), expect.any(Object));
     expect(copyBtn.disabled).toBe(false);
     expect(controller.state.link).toMatch(/#[a-z0-9]{8}$/);
@@ -64,7 +65,7 @@ describe('create conference flow (integration, jsdom)', () => {
 
     // Act
     getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert
     expect(getEl<HTMLVideoElement>(document, '#localVideo').srcObject).toBe(localStream);
@@ -74,7 +75,7 @@ describe('create conference flow (integration, jsdom)', () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Act
     const remoteStream = fakeStream('remote-stream');
@@ -88,7 +89,7 @@ describe('create conference flow (integration, jsdom)', () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Act
     fakeRoom.simulatePeerJoin('peer-1');
@@ -101,25 +102,25 @@ describe('create conference flow (integration, jsdom)', () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert — appId is consistent
-    expect(fakeJoinRoom.mock.calls[0]?.[0]).toEqual({ appId: 'call-ma' });
+    expect(fakeJoinRoom.mock.calls[0]?.[0]).toStrictEqual({ appId: 'call-ma' });
   });
 
   it('copies the link and logs confirmation when copy button is clicked after creating a room', async () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Act
     navigatorLike.clipboard.writeText.mockResolvedValue(undefined);
     getEl<HTMLButtonElement>(document, '#copyBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert
-    expect(navigatorLike.clipboard.writeText).toHaveBeenCalled();
+    expect(navigatorLike.clipboard.writeText).toHaveBeenCalledWith(expect.stringContaining('#'));
     expect(getEl(document, '#logs').textContent).toMatch(/copied/i);
   });
 
@@ -128,11 +129,11 @@ describe('create conference flow (integration, jsdom)', () => {
     const noClipboardNavigator = { mediaDevices: makeNavigator(fakeStream('stream')).mediaDevices };
     initApp({ document, window, navigator: noClipboardNavigator, joinRoom: fakeJoinRoom });
     getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Act
     getEl<HTMLButtonElement>(document, '#copyBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert
     expect(getEl(document, '#logs').textContent).toMatch(/could not copy/i);

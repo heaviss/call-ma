@@ -1,6 +1,7 @@
 import type { Mock } from 'vitest';
 
 import { JSDOM } from 'jsdom';
+import { setTimeout } from 'node:timers/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { JoinRoomLike } from '../connection/trysteroAdapter.ts';
@@ -43,11 +44,11 @@ describe('auto-join flow (Person B opens shared link)', () => {
       navigator: navigatorLike,
       joinRoom: fakeJoinRoom,
     });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert
     expect(fakeJoinRoom).toHaveBeenCalledWith({ appId: 'call-ma' }, 'abc12345', expect.any(Object));
-    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalled();
+    expect(navigatorLike.mediaDevices.getUserMedia).toHaveBeenCalledWith({ audio: true, video: true });
     expect(getEl<HTMLButtonElement>(dom.window.document, '#copyBtn').disabled).toBe(false);
     expect(controller.state.link).toContain('#abc12345');
   });
@@ -60,7 +61,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
 
     // Act
     initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert
     expect(getEl<HTMLVideoElement>(dom.window.document, '#localVideo').srcObject).toBe(localStream);
@@ -70,7 +71,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
     // Arrange
     const dom = setupDomWithRoomId();
     initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Act
     const remoteStream = fakeStream('remote-stream');
@@ -87,7 +88,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
     });
 
     initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     expect(fakeJoinRoom).not.toHaveBeenCalled();
   });
@@ -99,7 +100,7 @@ describe('auto-join flow (Person B opens shared link)', () => {
     });
 
     initApp({ document: dom.window.document, window: dom.window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     expect(fakeJoinRoom).not.toHaveBeenCalled();
   });

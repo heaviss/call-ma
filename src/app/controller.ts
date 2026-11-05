@@ -12,7 +12,6 @@ import {
 import { showDirectPanel, startDirectMode } from './directMode.ts';
 import { createLogger, type Logger } from './logger.ts';
 
-export type { AppDeps, AppNavigator, AppWindow } from './context.ts';
 
 export interface AppController {
   state: { link: string | null };
