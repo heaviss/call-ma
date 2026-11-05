@@ -46,6 +46,11 @@ function fakeStream(id = 'stream-1'): MediaStream {
   return makeStream(id, [{ kind: 'video', id }]);
 }
 
+// Must be a regular function (not arrow) so it works with `new`.
+function stubPeerConnection(pc: FakePeerConnection) {
+  return vi.fn<() => FakePeerConnection>(function () { return pc; });
+}
+
 describe('DirectAdapter', () => {
   let pc: FakePeerConnection;
   let adapter: DirectAdapter;
@@ -59,7 +64,7 @@ describe('DirectAdapter', () => {
     it('returns a non-empty encoded string', async () => {
       const encoded = await adapter.createOffer(fakeStream());
 
-      expect(typeof encoded).toBe('string');
+      expect(encoded).toBeTypeOf('string');
       expect(encoded.length).toBeGreaterThan(0);
     });
 
@@ -68,13 +73,13 @@ describe('DirectAdapter', () => {
 
       await adapter.createOffer(stream);
 
-      expect(pc.tracks.some((t) => t.stream === stream)).toBe(true);
+      expect(pc.tracks).toContainEqual(expect.objectContaining({ stream }));
     });
 
     it('sets local description on the peer connection', async () => {
       await adapter.createOffer(fakeStream());
 
-      expect(pc.localDescription).toEqual({ type: 'offer', sdp: 'v=0\r\nfake-offer' });
+      expect(pc.localDescription).toStrictEqual({ type: 'offer', sdp: 'v=0\r\nfake-offer' });
     });
   });
 
@@ -86,7 +91,7 @@ describe('DirectAdapter', () => {
 
       const answerEncoded = await answerAdapter.createAnswer(offerEncoded, fakeStream('stream-2'));
 
-      expect(typeof answerEncoded).toBe('string');
+      expect(answerEncoded).toBeTypeOf('string');
       expect(answerEncoded.length).toBeGreaterThan(0);
     });
 
@@ -120,7 +125,7 @@ describe('DirectAdapter', () => {
 
   describe('callbacks', () => {
     it('fires onStream when a remote track arrives', async () => {
-      const onStream = vi.fn();
+      const onStream = vi.fn<Parameters<DirectAdapter['onStream']>[0]>();
       const remoteStream = fakeStream('remote');
       adapter.onStream(onStream);
 
@@ -131,7 +136,7 @@ describe('DirectAdapter', () => {
     });
 
     it('fires onStream with null when a remote track arrives without a stream', async () => {
-      const onStream = vi.fn();
+      const onStream = vi.fn<Parameters<DirectAdapter['onStream']>[0]>();
       adapter.onStream(onStream);
       await adapter.createOffer(fakeStream());
 
@@ -141,13 +146,13 @@ describe('DirectAdapter', () => {
     });
 
     it('fires onConnect when connection state becomes connected', async () => {
-      const onConnect = vi.fn();
+      const onConnect = vi.fn<Parameters<DirectAdapter['onConnect']>[0]>();
       adapter.onConnect(onConnect);
 
       await adapter.createOffer(fakeStream());
       pc.simulateConnected();
 
-      expect(onConnect).toHaveBeenCalledOnce();
+      expect(onConnect).toHaveBeenCalledExactlyOnceWith();
     });
 
     it('supports fluent chaining of callbacks', () => {
@@ -194,35 +199,33 @@ describe('DirectAdapter', () => {
       const encoded = await adapter.createOffer(fakeStream());
 
       expect(pc.localDescription).not.toBeNull();
-      expect(typeof encoded).toBe('string');
+      expect(encoded).toBeTypeOf('string');
     });
   });
 
   describe('error handling', () => {
     it('fires onError when connection state becomes failed', async () => {
-      const onError = vi.fn();
+      const onError = vi.fn<Parameters<DirectAdapter['onError']>[0]>();
       adapter.onError(onError);
 
       await adapter.createOffer(fakeStream());
       pc.simulateFailed();
 
-      expect(onError).toHaveBeenCalledOnce();
-      expect(onError.mock.calls[0]?.[0]).toBeInstanceOf(Error);
+      expect(onError).toHaveBeenCalledExactlyOnceWith(expect.any(Error));
     });
   });
 
   describe('default PeerConnection factory', () => {
     it('falls back to globalThis.RTCPeerConnection when none is provided', async () => {
       const fakePc = new FakePeerConnection();
-      // Must be a regular function (not arrow) so it works with `new`
-      const FakeRTC = vi.fn(function () { return fakePc; });
+      const FakeRTC = stubPeerConnection(fakePc);
       vi.stubGlobal('RTCPeerConnection', FakeRTC);
 
       const defaultAdapter = new DirectAdapter({ iceServers: [{ urls: 'stun:stun.example.com' }] });
       const encoded = await defaultAdapter.createOffer(fakeStream());
 
-      expect(FakeRTC).toHaveBeenCalledOnce();
-      expect(typeof encoded).toBe('string');
+      expect(FakeRTC).toHaveBeenCalledExactlyOnceWith({ iceServers: [{ urls: 'stun:stun.example.com' }] });
+      expect(encoded).toBeTypeOf('string');
 
       vi.unstubAllGlobals();
     });

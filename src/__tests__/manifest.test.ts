@@ -1,4 +1,6 @@
 // @vitest-environment node
+import { describe, expect, it } from 'vitest';
+
 import { manifest } from '../../vite.config.ts';
 
 describe('PWA manifest config', () => {
@@ -8,16 +10,10 @@ describe('PWA manifest config', () => {
     // Act
 
     // Assert
-    expect(manifest).toBeTruthy();
-    expect(manifest.name).toBeTruthy();
-    expect(manifest.short_name).toBeTruthy();
-    expect(manifest.start_url).toBeTruthy();
-    expect(manifest.display).toBe('standalone');
-    expect(manifest.theme_color).toBeTruthy();
-    expect(manifest.background_color).toBeTruthy();
+    const requiredFields = [manifest.name, manifest.short_name, manifest.start_url, manifest.theme_color, manifest.background_color];
 
-    expect(manifest.icons).toHaveLength(1);
-    expect(manifest.icons[0]?.type).toBe('image/webp');
-    expect(manifest.icons[0]?.sizes).toBe('any');
+    expect(manifest).toMatchObject({ display: 'standalone', icons: [{ type: 'image/webp', sizes: 'any' }] });
+    expect(requiredFields).not.toContain(undefined);
+    expect(requiredFields).not.toContain('');
   });
 });

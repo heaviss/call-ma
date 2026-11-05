@@ -74,7 +74,7 @@ describe('link utilities', () => {
   describe('copyToClipboard', () => {
     it('copies text to clipboard and returns true', async () => {
       // Arrange
-      const writeText = vi.fn().mockResolvedValue(undefined);
+      const writeText = vi.fn<Clipboard['writeText']>().mockResolvedValue(undefined);
       const navigatorLike = { clipboard: { writeText } };
 
       // Act
@@ -86,7 +86,7 @@ describe('link utilities', () => {
     });
 
     it('returns false if clipboard is not available', async () => {
-      expect(await copyToClipboard({}, 'x')).toBe(false);
+      await expect(copyToClipboard({}, 'x')).resolves.toBe(false);
     });
   });
 });
@@ -110,11 +110,11 @@ describe('buildDirectUrl', () => {
 
 describe('parseDirectUrl', () => {
   it('returns type and encoded for an offer hash', () => {
-    expect(parseDirectUrl('https://example.com/#offer=abc123')).toEqual({ type: 'offer', encoded: 'abc123' });
+    expect(parseDirectUrl('https://example.com/#offer=abc123')).toStrictEqual({ type: 'offer', encoded: 'abc123' });
   });
 
   it('returns type and encoded for an answer hash', () => {
-    expect(parseDirectUrl('https://example.com/#answer=xyz789')).toEqual({ type: 'answer', encoded: 'xyz789' });
+    expect(parseDirectUrl('https://example.com/#answer=xyz789')).toStrictEqual({ type: 'answer', encoded: 'xyz789' });
   });
 
   it('returns null for a Trystero room hash', () => {

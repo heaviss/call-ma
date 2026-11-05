@@ -8,7 +8,7 @@ function makeReport(entries: StatsEntry[]): Map<string, StatsEntry> {
 
 describe('deriveMetrics', () => {
   it('returns all nulls for an empty report', () => {
-    expect(deriveMetrics(new Map())).toEqual({ rtt: null, bitrate: null, frameRate: null });
+    expect(deriveMetrics(new Map())).toStrictEqual({ rtt: null, bitrate: null, frameRate: null });
   });
 
   it('extracts RTT in ms from a succeeded candidate-pair', () => {

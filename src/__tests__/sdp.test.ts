@@ -8,7 +8,7 @@ describe('sdp', () => {
   it('encodes to a URL-safe string without +, /, or =', async () => {
     const encoded = await encodeSdp(desc);
 
-    expect(typeof encoded).toBe('string');
+    expect(encoded).toBeTypeOf('string');
     expect(encoded).not.toMatch(/[+/=]/);
   });
 
@@ -16,16 +16,16 @@ describe('sdp', () => {
     const encoded = await encodeSdp(desc);
     const decoded = await decodeSdp(encoded);
 
-    expect(decoded).toEqual(desc);
+    expect(decoded).toStrictEqual(desc);
   });
 
   it('decodeSdp throws on invalid base64url', async () => {
-    await expect(decodeSdp('!!!not-valid!!!')).rejects.toThrow();
+    await expect(decodeSdp('!!!not-valid!!!')).rejects.toThrow('Invalid character');
   });
 
   it('decodeSdp throws on valid base64url that is not JSON', async () => {
     const garbage = btoa('not json').replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
-    await expect(decodeSdp(garbage)).rejects.toThrow();
+    await expect(decodeSdp(garbage)).rejects.toThrow(TypeError);
   });
 
   it('encodeSdp throws when CompressionStream is not available', async () => {
@@ -44,6 +44,6 @@ describe('decodeSdp with output larger than the stream buffer', () => {
 
     const decoded = await decodeSdp(await encodeSdp(desc));
 
-    expect(decoded).toEqual(desc);
+    expect(decoded).toStrictEqual(desc);
   }, 3000);
 });

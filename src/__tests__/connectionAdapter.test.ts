@@ -43,11 +43,9 @@ describe('ConnectionAdapter', () => {
     'onConnect',
   ] as const;
 
-  for (const method of abstractMethods) {
-    it(`${method}() throws "Not implemented" when not overridden`, () => {
-      expect(() => new MinimalAdapter()[method]()).toThrow('Not implemented');
-    });
-  }
+  it.each(abstractMethods)('%s() throws "Not implemented" when not overridden', (method) => {
+    expect(() => new MinimalAdapter()[method]()).toThrow('Not implemented');
+  });
 });
 
 describe('assertAdapterShape', () => {
@@ -58,13 +56,11 @@ describe('assertAdapterShape', () => {
     expect(assertAdapterShape({ ...fullAdapter })).toBe(true);
   });
 
-  for (const method of required) {
-    it(`throws TypeError when "${method}" is missing`, () => {
-      const partial = { ...fullAdapter };
-      delete partial[method];
+  it.each(required)('throws TypeError when "%s" is missing', (method) => {
+    const partial = { ...fullAdapter };
+    delete partial[method];
 
-      expect(() => assertAdapterShape(partial)).toThrow(TypeError);
-      expect(() => assertAdapterShape(partial)).toThrow(method);
-    });
-  }
+    expect(() => assertAdapterShape(partial)).toThrow(TypeError);
+    expect(() => assertAdapterShape(partial)).toThrow(method);
+  });
 });

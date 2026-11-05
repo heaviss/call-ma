@@ -1,35 +1,42 @@
-import { expect, test } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 
-const BASE_URL = 'http://localhost:5173';
+import { test as base, expect } from '@playwright/test';
+
 // ponytail: browser.newContext() doesn't inherit playwright.config.ts's `use.permissions` —
-// only the default page/context fixtures do — so this test grants them explicitly.
+// only the default page/context fixtures do — so the receiver context grants them explicitly.
 const CONTEXT_OPTIONS = { permissions: ['camera', 'microphone', 'clipboard-read', 'clipboard-write'] };
+const CONNECT_TIMEOUT_MS = 10_000;
 
-test('two browsers connect via the direct QR/link fallback', async ({ browser }) => {
-  const initiatorContext = await browser.newContext(CONTEXT_OPTIONS);
-  const receiverContext  = await browser.newContext(CONTEXT_OPTIONS);
-  const initiator = await initiatorContext.newPage();
-  const receiver  = await receiverContext.newPage();
+// The initiator is the default `page`; the receiver needs a second, isolated browser context.
+const test = base.extend<{ receiver: Page }>({
+  receiver: async ({ browser }, use) => {
+    const context = await browser.newContext(CONTEXT_OPTIONS);
+    await use(await context.newPage());
+    await context.close();
+  },
+});
 
-  await initiator.goto(`${BASE_URL}/?debug=true`);
-  await initiator.locator('#directBtn').click();
-  await expect(initiator.locator('#directCopyBtn')).toBeEnabled({ timeout: 10_000 });
-  await initiator.locator('#directCopyBtn').click();
-  await expect(initiator.locator('#logs')).toContainText('Direct link copied.');
-  const offerLink = await initiator.evaluate(() => navigator.clipboard.readText());
+function logsOf(page: Page): Locator {
+  return page.getByRole('region', { name: 'Logs and stats', includeHidden: true });
+}
 
-  await receiver.goto(offerLink);
-  await expect(receiver.locator('#directCopyBtn')).toBeEnabled({ timeout: 10_000 });
-  await receiver.locator('#directCopyBtn').click();
-  await expect(receiver.locator('#logs')).toContainText('Direct link copied.');
-  const answerLink = await receiver.evaluate(() => navigator.clipboard.readText());
+async function copyDirectLink(page: Page): Promise<string> {
+  const copyButton = page.getByRole('button', { name: 'Copy link', exact: true });
+  await expect(copyButton).toBeEnabled({ timeout: CONNECT_TIMEOUT_MS });
+  await copyButton.click();
+  await expect(logsOf(page)).toContainText('Direct link copied.');
+  return page.evaluate(async () => navigator.clipboard.readText());
+}
 
-  await initiator.locator('#directAnswerInput').fill(answerLink);
-  await initiator.locator('#directConnectBtn').click();
+test.describe('direct connection', () => {
+  test('two browsers connect via the direct QR/link fallback', async ({ page: initiator, receiver }) => {
+    await initiator.goto('/?debug=true');
+    await initiator.getByRole('button', { name: "Can't connect? Try directly" }).click();
+    await receiver.goto(await copyDirectLink(initiator));
+    await initiator.getByLabel('Paste their response link:').fill(await copyDirectLink(receiver));
+    await initiator.getByRole('button', { name: 'Connect', exact: true }).click();
 
-  await expect(initiator.locator('#logs')).toContainText('Direct connection established!', { timeout: 10_000 });
-  await expect(receiver.locator('#logs')).toContainText('Direct connection established!', { timeout: 10_000 });
-
-  await initiatorContext.close();
-  await receiverContext.close();
+    await expect(logsOf(initiator)).toContainText('Direct connection established!', { timeout: CONNECT_TIMEOUT_MS });
+    await expect(logsOf(receiver)).toContainText('Direct connection established!', { timeout: CONNECT_TIMEOUT_MS });
+  });
 });

@@ -2,6 +2,7 @@ import type { DOMWindow } from 'jsdom';
 import type { Mock } from 'vitest';
 
 import { JSDOM } from 'jsdom';
+import { setTimeout } from 'node:timers/promises';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { JoinRoomLike } from '../connection/trysteroAdapter.ts';
@@ -47,7 +48,7 @@ describe('error/connection events (integration, jsdom)', () => {
     });
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert
     expect(getEl(document, '#logs').textContent).toMatch(/connection error/i);
@@ -57,7 +58,7 @@ describe('error/connection events (integration, jsdom)', () => {
     // Arrange
     initApp({ document, window, navigator: navigatorLike, joinRoom: fakeJoinRoom });
     getEl<HTMLButtonElement>(document, '#createBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Act
     fakeRoom.simulatePeerLeave('peer-1');
@@ -109,7 +110,7 @@ describe('error/connection events (integration, jsdom)', () => {
 
     // Act — click copy before onCreate has set state.link
     getEl<HTMLButtonElement>(document, '#copyBtn').click();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await setTimeout(0);
 
     // Assert — clipboard was not touched (state.link guard skipped the copy)
     expect(navigatorLike.clipboard.writeText).not.toHaveBeenCalled();

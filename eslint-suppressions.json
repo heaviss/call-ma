@@ -17,11 +17,17 @@
     "id-length": {
       "count": 1
     },
+    "max-classes-per-file": {
+      "count": 1
+    },
     "no-restricted-syntax": {
       "count": 1
     }
   },
   "src/__tests__/create-flow.test.ts": {
+    "max-statements": {
+      "count": 1
+    },
     "unicorn/no-non-function-verb-prefix": {
       "count": 1
     }
@@ -33,14 +39,14 @@
     "id-denylist": {
       "count": 2
     },
-    "id-length": {
-      "count": 20
+    "max-lines": {
+      "count": 1
+    },
+    "max-statements": {
+      "count": 4
     },
     "no-restricted-syntax": {
       "count": 1
-    },
-    "promise/param-names": {
-      "count": 20
     }
   },
   "src/__tests__/directAdapter.test.ts": {
@@ -50,10 +56,15 @@
     "@typescript-eslint/require-await": {
       "count": 6
     },
-    "id-length": {
+    "max-statements": {
       "count": 1
     },
     "no-restricted-syntax": {
+      "count": 1
+    }
+  },
+  "src/__tests__/error-retry.test.ts": {
+    "max-statements": {
       "count": 1
     }
   },
@@ -124,6 +135,9 @@
     },
     "id-length": {
       "count": 1
+    },
+    "max-statements": {
+      "count": 3
     }
   },
   "src/__tests__/ui.test.ts": {
@@ -137,9 +151,6 @@
       "count": 1
     },
     "sonarjs/deprecation": {
-      "count": 1
-    },
-    "unicorn/no-non-function-verb-prefix": {
       "count": 1
     }
   },
