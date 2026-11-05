@@ -49,6 +49,17 @@ export class TrysteroAdapter {
     this._iceServers = options.iceServers;
   }
 
+  private _buildConfig(relayUrls: string[] | undefined): JoinRoomConfig {
+    const config: JoinRoomConfig = { appId: 'call-ma' };
+    if (relayUrls?.length) {
+      config.relayConfig = { urls: relayUrls };
+    }
+    if (this._iceServers?.length) {
+      config.rtcConfig = { iceServers: this._iceServers };
+    }
+    return config;
+  }
+
   onStream(cb: StreamCallback): this {
     this._onStream = cb;
     return this;
@@ -74,15 +85,7 @@ export class TrysteroAdapter {
     };
 
     for (const { joinRoom, relayUrls } of this._transports) {
-      const config: JoinRoomConfig = { appId: 'call-ma' };
-      if (relayUrls?.length) {
-        config.relayConfig = { urls: relayUrls };
-      }
-      if (this._iceServers?.length) {
-        config.rtcConfig = { iceServers: this._iceServers };
-      }
-
-      const room = joinRoom(config, roomId, callbacks);
+      const room = joinRoom(this._buildConfig(relayUrls), roomId, callbacks);
       this._rooms.push(room);
 
       room.onPeerJoin = (peerId) => {
