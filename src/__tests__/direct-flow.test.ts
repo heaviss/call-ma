@@ -8,7 +8,7 @@ import { initApp } from '../app/controller.ts';
 import { type FakeNavigator, fakeStream, getEl, makeNavigator as makeFakeNavigator } from './fakes/dom.ts';
 
 // eslint-disable-next-line vitest/prefer-import-in-mock -- the typed import() form checks the factory against @types/qrcode, whose overloaded toCanvas cannot be expressed as a Mock
-vi.mock('qrcode', () => ({ default: { toCanvas: vi.fn<() => Promise<void>>().mockResolvedValue(undefined) } }));
+vi.mock('qrcode', () => ({ toCanvas: vi.fn<() => Promise<void>>().mockResolvedValue(undefined) }));
 
 class FakePeerConnection {
   #tracks: { track: MediaStreamTrack; stream: MediaStream }[] = [];
@@ -213,6 +213,17 @@ describe('direct mode — initiator flow', () => {
     expect(getEl<HTMLButtonElement>(dom.window.document, '#directCopyBtn').disabled).toBe(true);
   });
 
+  it('logs a direct mode error when the browser has no RTCPeerConnection', async () => {
+    const bareDom = makeDOM();
+    initApp({ document: bareDom.window.document, window: bareDom.window, navigator, transports: [] });
+
+    getEl<HTMLButtonElement>(bareDom.window.document, '#directBtn').click();
+    await setTimeout(50);
+
+    expect(getEl(bareDom.window.document, '#logs').textContent)
+      .toContain('Direct mode error: window.RTCPeerConnection is not a constructor');
+  });
+
   it('startDirectMode works when optional DOM elements are absent', async () => {
     // Stripped DOM — no localVideo, remoteVideo, directQr, directStatus, directPanel
     const html = `<!doctype html><html><body>
@@ -237,9 +248,8 @@ describe('direct mode — initiator flow', () => {
   });
 
   it('shows QR error log but still enables copy button when QRCode.toCanvas throws', async () => {
-    const qrcodeModule = await import('qrcode');
-    const QRCode = qrcodeModule.default;
-    vi.mocked(QRCode.toCanvas).mockRejectedValueOnce(new Error('canvas error'));
+    const { toCanvas } = await import('qrcode');
+    vi.mocked(toCanvas).mockRejectedValueOnce(new Error('canvas error'));
 
     initApp({ document: dom.window.document, window: dom.window, navigator, transports: [] });
     getEl<HTMLButtonElement>(dom.window.document, '#directBtn').click();

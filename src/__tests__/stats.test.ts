@@ -11,77 +11,112 @@ describe('deriveMetrics', () => {
     expect(deriveMetrics(new Map())).toStrictEqual({ rtt: null, bitrate: null, frameRate: null });
   });
 
-  it('extracts RTT in ms from a succeeded candidate-pair', () => {
+  it('takes each metric from the last entry that has it', () => {
     const report = makeReport([
-      { id: 'p1', type: 'candidate-pair', state: 'succeeded', currentRoundTripTime: 0.042 },
+      { id: 'p1', type: 'candidate-pair', state: 'succeeded', currentRoundTripTime: 0.01 },
+      { id: 'p2', type: 'candidate-pair', state: 'succeeded', currentRoundTripTime: 0.02 },
+      { id: 'p3', type: 'candidate-pair', state: 'succeeded' },
+      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', framesPerSecond: 24 },
+      { id: 'r2', type: 'inbound-rtp', mediaType: 'video', framesPerSecond: 30 },
+      { id: 'r3', type: 'inbound-rtp', mediaType: 'video' },
     ]);
 
-    const { rtt } = deriveMetrics(report);
+    const { rtt, frameRate } = deriveMetrics(report);
 
-    expect(rtt).toBeCloseTo(42, 0);
+    expect(rtt).toBeCloseTo(20, 0);
+    expect(frameRate).toBe(30);
   });
 
-  it('ignores candidate-pair entries that are not succeeded', () => {
-    const report = makeReport([
-      { id: 'p1', type: 'candidate-pair', state: 'waiting', currentRoundTripTime: 0.1 },
-    ]);
+  describe('rtt', () => {
+    it('extracts RTT in ms from a succeeded candidate-pair', () => {
+      const report = makeReport([
+        { id: 'p1', type: 'candidate-pair', state: 'succeeded', currentRoundTripTime: 0.042 },
+      ]);
 
-    expect(deriveMetrics(report).rtt).toBeNull();
+      const { rtt } = deriveMetrics(report);
+
+      expect(rtt).toBeCloseTo(42, 0);
+    });
+
+    it('ignores candidate-pair entries that are not succeeded', () => {
+      const report = makeReport([
+        { id: 'p1', type: 'candidate-pair', state: 'waiting', currentRoundTripTime: 0.1 },
+      ]);
+
+      expect(deriveMetrics(report).rtt).toBeNull();
+    });
+
+    it('returns null rtt when succeeded pair has no currentRoundTripTime', () => {
+      const report = makeReport([
+        { id: 'p1', type: 'candidate-pair', state: 'succeeded' },
+      ]);
+
+      expect(deriveMetrics(report).rtt).toBeNull();
+    });
   });
 
-  it('returns null rtt when succeeded pair has no currentRoundTripTime', () => {
-    const report = makeReport([
-      { id: 'p1', type: 'candidate-pair', state: 'succeeded' },
-    ]);
+  describe('frameRate', () => {
+    it('extracts frameRate from inbound-rtp video entry', () => {
+      const report = makeReport([
+        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', framesPerSecond: 30 },
+      ]);
 
-    expect(deriveMetrics(report).rtt).toBeNull();
+      expect(deriveMetrics(report).frameRate).toBe(30);
+    });
+
+    it('ignores inbound-rtp entries with mediaType audio for frameRate', () => {
+      const report = makeReport([
+        { id: 'r1', type: 'inbound-rtp', mediaType: 'audio', framesPerSecond: 30 },
+      ]);
+
+      expect(deriveMetrics(report).frameRate).toBeNull();
+    });
   });
 
-  it('extracts frameRate from inbound-rtp video entry', () => {
-    const report = makeReport([
-      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', framesPerSecond: 30 },
-    ]);
+  describe('bitrate', () => {
+    it('computes bitrate in kbps from two consecutive reports', () => {
+      const prev = makeReport([
+        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
+      ]);
+      const curr = makeReport([
+        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
+      ]);
 
-    expect(deriveMetrics(report).frameRate).toBe(30);
-  });
+      const { bitrate } = deriveMetrics(curr, prev, 1000);
 
-  it('ignores inbound-rtp entries with mediaType audio for frameRate', () => {
-    const report = makeReport([
-      { id: 'r1', type: 'inbound-rtp', mediaType: 'audio', framesPerSecond: 30 },
-    ]);
+      expect(bitrate).toBe(8);
+    });
 
-    expect(deriveMetrics(report).frameRate).toBeNull();
-  });
+    it('returns null bitrate when no prevReport is provided', () => {
+      const report = makeReport([
+        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 500 },
+      ]);
 
-  it('computes bitrate in kbps from two consecutive reports', () => {
-    const prev = makeReport([
-      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
-    ]);
-    const curr = makeReport([
-      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
-    ]);
+      expect(deriveMetrics(report).bitrate).toBeNull();
+    });
 
-    const { bitrate } = deriveMetrics(curr, prev, 1000);
+    it('returns null bitrate when timeDeltaMs is zero', () => {
+      const prev = makeReport([
+        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
+      ]);
+      const curr = makeReport([
+        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
+      ]);
 
-    expect(bitrate).toBe(8);
-  });
+      expect(deriveMetrics(curr, prev, 0).bitrate).toBeNull();
+    });
 
-  it('returns null bitrate when no prevReport is provided', () => {
-    const report = makeReport([
-      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 500 },
-    ]);
+    it('returns null bitrate when the previous report lacks the entry', () => {
+      const prev = makeReport([
+        { id: 'other', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
+      ]);
+      const curr = makeReport([
+        { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
+      ]);
 
-    expect(deriveMetrics(report).bitrate).toBeNull();
-  });
+      const { bitrate } = deriveMetrics(curr, prev, 1000);
 
-  it('returns null bitrate when timeDeltaMs is zero', () => {
-    const prev = makeReport([
-      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 1000 },
-    ]);
-    const curr = makeReport([
-      { id: 'r1', type: 'inbound-rtp', mediaType: 'video', bytesReceived: 2000 },
-    ]);
-
-    expect(deriveMetrics(curr, prev, 0).bitrate).toBeNull();
+      expect(bitrate).toBeNull();
+    });
   });
 });
